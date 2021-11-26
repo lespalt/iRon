@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="irsdk\irsdk_client.cpp">
+      <Filter>irsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="irsdk\irsdk_utils.cpp">
+      <Filter>irsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="irsdk\yaml_parser.cpp">
+      <Filter>irsdk</Filter>
+    </ClCompile>
+    <ClCompile Include="iracing.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="irsdk">
+      <UniqueIdentifier>{a67f493c-b77c-46e5-be0b-98bb42ae3d17}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="irsdk\irsdk_client.h">
+      <Filter>irsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="irsdk\irsdk_defines.h">
+      <Filter>irsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="irsdk\yaml_parser.h">
+      <Filter>irsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="iracing.h" />
+    <ClInclude Include="Overlay.h" />
+    <ClInclude Include="OverlayRelative.h" />
+    <ClInclude Include="OverlayInputs.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="picojson.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="LICENSE" />
+    <None Include="README.md" />
+  </ItemGroup>
+</Project>
