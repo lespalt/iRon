@@ -59,14 +59,22 @@ static void configWatcher()
     }
 }
 
+static void handleConfigChange( std::vector<Overlay*> overlays )
+{
+    for( Overlay* o : overlays )
+    {
+        o->enable( g_cfg.getBool(o->getName(),"enabled") );
+        o->notifyConfigChanged();
+    }
+}
+
 int main()
 {
     // Bump priority up so we get time from the sim
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);  
 
+    // Load the config and watch it for changes
     g_cfg.load();
-
-    // Watch for config file changes
     std::thread configWatchThread( configWatcher );
     configWatchThread.detach();
 
@@ -74,22 +82,22 @@ int main()
     //overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
 
-    // Trigger all config handling logic
-    for( Overlay* o : overlays )
-        o->notifyConfigChanged();
+    // Initialize by triggering all config handling logic
+    handleConfigChange( overlays );
 
     while( true )
     {
         const bool connected = ir_tick();
 
+        // Update roughly every 16ms
         for( Overlay* o : overlays )
             o->update();
 
+        // Watch for config change signal
         if( g_reloadConfigNeeded )
         {
             g_cfg.load();
-            for( Overlay* o : overlays )
-                o->notifyConfigChanged();
+            handleConfigChange( overlays );
             g_reloadConfigNeeded = false;
         }
 

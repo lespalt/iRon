@@ -40,52 +40,72 @@ class Overlay
 
         Overlay( const std::string name )
             : m_name( name )
-        {
-            const char* const wndclassName = "overlay";
-            WNDCLASSEX wndclass = {};
-            if( !GetClassInfoEx( 0, wndclassName, &wndclass ) )
-            {
-                wndclass.cbSize = sizeof(WNDCLASSEX);
-                wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-                wndclass.lpfnWndProc = windowProc;
-                wndclass.lpszClassName = wndclassName;
-                wndclass.hbrBackground = CreateSolidBrush(0);
-                RegisterClassEx(&wndclass);
-            }
-
-            m_hwnd = CreateWindowEx( WS_EX_TOPMOST, wndclassName, "", WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
-
-            PIXELFORMATDESCRIPTOR pfd = {};
-            pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-            pfd.nVersion = 1;
-            pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_SUPPORT_COMPOSITION;
-            pfd.iPixelType = PFD_TYPE_RGBA;
-            pfd.cColorBits = 24;
-            pfd.cAlphaBits = 8;
-            pfd.cDepthBits = 32;
-
-            m_hdc = GetDC( m_hwnd );
-            if( !SetPixelFormat(m_hdc, ChoosePixelFormat(m_hdc, &pfd), &pfd) )
-                printf("SetPixelFormat failed\n");
-
-            m_hglrc = wglCreateContext( m_hdc );
-            if( !m_hglrc )
-                printf("wglCreateContext failed\n");
-
-            glEnable( GL_BLEND );
-            glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-            // The following enables composition of our window into the desktop
-            DWM_BLURBEHIND bb = {};
-            bb.dwFlags = DWM_BB_ENABLE;
-            bb.fEnable = true;
-            DwmEnableBlurBehindWindow(m_hwnd, &bb);
-        }
+        {}
 
         virtual ~Overlay()
         {
-            wglDeleteContext( m_hglrc );
-            DestroyWindow( m_hwnd );
+            enable( false );
+        }
+
+        virtual std::string getName() const
+        {
+            return m_name;
+        }
+
+        virtual void enable( bool on )
+        {
+            if( on && !m_hwnd )
+            {
+                const char* const wndclassName = "overlay";
+                WNDCLASSEX wndclass = {};
+                if( !GetClassInfoEx( 0, wndclassName, &wndclass ) )  // only the first overlay we open registers the window class
+                {
+                    wndclass.cbSize = sizeof(WNDCLASSEX);
+                    wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+                    wndclass.lpfnWndProc = windowProc;
+                    wndclass.lpszClassName = wndclassName;
+                    wndclass.hbrBackground = CreateSolidBrush(0);
+                    RegisterClassEx(&wndclass);
+                }
+
+                m_hwnd = CreateWindowEx( WS_EX_TOPMOST, wndclassName, "", WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
+
+                PIXELFORMATDESCRIPTOR pfd = {};
+                pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+                pfd.nVersion = 1;
+                pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_SUPPORT_COMPOSITION;
+                pfd.iPixelType = PFD_TYPE_RGBA;
+                pfd.cColorBits = 24;
+                pfd.cAlphaBits = 8;
+                pfd.cDepthBits = 32;
+
+                m_hdc = GetDC( m_hwnd );
+                if( !SetPixelFormat(m_hdc, ChoosePixelFormat(m_hdc, &pfd), &pfd) )
+                    printf("SetPixelFormat failed\n");
+
+                m_hglrc = wglCreateContext( m_hdc );
+                if( !m_hglrc )
+                    printf("wglCreateContext failed\n");
+
+                // TODO: make ctx current?
+
+                glEnable( GL_BLEND );
+                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+                // The following enables composition of our window into the desktop
+                DWM_BLURBEHIND bb = {};
+                bb.dwFlags = DWM_BB_ENABLE;
+                bb.fEnable = true;
+                DwmEnableBlurBehindWindow(m_hwnd, &bb);
+            }
+            else if( !on && m_hwnd ) // disable
+            {
+                wglDeleteContext( m_hglrc );
+                DestroyWindow( m_hwnd );
+                m_hwnd = 0;
+                m_hdc = 0;
+                m_hglrc = 0;
+            }
         }
 
         virtual void update() {}

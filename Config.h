@@ -65,20 +65,7 @@ class Config
                 return;
             }
 
-            m_pjPrevSnapshot = m_pj;
             m_pj = pjval.get<picojson::object>();
-
-            m_loadCnt++;
-        }
-
-        bool hasChanged( const std::string& component, const std::string& key )
-        {
-            if( m_loadCnt==1 )
-                return true;  // if we've only loaded the config once so far, claim everything has changed so that all logic that listens for changes gets triggered
-
-            picojson::object& pjcompNew = m_pj[component].get<picojson::object>();
-            picojson::object& pjcompOld = m_pjPrevSnapshot[component].get<picojson::object>();
-            return pjcompNew[key] != pjcompOld[key];
         }
 
         bool getBool( const std::string& component, const std::string& key )
@@ -135,8 +122,6 @@ class Config
         }
 
         picojson::object  m_pj;
-        picojson::object  m_pjPrevSnapshot;
-        int               m_loadCnt = 0;
 };
 
 extern Config g_cfg;

@@ -161,6 +161,8 @@
     <ClInclude Include="picojson.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".gitignore" />
+    <None Include="config\config.json" />
     <None Include="LICENSE" />
     <None Include="README.md" />
   </ItemGroup>
