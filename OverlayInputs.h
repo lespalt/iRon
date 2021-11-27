@@ -43,7 +43,7 @@ class OverlayInputs : public Overlay
             const int y = g_cfg.getInt(m_name,"y_pos");
             const int w = g_cfg.getInt(m_name,"width");
             const int h = g_cfg.getInt(m_name,"height");
-            SetWindowPos( m_hwnd, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE|SWP_SHOWWINDOW );
+            setWindowPosAndSize( x, y, w, h );
 
             m_throttleVtx.resize( w );
             m_brakeVtx.resize( w );
@@ -54,16 +54,13 @@ class OverlayInputs : public Overlay
                 m_brakeVtx[i].x = float(i);
                 m_steerVtx[i].x = float(i);
             }
-
-            wglMakeCurrent( m_hdc, m_hglrc );
-            glViewport(0, 0, w, h);
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(0,w,0,h,1,-1);
         }
 
         void update()
         {
+            if( !m_enabled )
+                return;
+
             wglMakeCurrent( m_hdc, m_hglrc );
 
             const float w = (float)g_cfg.getInt(m_name,"width");

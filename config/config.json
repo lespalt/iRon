@@ -12,5 +12,10 @@
         "steering_col": [1,1,1,0.3],
         "throttle_fill_col": [0.2,0.45,0.15,0.6],
         "brake_fill_col": [0.46,0.01,0.06,0.6]
+    },
+
+    "OverlayRelative":
+    {
+        "enabled": true
     }
 } 

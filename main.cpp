@@ -79,7 +79,7 @@ int main()
     configWatchThread.detach();
 
     std::vector<Overlay*> overlays;
-    //overlays.push_back( new OverlayRelative() );
+    overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
 
     // Initialize by triggering all config handling logic

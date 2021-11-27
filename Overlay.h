@@ -100,6 +100,8 @@ class Overlay
                 bb.dwFlags = DWM_BB_ENABLE;
                 bb.fEnable = true;
                 DwmEnableBlurBehindWindow(m_hwnd, &bb);
+
+                m_enabled = true;
             }
             else if( !on && m_hwnd ) // disable
             {
@@ -108,16 +110,28 @@ class Overlay
                 m_hwnd = 0;
                 m_hdc = 0;
                 m_hglrc = 0;
+                m_enabled = false;
             }
         }
 
-        virtual void update() {}
-        virtual void notifyConfigChanged() {}
+        virtual void update() = 0;
+        virtual void notifyConfigChanged() = 0;
 
     protected:
+
+        virtual void setWindowPosAndSize( int x, int y, int w, int h )
+        {
+            SetWindowPos( m_hwnd, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE|SWP_SHOWWINDOW );
+            wglMakeCurrent( m_hdc, m_hglrc );
+            glViewport(0, 0, w, h);
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(0,w,0,h,1,-1);
+        }
 
         std::string   m_name;
         HWND          m_hwnd = 0;
         HDC           m_hdc = 0;
         HGLRC         m_hglrc = 0;
+        bool          m_enabled = false;
 };

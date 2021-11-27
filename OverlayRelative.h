@@ -25,6 +25,7 @@ SOFTWARE.
 #pragma once
 
 #include "Overlay.h"
+#include "Font.h"
 
 class OverlayRelative : public Overlay
 {
@@ -33,9 +34,21 @@ class OverlayRelative : public Overlay
         OverlayRelative()
             : Overlay("OverlayRelative")
         {
+
+            //Font fnt;
+            //fnt.load("arial-black");
+        }
+
+        void notifyConfigChanged()
+        {}
+
+        void update()
+        {
+            if( !m_enabled )
+                return;
+
+            wglMakeCurrent( m_hdc, m_hglrc );
         }
 
     protected:
 };
-
-
