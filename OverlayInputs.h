@@ -47,10 +47,12 @@ class OverlayInputs : public Overlay
 
             m_throttleVtx.resize( w );
             m_brakeVtx.resize( w );
+            m_steerVtx.resize( w );
             for( int i=0; i<w; ++i )
             {
                 m_throttleVtx[i].x = float(i);
                 m_brakeVtx[i].x = float(i);
+                m_steerVtx[i].x = float(i);
             }
 
             wglMakeCurrent( m_hdc, m_hglrc );
@@ -75,6 +77,10 @@ class OverlayInputs : public Overlay
             for( int i=0; i<(int)m_brakeVtx.size()-1; ++i )
                 m_brakeVtx[i].y = m_brakeVtx[i+1].y;
             m_brakeVtx[(int)m_brakeVtx.size()-1].y = ir_Brake.getFloat();
+
+            for( int i=0; i<(int)m_steerVtx.size()-1; ++i )
+                m_steerVtx[i].y = m_steerVtx[i+1].y;
+            m_steerVtx[(int)m_steerVtx.size()-1].y = std::min( 1.0f, std::max( 0.0f, (ir_SteeringWheelAngle.getFloat() / ir_SteeringWheelAngleMax.getFloat()) * -0.5f + 0.5f) );
 
             // Clear background
             float4 bgcol = g_cfg.getFloat4( m_name, "background_col" );
@@ -110,7 +116,7 @@ class OverlayInputs : public Overlay
             glColor4fv( &col );
             glBegin( GL_LINE_STRIP );
             for( int i=0; i<(int)m_throttleVtx.size(); ++i )
-                glVertex2f(m_throttleVtx[i].x,m_throttleVtx[i].y*h);
+                glVertex2f(m_throttleVtx[i].x,m_throttleVtx[i].y*(h-1));
             glEnd();
 
             // Brake line
@@ -118,7 +124,15 @@ class OverlayInputs : public Overlay
             glColor4fv( &col );
             glBegin( GL_LINE_STRIP );
             for( int i=0; i<(int)m_brakeVtx.size(); ++i )
-                glVertex2f(m_brakeVtx[i].x,m_brakeVtx[i].y*h);
+                glVertex2f(m_brakeVtx[i].x,m_brakeVtx[i].y*(h-1));
+            glEnd();
+
+            // Steering line
+            col = g_cfg.getFloat4( m_name, "steering_col" );
+            glColor4fv( &col );
+            glBegin( GL_LINE_STRIP );
+            for( int i=0; i<(int)m_steerVtx.size(); ++i )
+                glVertex2f(m_steerVtx[i].x,m_steerVtx[i].y*(h-1));
             glEnd();
 
             glFlush();
@@ -127,4 +141,5 @@ class OverlayInputs : public Overlay
 
         std::vector<float2> m_throttleVtx;
         std::vector<float2> m_brakeVtx;
+        std::vector<float2> m_steerVtx;
 };

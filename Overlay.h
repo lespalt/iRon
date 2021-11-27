@@ -87,8 +87,7 @@ class Overlay
                 if( !m_hglrc )
                     printf("wglCreateContext failed\n");
 
-                // TODO: make ctx current?
-
+                wglMakeCurrent( m_hdc, m_hglrc );
                 glEnable( GL_BLEND );
                 glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 

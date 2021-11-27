@@ -85,9 +85,13 @@ int main()
     // Initialize by triggering all config handling logic
     handleConfigChange( overlays );
 
+    bool connected = false;
     while( true )
     {
-        const bool connected = ir_tick();
+        bool prevConnected = connected;
+        connected = ir_tick();
+        if( connected != prevConnected )
+            printf( connected ? "iRacing: connected\n" : "iRacing: disconnected\n" );
 
         // Update roughly every 16ms
         for( Overlay* o : overlays )
