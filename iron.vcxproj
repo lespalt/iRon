@@ -147,11 +147,13 @@
     <ClCompile Include="irsdk\irsdk_client.cpp" />
     <ClCompile Include="irsdk\irsdk_utils.cpp" />
     <ClCompile Include="irsdk\yaml_parser.cpp" />
+    <ClCompile Include="lodepng\lodepng.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
     <ClInclude Include="Font.h" />
+    <ClInclude Include="lodepng\lodepng.h" />
     <ClInclude Include="OverlayInputs.h" />
     <ClInclude Include="iracing.h" />
     <ClInclude Include="irsdk\irsdk_client.h" />

@@ -12,6 +12,9 @@
       <Filter>irsdk</Filter>
     </ClCompile>
     <ClCompile Include="iracing.cpp" />
+    <ClCompile Include="lodepng\lodepng.cpp">
+      <Filter>lodepng</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="irsdk">
@@ -19,6 +22,9 @@
     </Filter>
     <Filter Include="config">
       <UniqueIdentifier>{ae484a03-949d-4920-a25a-ebebfd86d64a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lodepng">
+      <UniqueIdentifier>{c7064565-9ebe-4e9f-ade3-27845f74f593}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -38,6 +44,9 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="picojson.h" />
     <ClInclude Include="Font.h" />
+    <ClInclude Include="lodepng\lodepng.h">
+      <Filter>lodepng</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />
