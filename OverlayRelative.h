@@ -33,16 +33,22 @@ class OverlayRelative : public Overlay
 
         OverlayRelative()
             : Overlay("OverlayRelative")
-        {
-
-            //Font fnt;
-            //fnt.load("arial-black");
-        }
-
-        void notifyConfigChanged()
         {}
 
-        void update()
+        virtual void onConfigChanged()
+        {}
+
+        virtual void onEnable()
+        {
+            m_fnt.load("arial-black");
+        }
+
+        virtual void onDisable()
+        {
+            m_fnt.unload();
+        }
+
+        virtual void update()
         {
             if( !m_enabled )
                 return;
@@ -51,4 +57,6 @@ class OverlayRelative : public Overlay
         }
 
     protected:
+
+        Font    m_fnt;
 };

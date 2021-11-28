@@ -37,7 +37,7 @@ class OverlayInputs : public Overlay
             : Overlay("OverlayInputs")
         {}
 
-        void notifyConfigChanged()
+        virtual void onConfigChanged()
         {
             const int x = g_cfg.getInt(m_name,"x_pos");
             const int y = g_cfg.getInt(m_name,"y_pos");
@@ -56,7 +56,7 @@ class OverlayInputs : public Overlay
             }
         }
 
-        void update()
+        virtual void update()
         {
             if( !m_enabled )
                 return;

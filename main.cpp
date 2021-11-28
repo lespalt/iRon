@@ -64,7 +64,7 @@ static void handleConfigChange( std::vector<Overlay*> overlays )
     for( Overlay* o : overlays )
     {
         o->enable( g_cfg.getBool(o->getName(),"enabled") );
-        o->notifyConfigChanged();
+        o->onConfigChanged();
     }
 }
 

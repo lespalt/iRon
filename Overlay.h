@@ -47,6 +47,11 @@ class Overlay
             enable( false );
         }
 
+        virtual void update() {}
+        virtual void onConfigChanged() {}
+        virtual void onEnable() {}
+        virtual void onDisable() {}
+
         virtual std::string getName() const
         {
             return m_name;
@@ -102,9 +107,11 @@ class Overlay
                 DwmEnableBlurBehindWindow(m_hwnd, &bb);
 
                 m_enabled = true;
+                onEnable();
             }
             else if( !on && m_hwnd ) // disable
             {
+                onDisable();
                 wglDeleteContext( m_hglrc );
                 DestroyWindow( m_hwnd );
                 m_hwnd = 0;
@@ -113,9 +120,6 @@ class Overlay
                 m_enabled = false;
             }
         }
-
-        virtual void update() = 0;
-        virtual void notifyConfigChanged() = 0;
 
     protected:
 
