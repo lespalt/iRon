@@ -36,7 +36,13 @@ class OverlayRelative : public Overlay
         {}
 
         virtual void onConfigChanged()
-        {}
+        {
+            const int x = g_cfg.getInt(m_name,"x_pos");
+            const int y = g_cfg.getInt(m_name,"y_pos");
+            const int w = g_cfg.getInt(m_name,"width");
+            const int h = g_cfg.getInt(m_name,"height");
+            setWindowPosAndSize( x, y, w, h );
+        }
 
         virtual void onEnable()
         {
@@ -54,6 +60,17 @@ class OverlayRelative : public Overlay
                 return;
 
             wglMakeCurrent( m_hdc, m_hglrc );
+
+            // Clear background
+            float4 bgcol = g_cfg.getFloat4( m_name, "background_col" );
+            glClearColor( bgcol.r, bgcol.g, bgcol.b, bgcol.a );
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            
+            m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0 );
+
+            glFlush();
+            SwapBuffers( m_hdc );
         }
 
     protected:

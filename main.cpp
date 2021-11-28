@@ -37,6 +37,7 @@ SOFTWARE.
 Config              g_cfg;
 std::atomic<bool>   g_reloadConfigNeeded = false;
 
+
 static void configWatcher()
 {
     HANDLE dir = CreateFile( "config", FILE_LIST_DIRECTORY, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL );

@@ -73,7 +73,7 @@ class Overlay
                     RegisterClassEx(&wndclass);
                 }
 
-                m_hwnd = CreateWindowEx( WS_EX_TOPMOST, wndclassName, "", WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
+                m_hwnd = CreateWindowEx( WS_EX_TOPMOST, wndclassName, m_name.c_str(), WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
 
                 PIXELFORMATDESCRIPTOR pfd = {};
                 pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
@@ -96,9 +96,7 @@ class Overlay
                 glEnable( GL_BLEND );
                 glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
                 glEnable( GL_LINE_SMOOTH );
-                glEnable( GL_POLYGON_SMOOTH );
                 glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-                glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
                 // The following enables composition of our window into the desktop
                 DWM_BLURBEHIND bb = {};

@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2021 lespalt
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #pragma once
 
 #include <stdio.h>
@@ -6,6 +30,17 @@
 #include <map>
 #include <utility>
 #include "lodepng/lodepng.h"
+
+
+inline void glerr()
+{
+    GLenum err = glGetError();
+    if( err ) {
+        printf("OpenGL error: %d\n", (int)err );
+    } else {
+        printf("OpenGL: no error\n");
+    }
+}
 
 // Rendering of fonts exported with BMFont (AngelCode.com)
 class Font
@@ -27,7 +62,7 @@ class Font
 
             unsigned char* pngBuf = nullptr;
             unsigned width=0, height=0;
-            if( lodepng_decode32_file( &pngBuf, &width, &height, m_pngFilename.c_str() ) )
+            if( lodepng_decode_file( &pngBuf, &width, &height, m_pngFilename.c_str(), LCT_RGBA, 8 ) )
             {
                 printf( "Error loading %s\n", m_pngFilename.c_str() );
                 return false;
@@ -43,6 +78,8 @@ class Font
             glBindTexture( GL_TEXTURE_2D, m_fntTex );
             glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, m_common.scaleW, m_common.scaleH, 0, GL_RGBA, GL_UNSIGNED_BYTE, pngBuf );
             free( pngBuf );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
             glDisable( GL_TEXTURE_2D );
 
             return true;
@@ -54,9 +91,60 @@ class Font
                 return;
 
             glDeleteTextures( 1, &m_fntTex );
+            m_fntTex = 0;
             m_common = Common();
             m_charDescs.clear();
             m_kernings.clear();
+        }
+
+        void render( const std::string& text, int x, int y )
+        {
+            glEnable( GL_TEXTURE_2D );
+            glBindTexture( GL_TEXTURE_2D, m_fntTex );
+
+            int prevId = -1;
+
+            glBegin( GL_QUADS );
+            for( int i=0; i<(int)text.length(); ++i )
+            {
+                const int id = (int)(unsigned char)text[i];
+                const CharDesc& cd = m_charDescs[id];
+
+                int kerning = 0;
+                if( i > 0 ) {
+                    auto it = m_kernings.find(std::make_pair(prevId,id));
+                    if( it != m_kernings.end() )
+                        kerning = it->second;
+                }
+
+                const float left     = 0.5f + float(x + cd.xoffset + kerning);
+                const float right    = 0.5f + float(x + cd.xoffset + cd.width + kerning);
+                const float top      = 0.5f + float(y + m_common.lineHeight - cd.yoffset);
+                const float bottom   = 0.5f + float(y + m_common.lineHeight - cd.yoffset - cd.height);
+
+                const float tcleft   = (float(cd.x)+0.5f) / float(m_common.scaleW);
+                const float tcright  = (float(cd.x+cd.width)+0.5f) / float(m_common.scaleW);
+                const float tctop    = (float(cd.y)+0.5f) / float(m_common.scaleH);
+                const float tcbottom = (float(cd.y+cd.height)+0.5f) / float(m_common.scaleH);
+
+                glTexCoord2f( tcleft, tctop );
+                glVertex2f( left, top );
+
+                glTexCoord2f( tcleft, tcbottom );
+                glVertex2f( left, bottom );
+
+                glTexCoord2f( tcright, tcbottom );
+                glVertex2f( right, bottom );
+
+                glTexCoord2f( tcright, tctop );
+                glVertex2f( right, top );
+
+                x += cd.xadvance;
+                prevId = id;
+            }
+            glEnd();
+
+            glDisable( GL_TEXTURE_2D );
         }
 
     private:
@@ -105,7 +193,7 @@ class Font
                     fclose( fpfnt );
                     return false;
                 }
-                m_charDescs.push_back( cd );
+                m_charDescs.insert( std::make_pair(cd.id,cd) );
             }
 
             int kerningsCount = 0;
@@ -158,7 +246,7 @@ class Font
         };
 
         Common                              m_common;
-        std::vector<CharDesc>               m_charDescs;
+        std::map<int,CharDesc>              m_charDescs;
         std::map<std::pair<int,int>,int>    m_kernings;
         std::string                         m_pngFilename;
         GLuint                              m_fntTex = 0;
