@@ -64,7 +64,9 @@ int main()
         bool prevConnected = connected;
         connected = ir_tick();
         if( connected != prevConnected )
+        {
             printf( connected ? "iRacing: connected\n" : "iRacing: disconnected\n" );
+        }
 
         // Update roughly every 16ms
         for( Overlay* o : overlays )

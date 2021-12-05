@@ -24,265 +24,296 @@ SOFTWARE.
 
 #include "iracing.h"
 
-                                                                                 //     Unit, Type, Disk, Live, Description
-irsdkCVar ir_AirDensity("AirDensity");                                           //     kg/m^3     float     1    1    Density of air at start/finish line 
-irsdkCVar ir_AirPressure("AirPressure");                                         //     Hg     float     1    1    Pressure of air at start/finish line 
-irsdkCVar ir_AirTemp("AirTemp");                                                 //         float     1    1    Temperature of air at start/finish line 
-irsdkCVar ir_Alt("Alt");                                                         //     m     float     1    1    Altitude in meters 
-irsdkCVar ir_Brake("Brake");                                                     //     %     float     1    1    0=brake released to 1=max pedal force 
-irsdkCVar ir_BrakeRaw("BrakeRaw");                                               //     %     float     1    1    Raw brake input 0=brake released to 1=max pedal force 
-irsdkCVar ir_CamCameraNumber("CamCameraNumber");                                 //           int     0    1    Active camera number 
-irsdkCVar ir_CamCameraState("CamCameraState");                                   //     irsdk_CameraState     bitfield     0    1    State of camera system 
-irsdkCVar ir_CamCarIdx("CamCarIdx");                                             //           int     0    1    Active camera's focus car index 
-irsdkCVar ir_CamGroupNumber("CamGroupNumber");                                   //           int     0    1    Active camera group number 
-irsdkCVar ir_Clutch("Clutch");                                                   //     %     float     1    1    0=disengaged to 1=fully engaged 
-irsdkCVar ir_CpuUsageBG("CpuUsageBG");                                           //     %     float     1    1    Percent of available tim bg thread took with a 1 sec avg
-irsdkCVar ir_DCDriversSoFar("DCDriversSoFar");                                   //           int     0    1    Number of team drivers who have run a stint
-irsdkCVar ir_DCLapStatus("DCLapStatus");                                         //           int     0    1    Status of driver change lap requirements
-irsdkCVar ir_DisplayUnits("DisplayUnits");                                       //           int     0    1    Default units for the user interface 0 = english 1 = metric
-irsdkCVar ir_DriverMarker("DriverMarker");                                       //           bool     1    1    Driver activated flag
-irsdkCVar ir_EngineWarnings("EngineWarnings");                                   //     irsdk_EngineWarnings     bitfield     1    1    Bitfield for warning lights
-irsdkCVar ir_EnterExitReset("EnterExitReset");                                   //           int     1    1    Indicate action the reset key will take 0 enter 1 exit 2 reset
-irsdkCVar ir_FogLevel("FogLevel");                                               //     %     float     1    1    Fog level
-irsdkCVar ir_FrameRate("FrameRate");                                             //     fps     float     1    1    Average frames per second
-irsdkCVar ir_FuelLevel("FuelLevel");                                             //     l     float     1    1    Liters of fuel remaining
-irsdkCVar ir_FuelLevelPct("FuelLevelPct");                                       //     %     float     1    1    Percent fuel remaining
-irsdkCVar ir_FuelPress("FuelPress");                                             //     bar     float     1    1    Engine fuel pressure
-irsdkCVar ir_FuelUsePerHour("FuelUsePerHour");                                   //     kg/h     float     1    1    Engine fuel used instantaneous
-irsdkCVar ir_Gear("Gear");                                                       //         int     1    1    -1=reverse  0=neutral  1..n=current gear
-irsdkCVar ir_IsDiskLoggingActive("IsDiskLoggingActive");                         //         bool     0    1    0=disk based telemetry file not being written  1=being written
-irsdkCVar ir_IsDiskLoggingEnabled("IsDiskLoggingEnabled");                       //         bool     0    1    0=disk based telemetry turned off  1=turned on
-irsdkCVar ir_IsInGarage("IsInGarage");                                           //         bool     0    1    1=Car in garage physics running
-irsdkCVar ir_IsOnTrack("IsOnTrack");                                             //         bool     1    1    1=Car on track physics running with player in car
-irsdkCVar ir_IsOnTrackCar("IsOnTrackCar");                                       //         bool     1    1    1=Car on track physics running
-irsdkCVar ir_IsReplayPlaying("IsReplayPlaying");                                 //         bool     0    1    0=replay not playing  1=replay playing
-irsdkCVar ir_Lap("Lap");                                                         //         int     1    1    Lap count
-irsdkCVar ir_LapBestLap("LapBestLap");                                           //         int     1    1    Players best lap number
-irsdkCVar ir_LapBestLapTime("LapBestLapTime");                                   //     s     float     1    1    Players best lap time
-irsdkCVar ir_LapBestNLapLap("LapBestNLapLap");                                   //         int     1    1    Player last lap in best N average lap time
-irsdkCVar ir_LapBestNLapTime("LapBestNLapTime");                                 //     s     float     1    1    Player best N average lap time
-irsdkCVar ir_LapCurrentLapTime("LapCurrentLapTime");                             //     s     float     1    1    Estimate of players current lap time as shown in F3 box
-irsdkCVar ir_LapDeltaToBestLap("LapDeltaToBestLap");                             //     s     float     1    1    Delta time for best lap
-irsdkCVar ir_LapDeltaToBestLap_DD("LapDeltaToBestLap_DD");                       //     s/s     float     1    1    Rate of change of delta time for best lap 
-irsdkCVar ir_LapDeltaToBestLap_OK("LapDeltaToBestLap_OK");                       //         bool     1    1    Delta time for best lap is valid 
-irsdkCVar ir_LapDeltaToOptimalLap("LapDeltaToOptimalLap");                       //     s     float     1    1    Delta time for optimal lap 
-irsdkCVar ir_LapDeltaToOptimalLap_DD("LapDeltaToOptimalLap_DD");                 //     s/s     float     1    1    Rate of change of delta time for optimal lap 
-irsdkCVar ir_LapDeltaToOptimalLap_OK("LapDeltaToOptimalLap_OK");                 //         bool     1    1    Delta time for optimal lap is valid 
-irsdkCVar ir_LapDeltaToSessionBestLap("LapDeltaToSessionBestLap");               //     s     float     1    1    Delta time for session best lap 
-irsdkCVar ir_LapDeltaToSessionBestLap_DD("LapDeltaToSessionBestLap_DD");         //     s/s     float     1    1    Rate of change of delta time for session best lap 
-irsdkCVar ir_LapDeltaToSessionBestLap_OK("LapDeltaToSessionBestLap_OK");         //         bool     1    1    Delta time for session best lap is valid 
-irsdkCVar ir_LapDeltaToSessionLastlLap("LapDeltaToSessionLastlLap");             //     s     float     1    1    Delta time for session last lap 
-irsdkCVar ir_LapDeltaToSessionLastlLap_DD("LapDeltaToSessionLastlLap_DD");       //     s/s     float     1    1    Rate of change of delta time for session last lap 
-irsdkCVar ir_LapDeltaToSessionLastlLap_OK("LapDeltaToSessionLastlLap_OK");       //         bool     1    1    Delta time for session last lap is valid 
-irsdkCVar ir_LapDeltaToSessionOptimalLap("LapDeltaToSessionOptimalLap");         //     s     float     1    1    Delta time for session optimal lap 
-irsdkCVar ir_LapDeltaToSessionOptimalLap_DD("LapDeltaToSessionOptimalLap_DD");   //     s/s     float     1    1    Rate of change of delta time for session optimal lap 
-irsdkCVar ir_LapDeltaToSessionOptimalLap_OK("LapDeltaToSessionOptimalLap_OK");   //         bool     1    1    Delta time for session optimal lap is valid 
-irsdkCVar ir_LapDist("LapDist");                                                 //     m     float     1    1    Meters traveled from S/F this lap 
-irsdkCVar ir_LapDistPct("LapDistPct");                                           //     %     float     1    1    Percentage distance around lap 
-irsdkCVar ir_LapLasNLapSeq("LapLasNLapSeq");                                     //         int     1    1    Player num consecutive clean laps completed for N average 
-irsdkCVar ir_LapLastLapTime("LapLastLapTime");                                   //     s     float     1    1    Players last lap time 
-irsdkCVar ir_LapLastNLapTime("LapLastNLapTime");                                 //     s     float     1    1    Player last N average lap time 
-irsdkCVar ir_Lat("Lat");                                                         //     deg     double     1    1    Latitude in decimal degrees 
-irsdkCVar ir_LatAccel("LatAccel");                                               //     m/s^2     float     1    1    Lateral acceleration (including gravity) 
-irsdkCVar ir_Lon("Lon");                                                         //     deg     double     1    1    Longitude in decimal degrees 
-irsdkCVar ir_LongAccel("LongAccel");                                             //     m/s^2     float     1    1    Longitudinal acceleration (including gravity) 
-irsdkCVar ir_ManifoldPress("ManifoldPress");                                     //     bar     float     1    1    Engine manifold pressure 
-irsdkCVar ir_OilLevel("OilLevel");                                               //     l     float     1    1    Engine oil level 
-irsdkCVar ir_OilPress("OilPress");                                               //     bar     float     1    1    Engine oil pressure 
-irsdkCVar ir_OilTemp("OilTemp");                                                 //     C     float     1    1    Engine oil temperature 
-irsdkCVar ir_OnPitRoad("OnPitRoad");                                             //         bool     1    1    Is the player car on pit road between the cones 
-irsdkCVar ir_Pitch("Pitch");                                                     //     rad     float     1    1    Pitch orientation 
-irsdkCVar ir_PitchRate("PitchRate");                                             //     rad/s     float     1    1    Pitch rate 
-irsdkCVar ir_PitOptRepairLeft("PitOptRepairLeft");                               //     s     float     1    1    Time left for optional repairs if repairs are active 
-irsdkCVar ir_PitRepairLeft("PitRepairLeft");                                     //     s     float     1    1    Time left for mandatory pit repairs if repairs are active 
-irsdkCVar ir_PitSvFlags("PitSvFlags");                                           //     irsdk_PitSvFlags     bitfield     1    1    Bitfield of pit service checkboxes 
-irsdkCVar ir_PitSvFuel("PitSvFuel");                                             //     l     float     1    1    Pit service fuel add amount 
-irsdkCVar ir_PitSvLFP("PitSvLFP");                                               //     kPa     float     1    1    Pit service left front tire pressure 
-irsdkCVar ir_PitSvLRP("PitSvLRP");                                               //     kPa     float     1    1    Pit service left rear tire pressure 
-irsdkCVar ir_PitSvRFP("PitSvRFP");                                               //     kPa     float     1    1    Pit service right front tire pressure 
-irsdkCVar ir_PitSvRRP("PitSvRRP");                                               //     kPa     float     1    1    Pit service right rear tire pressure 
-irsdkCVar ir_PlayerCarClassPosition("PlayerCarClassPosition");                   //         int     1    1    Players class position in race 
-irsdkCVar ir_PlayerCarPosition("PlayerCarPosition");                             //         int     1    1    Players position in race 
-irsdkCVar ir_RaceLaps("RaceLaps");                                               //         int     0    1    Laps completed in race 
-irsdkCVar ir_RadioTransmitCarIdx("RadioTransmitCarIdx");                         //         int     0    1    The car index of the current person speaking on the radio 
-irsdkCVar ir_RadioTransmitFrequencyIdx("RadioTransmitFrequencyIdx");             //         int     0    1    The frequency index of the current person speaking on the raio 
-irsdkCVar ir_RadioTransmitRadioIdx("RadioTransmitRadioIdx");                     //         int     0    1    The radio index of the current person speaking on the radio 
-irsdkCVar ir_RelativeHumidity("RelativeHumidity");                               //     %     float     1    1    Relative Humidity 
-irsdkCVar ir_ReplayFrameNum("ReplayFrameNum");                                   //         int     0    1    Integer replay frame number (60 per second) 
-irsdkCVar ir_ReplayFrameNumEnd("ReplayFrameNumEnd");                             //         int     0    1    Integer replay frame number from end of tape 
-irsdkCVar ir_ReplayPlaySlowMotion("ReplayPlaySlowMotion");                       //         bool     0    1    0=not slow motion  1=replay is in slow motion 
-irsdkCVar ir_ReplayPlaySpeed("ReplayPlaySpeed");                                 //         int     0    1    Replay playback speed 
-irsdkCVar ir_ReplaySessionNum("ReplaySessionNum");                               //         int     0    1    Replay session number 
-irsdkCVar ir_ReplaySessionTime("ReplaySessionTime");                             //     s     double     0    1    Seconds since replay session start 
-irsdkCVar ir_Roll("Roll");                                                       //     rad     float     1    1    Roll orientation 
-irsdkCVar ir_RollRate("RollRate");                                               //     rad/s     float     1    1    Roll rate 
-irsdkCVar ir_RPM("RPM");                                                         //     revs/min     float     1    1    Engine rpm 
-irsdkCVar ir_SessionFlags("SessionFlags");                                       //     irsdk_Flags     bitfield     0    1    Session flags 
-irsdkCVar ir_SessionLapsRemain("SessionLapsRemain");                             //         int     1    1    Laps left till session ends 
-irsdkCVar ir_SessionNum("SessionNum");                                           //         int     1    1    Session number 
-irsdkCVar ir_SessionState("SessionState");                                       //     irsdk_SessionState     int     1    1    Session state 
-irsdkCVar ir_SessionTime("SessionTime");                                         //     s     double     1    1    Seconds since session start 
-irsdkCVar ir_SessionTimeRemain("SessionTimeRemain");                             //     s     double     1    1    Seconds left till session ends 
-irsdkCVar ir_SessionUniqueID("SessionUniqueID");                                 //         int     1    1    Session ID 
-irsdkCVar ir_ShiftGrindRPM("ShiftGrindRPM");                                     //     RPM     float     1    1    RPM of shifter grinding noise 
-irsdkCVar ir_ShiftIndicatorPct("ShiftIndicatorPct");                             //     %     float     1    1    DEPRECATED use DriverCarSLBlinkRPM instead 
-irsdkCVar ir_ShiftPowerPct("ShiftPowerPct");                                     //     %     float     1    1    Friction torque applied to gears when shifting or grinding 
-irsdkCVar ir_Skies("Skies");                                                     //         int     1    1    Skies (0=clear/1=p cloudy/2=m cloudy/3=overcast) 
-irsdkCVar ir_Speed("Speed");                                                     //     m/s     float     1    1    GPS vehicle speed 
-irsdkCVar ir_SteeringWheelAngle("SteeringWheelAngle");                           //     rad     float     1    1    Steering wheel angle 
-irsdkCVar ir_SteeringWheelAngleMax("SteeringWheelAngleMax");                     //     rad     float     1    1    Steering wheel max angle 
-irsdkCVar ir_SteeringWheelPctDamper("SteeringWheelPctDamper");                   //     %     float     1    1    Force feedback % max damping 
-irsdkCVar ir_SteeringWheelPctTorque("SteeringWheelPctTorque");                   //     %     float     1    1    Force feedback % max torque on steering shaft unsigned 
-irsdkCVar ir_SteeringWheelPctTorqueSign("SteeringWheelPctTorqueSign");           //     %     float     1    1    Force feedback % max torque on steering shaft signed 
-irsdkCVar ir_SteeringWheelPctTorqueSignStops("SteeringWheelPctTorqueSignStops"); //     %     float     1    1    Force feedback % max torque on steering shaft signed stops 
-irsdkCVar ir_SteeringWheelPeakForceNm("SteeringWheelPeakForceNm");               //     N*m     float     0    1    Peak torque mapping to direct input units for FFB 
-irsdkCVar ir_SteeringWheelTorque("SteeringWheelTorque");                         //     N*m     float     1    1    Output torque on steering shaft 
-irsdkCVar ir_Throttle("Throttle");                                               //     %     float     1    1    0=off throttle to 1=full throttle 
-irsdkCVar ir_ThrottleRaw("ThrottleRaw");                                         //     %     float     1    1    Raw throttle input 0=off throttle to 1=full throttle 
-irsdkCVar ir_TrackTemp("TrackTemp");                                             //     C     float     1    1    Temperature of track at start/finish line 
-irsdkCVar ir_TrackTempCrew("TrackTempCrew");                                     //     C     float     1    1    Temperature of track measured by crew around track 
-irsdkCVar ir_VelocityX("VelocityX");                                             //     m/s     float     1    1    X velocity 
-irsdkCVar ir_VelocityY("VelocityY");                                             //     m/s     float     1    1    Y velocity 
-irsdkCVar ir_VelocityZ("VelocityZ");                                             //     m/s     float     1    1    Z velocity 
-irsdkCVar ir_VertAccel("VertAccel");                                             //     m/s^2     float     1    1    Vertical acceleration (including gravity) 
-irsdkCVar ir_Voltage("Voltage");                                                 //     V     float     1    1    Engine voltage 
-irsdkCVar ir_WaterLevel("WaterLevel");                                           //     l     float     1    1    Engine coolant level 
-irsdkCVar ir_WaterTemp("WaterTemp");                                             //     C     float     1    1    Engine coolant temp 
-irsdkCVar ir_WeatherType("WeatherType");                                         //         int     1    1    Weather type (0=constant  1=dynamic) 
-irsdkCVar ir_WindDir("WindDir");                                                 //     rad     float     1    1    Wind direction at start/finish line 
-irsdkCVar ir_WindVel("WindVel");                                                 //     m/s     float     1    1    Wind velocity at start/finish line 
-irsdkCVar ir_Yaw("Yaw");                                                         //     rad     float     1    1    Yaw orientation 
-irsdkCVar ir_YawNorth("YawNorth");                                               //     rad     float     1    1    Yaw orientation relative to north 
-irsdkCVar ir_YawRate("YawRate");                                                 //     rad/s     float     1    1    Yaw rate 
-irsdkCVar ir_CFrideHeight("CFrideHeight");                                       //     m     float     1    0    CF ride height 
-irsdkCVar ir_CFshockDefl("CFshockDefl");                                         //     m     float     1    1    CF shock deflection 
-irsdkCVar ir_CFshockVel("CFshockVel");                                           //     m/s     float     1    1    CF shock velocity 
-irsdkCVar ir_CFSRrideHeight("CFSRrideHeight");                                   //     m     float     1    0    CFSR ride height 
-irsdkCVar ir_CRrideHeight("CRrideHeight");                                       //     m     float     1    0    CR ride height 
-irsdkCVar ir_CRshockDefl("CRshockDefl");                                         //     m     float     1    1    CR shock deflection 
-irsdkCVar ir_CRshockVel("CRshockVel");                                           //     m/s     float     1    1    CR shock velocity 
-irsdkCVar ir_dcABS("dcABS");                                                     //         float     1    1    In car abs adjustment 
-irsdkCVar ir_dcAntiRollFront("dcAntiRollFront");                                 //         float     1    1    In car front anti roll bar adjustment 
-irsdkCVar ir_dcAntiRollRear("dcAntiRollRear");                                   //         float     1    1    In car rear anti roll bar adjustment 
-irsdkCVar ir_dcBoostLevel("dcBoostLevel");                                       //         float     1    1    In car boost level adjustment 
-irsdkCVar ir_dcBrakeBias("dcBrakeBias");                                         //         float     1    1    In car brake bias adjustment 
-irsdkCVar ir_dcDiffEntry("dcDiffEntry");                                         //         float     1    1    In car diff entry adjustment 
-irsdkCVar ir_dcDiffExit("dcDiffExit");                                           //         float     1    1    In car diff exit adjustment 
-irsdkCVar ir_dcDiffMiddle("dcDiffMiddle");                                       //         float     1    1    In car diff middle adjustment 
-irsdkCVar ir_dcEngineBraking("dcEngineBraking");                                 //         float     1    1    In car engine braking adjustment 
-irsdkCVar ir_dcEnginePower("dcEnginePower");                                     //         float     1    1    In car engine power adjustment 
-irsdkCVar ir_dcFuelMixture("dcFuelMixture");                                     //         float     1    1    In car fuel mixture adjustment 
-irsdkCVar ir_dcRevLimiter("dcRevLimiter");                                       //         float     1    1    In car rev limiter adjustment 
-irsdkCVar ir_dcThrottleShape("dcThrottleShape");                                 //         float     1    1    In car throttle shape adjustment 
-irsdkCVar ir_dcTractionControl("dcTractionControl");                             //         float     1    1    In car traction control adjustment 
-irsdkCVar ir_dcTractionControl2("dcTractionControl2");                           //         float     1    1    In car traction control 2 adjustment 
-irsdkCVar ir_dcTractionControlToggle("dcTractionControlToggle");                 //          bool     1    1    In car traction control active 
-irsdkCVar ir_dcWeightJackerLeft("dcWeightJackerLeft");                           //         float     1    1    In car left weight jacker adjustment 
-irsdkCVar ir_dcWeightJackerRight("dcWeightJackerRight");                         //         float     1    1    In car right weight jacker adjustment 
-irsdkCVar ir_dcWingFront("dcWingFront");                                         //         float     1    1    In car front wing adjustment 
-irsdkCVar ir_dcWingRear("dcWingRear");                                           //         float     1    1    In car rear wing adjustment 
-irsdkCVar ir_dpFNOMKnobSetting("dpFNOMKnobSetting");                             //         float     1    1    Pitstop front flap adjustment 
-irsdkCVar ir_dpFUFangleIndex("dpFUFangleIndex");                                 //         float     1    1    Pitstop front upper flap adjustment 
-irsdkCVar ir_dpFWingAngle("dpFWingAngle");                                       //         float     1    1    Pitstop front wing adjustment 
-irsdkCVar ir_dpFWingIndex("dpFWingIndex");                                       //         float     1    1    Pitstop front wing adjustment 
-irsdkCVar ir_dpLrWedgeAdj("dpLrWedgeAdj");                                       //         float     1    1    Pitstop lr spring offset adjustment 
-irsdkCVar ir_dpPSSetting("dpPSSetting");                                         //         float     1    1    Pitstop power steering adjustment 
-irsdkCVar ir_dpQtape("dpQtape");                                                 //         float     1    1    Pitstop qtape adjustment 
-irsdkCVar ir_dpRBarSetting("dpRBarSetting");                                     //         float     1    1    Pitstop rear bar adjustment 
-irsdkCVar ir_dpRFTruckarmP1Dz("dpRFTruckarmP1Dz");                               //         float     1    1    Pitstop rftruckarmP1Dz adjustment 
-irsdkCVar ir_dpRRDamperPerchOffsetm("dpRRDamperPerchOffsetm");                   //          float     1    1    Pitstop right rear dampter perch offset adjustment 
-irsdkCVar ir_dpRrPerchOffsetm("dpRrPerchOffsetm");                               //         float     1    1    Pitstop right rear spring offset adjustment 
-irsdkCVar ir_dpRrWedgeAdj("dpRrWedgeAdj");                                       //         float     1    1    Pitstop rr spring offset adjustment 
-irsdkCVar ir_dpRWingAngle("dpRWingAngle");                                       //         float     1    1    Pitstop rear wing adjustment 
-irsdkCVar ir_dpRWingIndex("dpRWingIndex");                                       //         float     1    1    Pitstop rear wing adjustment 
-irsdkCVar ir_dpRWingSetting("dpRWingSetting");                                   //         float     1    1    Pitstop rear wing adjustment 
-irsdkCVar ir_dpTruckarmP1Dz("dpTruckarmP1Dz");                                   //         float     1    1    Pitstop truckarmP1Dz adjustment 
-irsdkCVar ir_dpWedgeAdj("dpWedgeAdj");                                           //         float     1    1    Pitstop wedge adjustment 
-irsdkCVar ir_LFbrakeLinePress("LFbrakeLinePress");                               //     bar     float     1    1    LF  brake line pressure 
-irsdkCVar ir_LFcoldPressure("LFcoldPressure");                                   //     kPa     float     1    1    LF tire cold pressure  as set in the garage 
-irsdkCVar ir_LFpressure("LFpressure");                                           //     kPa     float     1    0    LF tire pressure 
-irsdkCVar ir_LFrideHeight("LFrideHeight");                                       //     m     float     1    0    LF ride height 
-irsdkCVar ir_LFshockDefl("LFshockDefl");                                         //     m     float     1    1    LF shock deflection 
-irsdkCVar ir_LFshockVel("LFshockVel");                                           //     m/s     float     1    1    LF shock velocity 
-irsdkCVar ir_LFspeed("LFspeed");                                                 //     m/s     float     1    1    LF wheel speed 
-irsdkCVar ir_LFtempCL("LFtempCL");                                               //     C     float     1    1    LF tire left carcass temperature 
-irsdkCVar ir_LFtempCM("LFtempCM");                                               //     C     float     1    1    LF tire middle carcass temperature 
-irsdkCVar ir_LFtempCR("LFtempCR");                                               //     C     float     1    1    LF tire right carcass temperature 
-irsdkCVar ir_LFtempL("LFtempL");                                                 //     C     float     1    0    LF tire left surface temperature 
-irsdkCVar ir_LFtempM("LFtempM");                                                 //     C     float     1    0    LF tire middle surface temperature 
-irsdkCVar ir_LFtempR("LFtempR");                                                 //     C     float     1    0    LF tire right surface temperature 
-irsdkCVar ir_LFwearL("LFwearL");                                                 //     %     float     1    1    LF tire left percent tread remaining 
-irsdkCVar ir_LFwearM("LFwearM");                                                 //     %     float     1    1    LF tire middle percent tread remaining 
-irsdkCVar ir_LFwearR("LFwearR");                                                 //     %     float     1    1    LF tire right percent tread remaining 
-irsdkCVar ir_LRbrakeLinePress("LRbrakeLinePress");                               //     bar     float     1    1    LR  brake line pressure 
-irsdkCVar ir_LRcoldPressure("LRcoldPressure");                                   //     kPa     float     1    1    LR tire cold pressure  as set in the garage 
-irsdkCVar ir_LRpressure("LRpressure");                                           //     kPa     float     1    0    LR tire pressure 
-irsdkCVar ir_LRrideHeight("LRrideHeight");                                       //     m     float     1    0    LR ride height 
-irsdkCVar ir_LRshockDefl("LRshockDefl");                                         //     m     float     1    1    LR shock deflection 
-irsdkCVar ir_LRshockVel("LRshockVel");                                           //     m/s     float     1    1    LR shock velocity 
-irsdkCVar ir_LRspeed("LRspeed");                                                 //     m/s     float     1    1    LR wheel speed 
-irsdkCVar ir_LRtempCL("LRtempCL");                                               //     C     float     1    1    LR tire left carcass temperature 
-irsdkCVar ir_LRtempCM("LRtempCM");                                               //     C     float     1    1    LR tire middle carcass temperature 
-irsdkCVar ir_LRtempCR("LRtempCR");                                               //     C     float     1    1    LR tire right carcass temperature 
-irsdkCVar ir_LRtempL("LRtempL");                                                 //     C     float     1    0    LR tire left surface temperature 
-irsdkCVar ir_LRtempM("LRtempM");                                                 //     C     float     1    0    LR tire middle surface temperature 
-irsdkCVar ir_LRtempR("LRtempR");                                                 //     C     float     1    0    LR tire right surface temperature 
-irsdkCVar ir_LRwearL("LRwearL");                                                 //     %     float     1    1    LR tire left percent tread remaining 
-irsdkCVar ir_LRwearM("LRwearM");                                                 //     %     float     1    1    LR tire middle percent tread remaining 
-irsdkCVar ir_LRwearR("LRwearR");                                                 //     %     float     1    1    LR tire right percent tread remaining 
-irsdkCVar ir_RFbrakeLinePress("RFbrakeLinePress");                               //     bar     float     1    1    RF  brake line pressure 
-irsdkCVar ir_RFcoldPressure("RFcoldPressure");                                   //     kPa     float     1    1    RF tire cold pressure  as set in the garage 
-irsdkCVar ir_RFpressure("RFpressure");                                           //     kPa     float     1    0    RF tire pressure 
-irsdkCVar ir_RFrideHeight("RFrideHeight");                                       //     m     float     1    0    RF ride height 
-irsdkCVar ir_RFshockDefl("RFshockDefl");                                         //     m     float     1    1    RF shock deflection 
-irsdkCVar ir_RFshockVel("RFshockVel");                                           //     m/s     float     1    1    RF shock velocity 
-irsdkCVar ir_RFspeed("RFspeed");                                                 //     m/s     float     1    1    RF wheel speed 
-irsdkCVar ir_RFtempCL("RFtempCL");                                               //     C     float     1    1    RF tire left carcass temperature 
-irsdkCVar ir_RFtempCM("RFtempCM");                                               //     C     float     1    1    RF tire middle carcass temperature 
-irsdkCVar ir_RFtempCR("RFtempCR");                                               //     C     float     1    1    RF tire right carcass temperature 
-irsdkCVar ir_RFtempL("RFtempL");                                                 //     C     float     1    0    RF tire left surface temperature 
-irsdkCVar ir_RFtempM("RFtempM");                                                 //     C     float     1    0    RF tire middle surface temperature 
-irsdkCVar ir_RFtempR("RFtempR");                                                 //     C     float     1    0    RF tire right surface temperature 
-irsdkCVar ir_RFwearL("RFwearL");                                                 //     %     float     1    1    RF tire left percent tread remaining 
-irsdkCVar ir_RFwearM("RFwearM");                                                 //     %     float     1    1    RF tire middle percent tread remaining 
-irsdkCVar ir_RFwearR("RFwearR");                                                 //     %     float     1    1    RF tire right percent tread remaining 
-irsdkCVar ir_RRbrakeLinePress("RRbrakeLinePress");                               //     bar     float     1    1    R  brake line pressure 
-irsdkCVar ir_RRcoldPressure("RRcoldPressure");                                   //     kPa     float     1    1    RR tire cold pressure  as set in the garage 
-irsdkCVar ir_RRpressure("RRpressure");                                           //     kPa     float     1    0    RR tire pressure 
-irsdkCVar ir_RRrideHeight("RRrideHeight");                                       //     m     float     1    0    RR ride height 
-irsdkCVar ir_RRshockDefl("RRshockDefl");                                         //     m     float     1    1    RR shock deflection 
-irsdkCVar ir_RRshockVel("RRshockVel");                                           //     m/s     float     1    1    RR shock velocity 
-irsdkCVar ir_RRspeed("RRspeed");                                                 //     m/s     float     1    1    RR wheel speed 
-irsdkCVar ir_RRtempCL("RRtempCL");                                               //     C     float     1    1    RR tire left carcass temperature 
-irsdkCVar ir_RRtempCM("RRtempCM");                                               //     C     float     1    1    RR tire middle carcass temperature 
-irsdkCVar ir_RRtempCR("RRtempCR");                                               //     C     float     1    1    RR tire right carcass temperature 
-irsdkCVar ir_RRtempL("RRtempL");                                                 //     C     float     1    0    RR tire left surface temperature 
-irsdkCVar ir_RRtempM("RRtempM");                                                 //     C     float     1    0    RR tire middle surface temperature 
-irsdkCVar ir_RRtempR("RRtempR");                                                 //     C     float     1    0    RR tire right surface temperature 
-irsdkCVar ir_RRwearL("RRwearL");                                                 //     %     float     1    1    RR tire left percent tread remaining 
-irsdkCVar ir_RRwearM("RRwearM");                                                 //     %     float     1    1    RR tire middle percent tread remaining 
-irsdkCVar ir_RRwearR("RRwearR");                                                 //     %     float     1    1    RR tire right percent tread remaining 
-irsdkCVar ir_CarIdxClassPosition("CarIdxClassPosition");                         //         int     0    1    Cars class position in race by car index 
-irsdkCVar ir_CarIdxEstTime("CarIdxEstTime");                                     //     s     float     0    1    Estimated time to reach current location on track 
-irsdkCVar ir_CarIdxF2Time("CarIdxF2Time");                                       //     s     float     0    1    Race time behind leader or fastest lap time otherwise 
-irsdkCVar ir_CarIdxGear("CarIdxGear");                                           //         int     0    1    -1=reverse  0=neutral  1..n=current gear by car index 
-irsdkCVar ir_CarIdxLap("CarIdxLap");                                             //         int     0    1    Lap count by car index 
-irsdkCVar ir_CarIdxLapDistPct("CarIdxLapDistPct");                               //     %     float     0    1    Percentage distance around lap by car index 
-irsdkCVar ir_CarIdxOnPitRoad("CarIdxOnPitRoad");                                 //         bool     0    1    On pit road between the cones by car index 
-irsdkCVar ir_CarIdxPosition("CarIdxPosition");                                   //         int     0    1    Cars position in race by car index 
-irsdkCVar ir_CarIdxRPM("CarIdxRPM");                                             //     revs/min     float     0    1    Engine rpm by car index 
-irsdkCVar ir_CarIdxSteer("CarIdxSteer");                                         //     rad     float     0    1    Steering wheel angle by car index 
-irsdkCVar ir_CarIdxTrackSurface("CarIdxTrackSurface");                           //     irsdk_TrkLoc     int     0    1    Track surface type by car index 
-irsdkCVar ir_CarIdxLastLapTime("CarIdxLastLapTime");                             //     s   float  ?  ?  Cars last lap time
-irsdkCVar ir_CarIdxBestLapTime("CarIdxBestLapTime");                             //     s   float  ?  ?  Cars best lap time
-irsdkCVar ir_CarIdxBestLapNum("CarIdxBestLapNum");                               //         int    ?  ?  Cars best lap number
-irsdkCVar ir_CarIdxP2P_Status("CarIdxP2P_Status");                               //         bool   ?  ?  Push2Pass active or not
-irsdkCVar ir_CarIdxP2P_Count("CarIdxP2P_Count");                                 //         int    ?  ?  Push2Pass count of usage (or remaining in Race)
-irsdkCVar ir_PaceMode("PaceMode");                                               //         int    ?  ?  irsdk_PaceMode, Are we pacing or not
-irsdkCVar ir_CarIdxPaceLine("CarIdxPaceLine");                                   //         int    ?  ?  What line cars are pacing in, or -1 if not pacing
-irsdkCVar ir_CarIdxPaceRow("CarIdxPaceRow");                                     //         int    ?  ?  What row cars are pacing in, or -1 if not pacing
-irsdkCVar ir_CarIdxPaceFlags("CarIdxPaceFlags");                                 //         int    ?  ?  irsdk_PaceFlags, Pacing status flags for each car
-
+irsdkCVar ir_SessionTime("SessionTime");    // double[1] Seconds since session start (s)
+irsdkCVar ir_SessionTick("SessionTick");    // int[1] Current update number ()
+irsdkCVar ir_SessionNum("SessionNum");    // int[1] Session number ()
+irsdkCVar ir_SessionState("SessionState");    // int[1] Session state (irsdk_SessionState)
+irsdkCVar ir_SessionUniqueID("SessionUniqueID");    // int[1] Session ID ()
+irsdkCVar ir_SessionFlags("SessionFlags");    // bitfield[1] Session flags (irsdk_Flags)
+irsdkCVar ir_SessionTimeRemain("SessionTimeRemain");    // double[1] Seconds left till session ends (s)
+irsdkCVar ir_SessionLapsRemain("SessionLapsRemain");    // int[1] Old laps left till session ends use SessionLapsRemainEx ()
+irsdkCVar ir_SessionLapsRemainEx("SessionLapsRemainEx");    // int[1] New improved laps left till session ends ()
+irsdkCVar ir_SessionTimeTotal("SessionTimeTotal");    // double[1] Total number of seconds in session (s)
+irsdkCVar ir_SessionLapsTotal("SessionLapsTotal");    // int[1] Total number of laps in session ()
+irsdkCVar ir_SessionTimeOfDay("SessionTimeOfDay");    // float[1] Time of day in seconds (s)
+irsdkCVar ir_RadioTransmitCarIdx("RadioTransmitCarIdx");    // int[1] The car index of the current person speaking on the radio ()
+irsdkCVar ir_RadioTransmitRadioIdx("RadioTransmitRadioIdx");    // int[1] The radio index of the current person speaking on the radio ()
+irsdkCVar ir_RadioTransmitFrequencyIdx("RadioTransmitFrequencyIdx");    // int[1] The frequency index of the current person speaking on the radio ()
+irsdkCVar ir_DisplayUnits("DisplayUnits");    // int[1] Default units for the user interface 0 = english 1 = metric ()
+irsdkCVar ir_DriverMarker("DriverMarker");    // bool[1] Driver activated flag ()
+irsdkCVar ir_PushToPass("PushToPass");    // bool[1] Push to pass button state ()
+irsdkCVar ir_ManualBoost("ManualBoost");    // bool[1] Hybrid manual boost state ()
+irsdkCVar ir_ManualNoBoost("ManualNoBoost");    // bool[1] Hybrid manual no boost state ()
+irsdkCVar ir_IsOnTrack("IsOnTrack");    // bool[1] 1=Car on track physics running with player in car ()
+irsdkCVar ir_IsReplayPlaying("IsReplayPlaying");    // bool[1] 0=replay not playing  1=replay playing ()
+irsdkCVar ir_ReplayFrameNum("ReplayFrameNum");    // int[1] Integer replay frame number (60 per second) ()
+irsdkCVar ir_ReplayFrameNumEnd("ReplayFrameNumEnd");    // int[1] Integer replay frame number from end of tape ()
+irsdkCVar ir_IsDiskLoggingEnabled("IsDiskLoggingEnabled");    // bool[1] 0=disk based telemetry turned off  1=turned on ()
+irsdkCVar ir_IsDiskLoggingActive("IsDiskLoggingActive");    // bool[1] 0=disk based telemetry file not being written  1=being written ()
+irsdkCVar ir_FrameRate("FrameRate");    // float[1] Average frames per second (fps)
+irsdkCVar ir_CpuUsageFG("CpuUsageFG");    // float[1] Percent of available tim fg thread took with a 1 sec avg (%)
+irsdkCVar ir_GpuUsage("GpuUsage");    // float[1] Percent of available tim gpu took with a 1 sec avg (%)
+irsdkCVar ir_ChanAvgLatency("ChanAvgLatency");    // float[1] Communications average latency (s)
+irsdkCVar ir_ChanLatency("ChanLatency");    // float[1] Communications latency (s)
+irsdkCVar ir_ChanQuality("ChanQuality");    // float[1] Communications quality (%)
+irsdkCVar ir_ChanPartnerQuality("ChanPartnerQuality");    // float[1] Partner communications quality (%)
+irsdkCVar ir_CpuUsageBG("CpuUsageBG");    // float[1] Percent of available tim bg thread took with a 1 sec avg (%)
+irsdkCVar ir_ChanClockSkew("ChanClockSkew");    // float[1] Communications server clock skew (s)
+irsdkCVar ir_MemPageFaultSec("MemPageFaultSec");    // float[1] Memory page faults per second ()
+irsdkCVar ir_PlayerCarPosition("PlayerCarPosition");    // int[1] Players position in race ()
+irsdkCVar ir_PlayerCarClassPosition("PlayerCarClassPosition");    // int[1] Players class position in race ()
+irsdkCVar ir_PlayerCarClass("PlayerCarClass");    // int[1] Player car class id ()
+irsdkCVar ir_PlayerTrackSurface("PlayerTrackSurface");    // int[1] Players car track surface type (irsdk_TrkLoc)
+irsdkCVar ir_PlayerTrackSurfaceMaterial("PlayerTrackSurfaceMaterial");    // int[1] Players car track surface material type (irsdk_TrkSurf)
+irsdkCVar ir_PlayerCarIdx("PlayerCarIdx");    // int[1] Players carIdx ()
+irsdkCVar ir_PlayerCarTeamIncidentCount("PlayerCarTeamIncidentCount");    // int[1] Players team incident count for this session ()
+irsdkCVar ir_PlayerCarMyIncidentCount("PlayerCarMyIncidentCount");    // int[1] Players own incident count for this session ()
+irsdkCVar ir_PlayerCarDriverIncidentCount("PlayerCarDriverIncidentCount");    // int[1] Teams current drivers incident count for this session ()
+irsdkCVar ir_PlayerCarWeightPenalty("PlayerCarWeightPenalty");    // float[1] Players weight penalty (kg)
+irsdkCVar ir_PlayerCarPowerAdjust("PlayerCarPowerAdjust");    // float[1] Players power adjust (%)
+irsdkCVar ir_PlayerCarDryTireSetLimit("PlayerCarDryTireSetLimit");    // int[1] Players dry tire set limit ()
+irsdkCVar ir_PlayerCarTowTime("PlayerCarTowTime");    // float[1] Players car is being towed if time is greater than zero (s)
+irsdkCVar ir_PlayerCarInPitStall("PlayerCarInPitStall");    // bool[1] Players car is properly in there pitstall ()
+irsdkCVar ir_PlayerCarPitSvStatus("PlayerCarPitSvStatus");    // int[1] Players car pit service status bits (irsdk_PitSvStatus)
+irsdkCVar ir_PlayerTireCompound("PlayerTireCompound");    // int[1] Players car current tire compound ()
+irsdkCVar ir_PlayerFastRepairsUsed("PlayerFastRepairsUsed");    // int[1] Players car number of fast repairs used ()
+irsdkCVar ir_CarIdxLap("CarIdxLap");    // int[64] Laps started by car index ()
+irsdkCVar ir_CarIdxLapCompleted("CarIdxLapCompleted");    // int[64] Laps completed by car index ()
+irsdkCVar ir_CarIdxLapDistPct("CarIdxLapDistPct");    // float[64] Percentage distance around lap by car index (%)
+irsdkCVar ir_CarIdxTrackSurface("CarIdxTrackSurface");    // int[64] Track surface type by car index (irsdk_TrkLoc)
+irsdkCVar ir_CarIdxTrackSurfaceMaterial("CarIdxTrackSurfaceMaterial");    // int[64] Track surface material type by car index (irsdk_TrkSurf)
+irsdkCVar ir_CarIdxOnPitRoad("CarIdxOnPitRoad");    // bool[64] On pit road between the cones by car index ()
+irsdkCVar ir_CarIdxPosition("CarIdxPosition");    // int[64] Cars position in race by car index ()
+irsdkCVar ir_CarIdxClassPosition("CarIdxClassPosition");    // int[64] Cars class position in race by car index ()
+irsdkCVar ir_CarIdxClass("CarIdxClass");    // int[64] Cars class id by car index ()
+irsdkCVar ir_CarIdxF2Time("CarIdxF2Time");    // float[64] Race time behind leader or fastest lap time otherwise (s)
+irsdkCVar ir_CarIdxEstTime("CarIdxEstTime");    // float[64] Estimated time to reach current location on track (s)
+irsdkCVar ir_CarIdxLastLapTime("CarIdxLastLapTime");    // float[64] Cars last lap time (s)
+irsdkCVar ir_CarIdxBestLapTime("CarIdxBestLapTime");    // float[64] Cars best lap time (s)
+irsdkCVar ir_CarIdxBestLapNum("CarIdxBestLapNum");    // int[64] Cars best lap number ()
+irsdkCVar ir_CarIdxTireCompound("CarIdxTireCompound");    // int[64] Cars current tire compound ()
+irsdkCVar ir_CarIdxQualTireCompound("CarIdxQualTireCompound");    // int[64] Cars Qual tire compound ()
+irsdkCVar ir_CarIdxQualTireCompoundLocked("CarIdxQualTireCompoundLocked");    // bool[64] Cars Qual tire compound is locked-in ()
+irsdkCVar ir_CarIdxFastRepairsUsed("CarIdxFastRepairsUsed");    // int[64] How many fast repairs each car has used ()
+irsdkCVar ir_PaceMode("PaceMode");    // int[1] Are we pacing or not (irsdk_PaceMode)
+irsdkCVar ir_CarIdxPaceLine("CarIdxPaceLine");    // int[64] What line cars are pacing in  or -1 if not pacing ()
+irsdkCVar ir_CarIdxPaceRow("CarIdxPaceRow");    // int[64] What row cars are pacing in  or -1 if not pacing ()
+irsdkCVar ir_CarIdxPaceFlags("CarIdxPaceFlags");    // int[64] Pacing status flags for each car (irsdk_PaceFlags)
+irsdkCVar ir_OnPitRoad("OnPitRoad");    // bool[1] Is the player car on pit road between the cones ()
+irsdkCVar ir_CarIdxSteer("CarIdxSteer");    // float[64] Steering wheel angle by car index (rad)
+irsdkCVar ir_CarIdxRPM("CarIdxRPM");    // float[64] Engine rpm by car index (revs/min)
+irsdkCVar ir_CarIdxGear("CarIdxGear");    // int[64] -1=reverse  0=neutral  1..n=current gear by car index ()
+irsdkCVar ir_SteeringWheelAngle("SteeringWheelAngle");    // float[1] Steering wheel angle (rad)
+irsdkCVar ir_Throttle("Throttle");    // float[1] 0=off throttle to 1=full throttle (%)
+irsdkCVar ir_Brake("Brake");    // float[1] 0=brake released to 1=max pedal force (%)
+irsdkCVar ir_Clutch("Clutch");    // float[1] 0=disengaged to 1=fully engaged (%)
+irsdkCVar ir_Gear("Gear");    // int[1] -1=reverse  0=neutral  1..n=current gear ()
+irsdkCVar ir_RPM("RPM");    // float[1] Engine rpm (revs/min)
+irsdkCVar ir_Lap("Lap");    // int[1] Laps started count ()
+irsdkCVar ir_LapCompleted("LapCompleted");    // int[1] Laps completed count ()
+irsdkCVar ir_LapDist("LapDist");    // float[1] Meters traveled from S/F this lap (m)
+irsdkCVar ir_LapDistPct("LapDistPct");    // float[1] Percentage distance around lap (%)
+irsdkCVar ir_RaceLaps("RaceLaps");    // int[1] Laps completed in race ()
+irsdkCVar ir_LapBestLap("LapBestLap");    // int[1] Players best lap number ()
+irsdkCVar ir_LapBestLapTime("LapBestLapTime");    // float[1] Players best lap time (s)
+irsdkCVar ir_LapLastLapTime("LapLastLapTime");    // float[1] Players last lap time (s)
+irsdkCVar ir_LapCurrentLapTime("LapCurrentLapTime");    // float[1] Estimate of players current lap time as shown in F3 box (s)
+irsdkCVar ir_LapLasNLapSeq("LapLasNLapSeq");    // int[1] Player num consecutive clean laps completed for N average ()
+irsdkCVar ir_LapLastNLapTime("LapLastNLapTime");    // float[1] Player last N average lap time (s)
+irsdkCVar ir_LapBestNLapLap("LapBestNLapLap");    // int[1] Player last lap in best N average lap time ()
+irsdkCVar ir_LapBestNLapTime("LapBestNLapTime");    // float[1] Player best N average lap time (s)
+irsdkCVar ir_LapDeltaToBestLap("LapDeltaToBestLap");    // float[1] Delta time for best lap (s)
+irsdkCVar ir_LapDeltaToBestLap_DD("LapDeltaToBestLap_DD");    // float[1] Rate of change of delta time for best lap (s/s)
+irsdkCVar ir_LapDeltaToBestLap_OK("LapDeltaToBestLap_OK");    // bool[1] Delta time for best lap is valid ()
+irsdkCVar ir_LapDeltaToOptimalLap("LapDeltaToOptimalLap");    // float[1] Delta time for optimal lap (s)
+irsdkCVar ir_LapDeltaToOptimalLap_DD("LapDeltaToOptimalLap_DD");    // float[1] Rate of change of delta time for optimal lap (s/s)
+irsdkCVar ir_LapDeltaToOptimalLap_OK("LapDeltaToOptimalLap_OK");    // bool[1] Delta time for optimal lap is valid ()
+irsdkCVar ir_LapDeltaToSessionBestLap("LapDeltaToSessionBestLap");    // float[1] Delta time for session best lap (s)
+irsdkCVar ir_LapDeltaToSessionBestLap_DD("LapDeltaToSessionBestLap_DD");    // float[1] Rate of change of delta time for session best lap (s/s)
+irsdkCVar ir_LapDeltaToSessionBestLap_OK("LapDeltaToSessionBestLap_OK");    // bool[1] Delta time for session best lap is valid ()
+irsdkCVar ir_LapDeltaToSessionOptimalLap("LapDeltaToSessionOptimalLap");    // float[1] Delta time for session optimal lap (s)
+irsdkCVar ir_LapDeltaToSessionOptimalLap_DD("LapDeltaToSessionOptimalLap_DD");    // float[1] Rate of change of delta time for session optimal lap (s/s)
+irsdkCVar ir_LapDeltaToSessionOptimalLap_OK("LapDeltaToSessionOptimalLap_OK");    // bool[1] Delta time for session optimal lap is valid ()
+irsdkCVar ir_LapDeltaToSessionLastlLap("LapDeltaToSessionLastlLap");    // float[1] Delta time for session last lap (s)
+irsdkCVar ir_LapDeltaToSessionLastlLap_DD("LapDeltaToSessionLastlLap_DD");    // float[1] Rate of change of delta time for session last lap (s/s)
+irsdkCVar ir_LapDeltaToSessionLastlLap_OK("LapDeltaToSessionLastlLap_OK");    // bool[1] Delta time for session last lap is valid ()
+irsdkCVar ir_Speed("Speed");    // float[1] GPS vehicle speed (m/s)
+irsdkCVar ir_Yaw("Yaw");    // float[1] Yaw orientation (rad)
+irsdkCVar ir_YawNorth("YawNorth");    // float[1] Yaw orientation relative to north (rad)
+irsdkCVar ir_Pitch("Pitch");    // float[1] Pitch orientation (rad)
+irsdkCVar ir_Roll("Roll");    // float[1] Roll orientation (rad)
+irsdkCVar ir_EnterExitReset("EnterExitReset");    // int[1] Indicate action the reset key will take 0 enter 1 exit 2 reset ()
+irsdkCVar ir_TrackTemp("TrackTemp");    // float[1] Deprecated  set to TrackTempCrew (C)
+irsdkCVar ir_TrackTempCrew("TrackTempCrew");    // float[1] Temperature of track measured by crew around track (C)
+irsdkCVar ir_AirTemp("AirTemp");    // float[1] Temperature of air at start/finish line (C)
+irsdkCVar ir_WeatherType("WeatherType");    // int[1] Weather type (0=constant  1=dynamic) ()
+irsdkCVar ir_Skies("Skies");    // int[1] Skies (0=clear/1=p cloudy/2=m cloudy/3=overcast) ()
+irsdkCVar ir_AirDensity("AirDensity");    // float[1] Density of air at start/finish line (kg/m^3)
+irsdkCVar ir_AirPressure("AirPressure");    // float[1] Pressure of air at start/finish line (Hg)
+irsdkCVar ir_WindVel("WindVel");    // float[1] Wind velocity at start/finish line (m/s)
+irsdkCVar ir_WindDir("WindDir");    // float[1] Wind direction at start/finish line (rad)
+irsdkCVar ir_RelativeHumidity("RelativeHumidity");    // float[1] Relative Humidity (%)
+irsdkCVar ir_FogLevel("FogLevel");    // float[1] Fog level (%)
+irsdkCVar ir_DCLapStatus("DCLapStatus");    // int[1] Status of driver change lap requirements ()
+irsdkCVar ir_DCDriversSoFar("DCDriversSoFar");    // int[1] Number of team drivers who have run a stint ()
+irsdkCVar ir_OkToReloadTextures("OkToReloadTextures");    // bool[1] True if it is ok to reload car textures at this time ()
+irsdkCVar ir_LoadNumTextures("LoadNumTextures");    // bool[1] True if the car_num texture will be loaded ()
+irsdkCVar ir_CarLeftRight("CarLeftRight");    // bitfield[1] Notify if car is to the left or right of driver (irsdk_CarLeftRight)
+irsdkCVar ir_PitsOpen("PitsOpen");    // bool[1] True if pit stop is allowed for the current player ()
+irsdkCVar ir_VidCapEnabled("VidCapEnabled");    // bool[1] True if video capture system is enabled ()
+irsdkCVar ir_VidCapActive("VidCapActive");    // bool[1] True if video currently being captured ()
+irsdkCVar ir_PitRepairLeft("PitRepairLeft");    // float[1] Time left for mandatory pit repairs if repairs are active (s)
+irsdkCVar ir_PitOptRepairLeft("PitOptRepairLeft");    // float[1] Time left for optional repairs if repairs are active (s)
+irsdkCVar ir_PitstopActive("PitstopActive");    // bool[1] Is the player getting pit stop service ()
+irsdkCVar ir_FastRepairUsed("FastRepairUsed");    // int[1] How many fast repairs used so far ()
+irsdkCVar ir_FastRepairAvailable("FastRepairAvailable");    // int[1] How many fast repairs left  255 is unlimited ()
+irsdkCVar ir_LFTiresUsed("LFTiresUsed");    // int[1] How many left front tires used so far ()
+irsdkCVar ir_RFTiresUsed("RFTiresUsed");    // int[1] How many right front tires used so far ()
+irsdkCVar ir_LRTiresUsed("LRTiresUsed");    // int[1] How many left rear tires used so far ()
+irsdkCVar ir_RRTiresUsed("RRTiresUsed");    // int[1] How many right rear tires used so far ()
+irsdkCVar ir_LeftTireSetsUsed("LeftTireSetsUsed");    // int[1] How many left tire sets used so far ()
+irsdkCVar ir_RightTireSetsUsed("RightTireSetsUsed");    // int[1] How many right tire sets used so far ()
+irsdkCVar ir_FrontTireSetsUsed("FrontTireSetsUsed");    // int[1] How many front tire sets used so far ()
+irsdkCVar ir_RearTireSetsUsed("RearTireSetsUsed");    // int[1] How many rear tire sets used so far ()
+irsdkCVar ir_TireSetsUsed("TireSetsUsed");    // int[1] How many tire sets used so far ()
+irsdkCVar ir_LFTiresAvailable("LFTiresAvailable");    // int[1] How many left front tires are remaining  255 is unlimited ()
+irsdkCVar ir_RFTiresAvailable("RFTiresAvailable");    // int[1] How many right front tires are remaining  255 is unlimited ()
+irsdkCVar ir_LRTiresAvailable("LRTiresAvailable");    // int[1] How many left rear tires are remaining  255 is unlimited ()
+irsdkCVar ir_RRTiresAvailable("RRTiresAvailable");    // int[1] How many right rear tires are remaining  255 is unlimited ()
+irsdkCVar ir_LeftTireSetsAvailable("LeftTireSetsAvailable");    // int[1] How many left tire sets are remaining  255 is unlimited ()
+irsdkCVar ir_RightTireSetsAvailable("RightTireSetsAvailable");    // int[1] How many right tire sets are remaining  255 is unlimited ()
+irsdkCVar ir_FrontTireSetsAvailable("FrontTireSetsAvailable");    // int[1] How many front tire sets are remaining  255 is unlimited ()
+irsdkCVar ir_RearTireSetsAvailable("RearTireSetsAvailable");    // int[1] How many rear tire sets are remaining  255 is unlimited ()
+irsdkCVar ir_TireSetsAvailable("TireSetsAvailable");    // int[1] How many tire sets are remaining  255 is unlimited ()
+irsdkCVar ir_CamCarIdx("CamCarIdx");    // int[1] Active camera's focus car index ()
+irsdkCVar ir_CamCameraNumber("CamCameraNumber");    // int[1] Active camera number ()
+irsdkCVar ir_CamGroupNumber("CamGroupNumber");    // int[1] Active camera group number ()
+irsdkCVar ir_CamCameraState("CamCameraState");    // bitfield[1] State of camera system (irsdk_CameraState)
+irsdkCVar ir_IsOnTrackCar("IsOnTrackCar");    // bool[1] 1=Car on track physics running ()
+irsdkCVar ir_IsInGarage("IsInGarage");    // bool[1] 1=Car in garage physics running ()
+irsdkCVar ir_SteeringWheelPctTorque("SteeringWheelPctTorque");    // float[1] Force feedback % max torque on steering shaft unsigned (%)
+irsdkCVar ir_SteeringWheelPctTorqueSign("SteeringWheelPctTorqueSign");    // float[1] Force feedback % max torque on steering shaft signed (%)
+irsdkCVar ir_SteeringWheelPctTorqueSignStops("SteeringWheelPctTorqueSignStops");    // float[1] Force feedback % max torque on steering shaft signed stops (%)
+irsdkCVar ir_SteeringWheelPctDamper("SteeringWheelPctDamper");    // float[1] Force feedback % max damping (%)
+irsdkCVar ir_SteeringWheelAngleMax("SteeringWheelAngleMax");    // float[1] Steering wheel max angle (rad)
+irsdkCVar ir_SteeringWheelLimiter("SteeringWheelLimiter");    // float[1] Force feedback limiter strength limits impacts and oscillation (%)
+irsdkCVar ir_ShiftIndicatorPct("ShiftIndicatorPct");    // float[1] DEPRECATED use DriverCarSLBlinkRPM instead (%)
+irsdkCVar ir_ShiftPowerPct("ShiftPowerPct");    // float[1] Friction torque applied to gears when shifting or grinding (%)
+irsdkCVar ir_ShiftGrindRPM("ShiftGrindRPM");    // float[1] RPM of shifter grinding noise (RPM)
+irsdkCVar ir_ThrottleRaw("ThrottleRaw");    // float[1] Raw throttle input 0=off throttle to 1=full throttle (%)
+irsdkCVar ir_BrakeRaw("BrakeRaw");    // float[1] Raw brake input 0=brake released to 1=max pedal force (%)
+irsdkCVar ir_HandbrakeRaw("HandbrakeRaw");    // float[1] Raw handbrake input 0=handbrake released to 1=max force (%)
+irsdkCVar ir_SteeringWheelPeakForceNm("SteeringWheelPeakForceNm");    // float[1] Peak torque mapping to direct input units for FFB (N*m)
+irsdkCVar ir_SteeringWheelMaxForceNm("SteeringWheelMaxForceNm");    // float[1] Value of strength or max force slider in Nm for FFB (N*m)
+irsdkCVar ir_SteeringWheelUseLinear("SteeringWheelUseLinear");    // bool[1] True if steering wheel force is using linear mode ()
+irsdkCVar ir_BrakeABSactive("BrakeABSactive");    // bool[1] true if abs is currently reducing brake force pressure ()
+irsdkCVar ir_EngineWarnings("EngineWarnings");    // bitfield[1] Bitfield for warning lights (irsdk_EngineWarnings)
+irsdkCVar ir_FuelLevel("FuelLevel");    // float[1] Liters of fuel remaining (l)
+irsdkCVar ir_FuelLevelPct("FuelLevelPct");    // float[1] Percent fuel remaining (%)
+irsdkCVar ir_PitSvFlags("PitSvFlags");    // bitfield[1] Bitfield of pit service checkboxes (irsdk_PitSvFlags)
+irsdkCVar ir_PitSvLFP("PitSvLFP");    // float[1] Pit service left front tire pressure (kPa)
+irsdkCVar ir_PitSvRFP("PitSvRFP");    // float[1] Pit service right front tire pressure (kPa)
+irsdkCVar ir_PitSvLRP("PitSvLRP");    // float[1] Pit service left rear tire pressure (kPa)
+irsdkCVar ir_PitSvRRP("PitSvRRP");    // float[1] Pit service right rear tire pressure (kPa)
+irsdkCVar ir_PitSvFuel("PitSvFuel");    // float[1] Pit service fuel add amount (l)
+irsdkCVar ir_PitSvTireCompound("PitSvTireCompound");    // int[1] Pit service pending tire compound ()
+irsdkCVar ir_CarIdxP2P_Status("CarIdxP2P_Status");    // bool[64] Push2Pass active or not ()
+irsdkCVar ir_CarIdxP2P_Count("CarIdxP2P_Count");    // int[64] Push2Pass count of usage (or remaining in Race) ()
+irsdkCVar ir_ReplayPlaySpeed("ReplayPlaySpeed");    // int[1] Replay playback speed ()
+irsdkCVar ir_ReplayPlaySlowMotion("ReplayPlaySlowMotion");    // bool[1] 0=not slow motion  1=replay is in slow motion ()
+irsdkCVar ir_ReplaySessionTime("ReplaySessionTime");    // double[1] Seconds since replay session start (s)
+irsdkCVar ir_ReplaySessionNum("ReplaySessionNum");    // int[1] Replay session number ()
+irsdkCVar ir_TireLF_RumblePitch("TireLF_RumblePitch");    // float[1] Players LF Tire Sound rumblestrip pitch (Hz)
+irsdkCVar ir_TireRF_RumblePitch("TireRF_RumblePitch");    // float[1] Players RF Tire Sound rumblestrip pitch (Hz)
+irsdkCVar ir_TireLR_RumblePitch("TireLR_RumblePitch");    // float[1] Players LR Tire Sound rumblestrip pitch (Hz)
+irsdkCVar ir_TireRR_RumblePitch("TireRR_RumblePitch");    // float[1] Players RR Tire Sound rumblestrip pitch (Hz)
+irsdkCVar ir_SteeringWheelTorque_ST("SteeringWheelTorque_ST");    // float[6] Output torque on steering shaft at 360 Hz (N*m)
+irsdkCVar ir_SteeringWheelTorque("SteeringWheelTorque");    // float[1] Output torque on steering shaft (N*m)
+irsdkCVar ir_VelocityZ_ST("VelocityZ_ST");    // float[6] Z velocity (m/s at 360 Hz)
+irsdkCVar ir_VelocityY_ST("VelocityY_ST");    // float[6] Y velocity (m/s at 360 Hz)
+irsdkCVar ir_VelocityX_ST("VelocityX_ST");    // float[6] X velocity (m/s at 360 Hz)
+irsdkCVar ir_VelocityZ("VelocityZ");    // float[1] Z velocity (m/s)
+irsdkCVar ir_VelocityY("VelocityY");    // float[1] Y velocity (m/s)
+irsdkCVar ir_VelocityX("VelocityX");    // float[1] X velocity (m/s)
+irsdkCVar ir_YawRate_ST("YawRate_ST");    // float[6] Yaw rate at 360 Hz (rad/s)
+irsdkCVar ir_PitchRate_ST("PitchRate_ST");    // float[6] Pitch rate at 360 Hz (rad/s)
+irsdkCVar ir_RollRate_ST("RollRate_ST");    // float[6] Roll rate at 360 Hz (rad/s)
+irsdkCVar ir_YawRate("YawRate");    // float[1] Yaw rate (rad/s)
+irsdkCVar ir_PitchRate("PitchRate");    // float[1] Pitch rate (rad/s)
+irsdkCVar ir_RollRate("RollRate");    // float[1] Roll rate (rad/s)
+irsdkCVar ir_VertAccel_ST("VertAccel_ST");    // float[6] Vertical acceleration (including gravity) at 360 Hz (m/s^2)
+irsdkCVar ir_LatAccel_ST("LatAccel_ST");    // float[6] Lateral acceleration (including gravity) at 360 Hz (m/s^2)
+irsdkCVar ir_LongAccel_ST("LongAccel_ST");    // float[6] Longitudinal acceleration (including gravity) at 360 Hz (m/s^2)
+irsdkCVar ir_VertAccel("VertAccel");    // float[1] Vertical acceleration (including gravity) (m/s^2)
+irsdkCVar ir_LatAccel("LatAccel");    // float[1] Lateral acceleration (including gravity) (m/s^2)
+irsdkCVar ir_LongAccel("LongAccel");    // float[1] Longitudinal acceleration (including gravity) (m/s^2)
+irsdkCVar ir_dcStarter("dcStarter");    // bool[1] In car trigger car starter ()
+irsdkCVar ir_dpRTireChange("dpRTireChange");    // float[1] Pitstop right tire change request ()
+irsdkCVar ir_dpLTireChange("dpLTireChange");    // float[1] Pitstop left tire change request ()
+irsdkCVar ir_dpFuelFill("dpFuelFill");    // float[1] Pitstop fuel fill flag ()
+irsdkCVar ir_dpWindshieldTearoff("dpWindshieldTearoff");    // float[1] Pitstop windshield tearoff ()
+irsdkCVar ir_dpFuelAddKg("dpFuelAddKg");    // float[1] Pitstop fuel add ammount (kg)
+irsdkCVar ir_dpFastRepair("dpFastRepair");    // float[1] Pitstop fast repair set ()
+irsdkCVar ir_dcBrakeBias("dcBrakeBias");    // float[1] In car brake bias adjustment ()
+irsdkCVar ir_dpLFTireColdPress("dpLFTireColdPress");    // float[1] Pitstop lf tire cold pressure adjustment (Pa)
+irsdkCVar ir_dpRFTireColdPress("dpRFTireColdPress");    // float[1] Pitstop rf cold tire pressure adjustment (Pa)
+irsdkCVar ir_dpLRTireColdPress("dpLRTireColdPress");    // float[1] Pitstop lr tire cold pressure adjustment (Pa)
+irsdkCVar ir_dpRRTireColdPress("dpRRTireColdPress");    // float[1] Pitstop rr cold tire pressure adjustment (Pa)
+irsdkCVar ir_dpWeightJackerLeft("dpWeightJackerLeft");    // float[1] Pitstop left wedge/weight jacker adjustment ()
+irsdkCVar ir_dpWeightJackerRight("dpWeightJackerRight");    // float[1] Pitstop right wedge/weight jacker adjustment ()
+irsdkCVar ir_WaterTemp("WaterTemp");    // float[1] Engine coolant temp (C)
+irsdkCVar ir_WaterLevel("WaterLevel");    // float[1] Engine coolant level (l)
+irsdkCVar ir_FuelPress("FuelPress");    // float[1] Engine fuel pressure (bar)
+irsdkCVar ir_FuelUsePerHour("FuelUsePerHour");    // float[1] Engine fuel used instantaneous (kg/h)
+irsdkCVar ir_OilTemp("OilTemp");    // float[1] Engine oil temperature (C)
+irsdkCVar ir_OilPress("OilPress");    // float[1] Engine oil pressure (bar)
+irsdkCVar ir_OilLevel("OilLevel");    // float[1] Engine oil level (l)
+irsdkCVar ir_Voltage("Voltage");    // float[1] Engine voltage (V)
+irsdkCVar ir_ManifoldPress("ManifoldPress");    // float[1] Engine manifold pressure (bar)
+irsdkCVar ir_RFcoldPressure("RFcoldPressure");    // float[1] RF tire cold pressure  as set in the garage (kPa)
+irsdkCVar ir_RFtempCL("RFtempCL");    // float[1] RF tire left carcass temperature (C)
+irsdkCVar ir_RFtempCM("RFtempCM");    // float[1] RF tire middle carcass temperature (C)
+irsdkCVar ir_RFtempCR("RFtempCR");    // float[1] RF tire right carcass temperature (C)
+irsdkCVar ir_RFwearL("RFwearL");    // float[1] RF tire left percent tread remaining (%)
+irsdkCVar ir_RFwearM("RFwearM");    // float[1] RF tire middle percent tread remaining (%)
+irsdkCVar ir_RFwearR("RFwearR");    // float[1] RF tire right percent tread remaining (%)
+irsdkCVar ir_LFcoldPressure("LFcoldPressure");    // float[1] LF tire cold pressure  as set in the garage (kPa)
+irsdkCVar ir_LFtempCL("LFtempCL");    // float[1] LF tire left carcass temperature (C)
+irsdkCVar ir_LFtempCM("LFtempCM");    // float[1] LF tire middle carcass temperature (C)
+irsdkCVar ir_LFtempCR("LFtempCR");    // float[1] LF tire right carcass temperature (C)
+irsdkCVar ir_LFwearL("LFwearL");    // float[1] LF tire left percent tread remaining (%)
+irsdkCVar ir_LFwearM("LFwearM");    // float[1] LF tire middle percent tread remaining (%)
+irsdkCVar ir_LFwearR("LFwearR");    // float[1] LF tire right percent tread remaining (%)
+irsdkCVar ir_RRcoldPressure("RRcoldPressure");    // float[1] RR tire cold pressure  as set in the garage (kPa)
+irsdkCVar ir_RRtempCL("RRtempCL");    // float[1] RR tire left carcass temperature (C)
+irsdkCVar ir_RRtempCM("RRtempCM");    // float[1] RR tire middle carcass temperature (C)
+irsdkCVar ir_RRtempCR("RRtempCR");    // float[1] RR tire right carcass temperature (C)
+irsdkCVar ir_RRwearL("RRwearL");    // float[1] RR tire left percent tread remaining (%)
+irsdkCVar ir_RRwearM("RRwearM");    // float[1] RR tire middle percent tread remaining (%)
+irsdkCVar ir_RRwearR("RRwearR");    // float[1] RR tire right percent tread remaining (%)
+irsdkCVar ir_LRcoldPressure("LRcoldPressure");    // float[1] LR tire cold pressure  as set in the garage (kPa)
+irsdkCVar ir_LRtempCL("LRtempCL");    // float[1] LR tire left carcass temperature (C)
+irsdkCVar ir_LRtempCM("LRtempCM");    // float[1] LR tire middle carcass temperature (C)
+irsdkCVar ir_LRtempCR("LRtempCR");    // float[1] LR tire right carcass temperature (C)
+irsdkCVar ir_LRwearL("LRwearL");    // float[1] LR tire left percent tread remaining (%)
+irsdkCVar ir_LRwearM("LRwearM");    // float[1] LR tire middle percent tread remaining (%)
+irsdkCVar ir_LRwearR("LRwearR");    // float[1] LR tire right percent tread remaining (%)
+irsdkCVar ir_RRSHshockDefl("RRSHshockDefl");    // float[1] RRSH shock deflection (m)
+irsdkCVar ir_RRSHshockDefl_ST("RRSHshockDefl_ST");    // float[6] RRSH shock deflection at 360 Hz (m)
+irsdkCVar ir_RRSHshockVel("RRSHshockVel");    // float[1] RRSH shock velocity (m/s)
+irsdkCVar ir_RRSHshockVel_ST("RRSHshockVel_ST");    // float[6] RRSH shock velocity at 360 Hz (m/s)
+irsdkCVar ir_LRSHshockDefl("LRSHshockDefl");    // float[1] LRSH shock deflection (m)
+irsdkCVar ir_LRSHshockDefl_ST("LRSHshockDefl_ST");    // float[6] LRSH shock deflection at 360 Hz (m)
+irsdkCVar ir_LRSHshockVel("LRSHshockVel");    // float[1] LRSH shock velocity (m/s)
+irsdkCVar ir_LRSHshockVel_ST("LRSHshockVel_ST");    // float[6] LRSH shock velocity at 360 Hz (m/s)
+irsdkCVar ir_RFSHshockDefl("RFSHshockDefl");    // float[1] RFSH shock deflection (m)
+irsdkCVar ir_RFSHshockDefl_ST("RFSHshockDefl_ST");    // float[6] RFSH shock deflection at 360 Hz (m)
+irsdkCVar ir_RFSHshockVel("RFSHshockVel");    // float[1] RFSH shock velocity (m/s)
+irsdkCVar ir_RFSHshockVel_ST("RFSHshockVel_ST");    // float[6] RFSH shock velocity at 360 Hz (m/s)
+irsdkCVar ir_LFSHshockDefl("LFSHshockDefl");    // float[1] LFSH shock deflection (m)
+irsdkCVar ir_LFSHshockDefl_ST("LFSHshockDefl_ST");    // float[6] LFSH shock deflection at 360 Hz (m)
+irsdkCVar ir_LFSHshockVel("LFSHshockVel");    // float[1] LFSH shock velocity (m/s)
+irsdkCVar ir_LFSHshockVel_ST("LFSHshockVel_ST");    // float[6] LFSH shock velocity at 360 Hz (m/s)
 
 Session ir_session;
 
@@ -374,7 +405,12 @@ bool ir_tick()
         }
     }
 
-    for( int i=0; i<ir_CarIdxEstTime.getCount(); ++i )
+#if 0
+    printf("SESSION flags 0x%x, rem.laps %d, session num %d, state %d, time %f, time remain %f, session ID %d\n",
+        ir_SessionFlags.getInt(), ir_SessionLapsRemain.getInt(), ir_SessionNum.getInt(), ir_SessionState.getInt(), ir_SessionTime.getDouble(), ir_SessionTimeRemain.getDouble(), ir_SessionUniqueID.getInt() );
+    printf("on track: %d,  on track car: %d\n", (int)ir_IsOnTrack.getBool(), (int)ir_IsOnTrackCar.getBool() );
+
+    for( int i=0; i<64; ++i )
     {
         /*
         if( ir_CarIdxEstTime.isValid() && ir_CarIdxLap.getInt(i)>=0 ) {
@@ -387,8 +423,39 @@ bool ir_tick()
         }
         */
 
+        printf("[%d]  pos %d, lap %d, inpit %d, estTime %f, aroundlap %f%%\n",
+            i, ir_CarIdxPosition.getInt(i), ir_CarIdxLap.getInt(i), (int)ir_CarIdxOnPitRoad.getBool(i),ir_CarIdxEstTime.getFloat(i), ir_CarIdxLapDistPct.getFloat(i) );
+
     }
-    //printf("\n\n");
+    printf("\n\n");
+#endif
 
     return true;
 }
+
+void ir_printVariables()
+{
+    if( !irsdk_isConnected() )
+        return;
+
+    const irsdk_header* header = irsdk_getHeader();
+
+    printf("IRSDK Variables:\n");
+    for( int i=0; i<header->numVars; ++i )
+    {
+        const irsdk_varHeader* var = irsdk_getVarHeaderEntry(i);
+        std::string type;
+        switch( var->type )
+        {
+            case irsdk_char: type="char"; break;
+            case irsdk_bool: type="bool"; break;
+            case irsdk_int: type="int"; break;
+            case irsdk_bitField: type="bitfield"; break;
+            case irsdk_float: type="float"; break;
+            case irsdk_double: type="double"; break;
+        }
+        printf( "irsdkCVar ir_%s(\"%s\");    // %s[%d] %s (%s)\n",
+            var->name, var->name, type.c_str(), var->count, var->desc, var->unit );
+    }
+}
+
