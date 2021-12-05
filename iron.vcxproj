@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="iracing.cpp" />
     <ClCompile Include="irsdk\irsdk_client.cpp" />
     <ClCompile Include="irsdk\irsdk_utils.cpp" />

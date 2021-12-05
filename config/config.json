@@ -17,10 +17,10 @@
     "OverlayRelative":
     {
         "enabled": true,
-        "x_pos": 3540,
+        "x_pos": 3640,
         "y_pos": 400,
         "width": 600,
         "height": 400,
-        "background_col": [0,0,0,0.6]
+        "background_col": [0.2,0,0,0.1]
     }
 } 

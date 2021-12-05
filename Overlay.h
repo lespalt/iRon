@@ -47,10 +47,10 @@ class Overlay
             enable( false );
         }
 
-        virtual void update() {}
-        virtual void onConfigChanged() {}
         virtual void onEnable() {}
         virtual void onDisable() {}
+        virtual void onConfigChanged() {}
+        virtual void update() {}
 
         virtual std::string getName() const
         {
@@ -59,8 +59,10 @@ class Overlay
 
         virtual void enable( bool on )
         {
-            if( on && !m_hwnd )
+            if( on && !m_hwnd )  // enable
             {
+                // Create a window with a GL context.
+                
                 const char* const wndclassName = "overlay";
                 WNDCLASSEX wndclass = {};
                 if( !GetClassInfoEx( 0, wndclassName, &wndclass ) )  // only the first overlay we open registers the window class
@@ -105,11 +107,11 @@ class Overlay
                 DwmEnableBlurBehindWindow(m_hwnd, &bb);
 
                 m_enabled = true;
-                onEnable();
+                onEnable();  // trigger overlay-specific enable logic
             }
             else if( !on && m_hwnd ) // disable
             {
-                onDisable();
+                onDisable();  // trigger overlay-specific disable logic
                 wglDeleteContext( m_hglrc );
                 DestroyWindow( m_hwnd );
                 m_hwnd = 0;

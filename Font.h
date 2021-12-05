@@ -42,7 +42,11 @@ inline void glerr()
     }
 }
 
-// Rendering of fonts exported with BMFont (AngelCode.com)
+//
+// Rendering of fonts exported with BMFont (AngelCode.com).
+// Make sure to set 'Bit depth' to 32 in BMFont's export options in order
+// to get alpha-antialiased outlines.
+//
 class Font
 {
     public:        

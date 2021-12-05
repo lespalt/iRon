@@ -24,6 +24,9 @@ SOFTWARE.
 
 #pragma once
 
+#include <Windows.h>
+#include <atomic>
+#include <thread>
 #include "picojson.h"
 
 struct float2
@@ -48,80 +51,24 @@ class Config
 {
     public:
 
-        void load()
-        {
-            std::string json;
-            if( !loadFile("config/config.json", json) )
-            {
-                printf("Could not load config file\n");
-                return;
-            }
+        bool    load();
 
-            picojson::value pjval;
-            std::string parseError = picojson::parse( pjval, json );
-            if( !parseError.empty() )
-            {
-                printf("Config file is not valid JSON!\n%s\n", parseError.c_str() );
-                return;
-            }
+        void    watchForChanges();
+        bool    hasChanged();
 
-            m_pj = pjval.get<picojson::object>();
-        }
-
-        bool getBool( const std::string& component, const std::string& key )
-        {
-            picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-            return pjcomp[key].get<bool>();
-        }
-
-        int getInt( const std::string& component, const std::string& key )
-        {
-            picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-            return (int)pjcomp[key].get<double>();
-        }
-
-        float getFloat( const std::string& component, const std::string& key )
-        {
-            picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-            return (float)pjcomp[key].get<double>();
-        }
-
-        float4 getFloat4( const std::string& component, const std::string& key )
-        {
-            picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-            picojson::array& arr = pjcomp[key].get<picojson::array>();
-            float4 ret;
-            ret.x = (float)arr[0].get<double>();
-            ret.y = (float)arr[1].get<double>();
-            ret.z = (float)arr[2].get<double>();
-            ret.w = (float)arr[3].get<double>();
-            return ret;
-        }
-
+        bool    getBool( const std::string& component, const std::string& key );
+        int     getInt( const std::string& component, const std::string& key );
+        float   getFloat( const std::string& component, const std::string& key );
+        float4  getFloat4( const std::string& component, const std::string& key );
 
     private:
 
-        bool loadFile( const char* fname, std::string& output )
-        {
-            FILE* fp = fopen( fname, "rb" );
-            if( !fp )
-                return false;
+        bool    loadFile( const char* fname, std::string& output );
 
-            fseek( fp, 0, SEEK_END );
-            const long sz = ftell( fp );
-            fseek( fp, 0, SEEK_SET );
-
-            char* buf = new char[sz];
-
-            fread( buf, 1, sz, fp );
-            fclose( fp );
-            output = std::string( buf, sz );
-
-            delete[] buf;
-            return true;
-        }
-
-        picojson::object  m_pj;
+        picojson::object    m_pj;
+        std::atomic<bool>   m_hasChanged = false;
+        std::thread         m_configWatchThread;
 };
 
-extern Config g_cfg;
+extern Config        g_cfg;
+

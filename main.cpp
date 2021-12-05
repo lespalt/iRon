@@ -26,39 +26,12 @@ SOFTWARE.
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include <thread>
-#include <atomic>
 #include <Windows.h>
 #include "iracing.h"
 #include "Config.h"
 #include "OverlayRelative.h"
 #include "OverlayInputs.h"
 
-Config              g_cfg;
-std::atomic<bool>   g_reloadConfigNeeded = false;
-
-
-static void configWatcher()
-{
-    HANDLE dir = CreateFile( "config", FILE_LIST_DIRECTORY, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL );
-    if( dir == INVALID_HANDLE_VALUE )
-    {
-        printf( "Could not start config watch thread.\n" );
-        return;
-    }
-
-    std::vector<DWORD> buf( 1024*1024 );
-    DWORD bytesReturned = 0;
-
-    while( true )
-    {        
-        if( ReadDirectoryChangesW( dir, buf.data(), (DWORD)buf.size()/sizeof(DWORD), TRUE, FILE_NOTIFY_CHANGE_LAST_WRITE, &bytesReturned, NULL, NULL ) )
-        {
-            Sleep( 100 );  // wait a bit to make sure changes are actually picked up when we reload
-            g_reloadConfigNeeded = true;
-        }
-    }
-}
 
 static void handleConfigChange( std::vector<Overlay*> overlays )
 {
@@ -76,9 +49,8 @@ int main()
 
     // Load the config and watch it for changes
     g_cfg.load();
-    std::thread configWatchThread( configWatcher );
-    configWatchThread.detach();
-
+    g_cfg.watchForChanges();
+    
     std::vector<Overlay*> overlays;
     overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
@@ -99,11 +71,10 @@ int main()
             o->update();
 
         // Watch for config change signal
-        if( g_reloadConfigNeeded )
+        if( g_cfg.hasChanged() )
         {
             g_cfg.load();
             handleConfigChange( overlays );
-            g_reloadConfigNeeded = false;
         }
 
         // Message pump

@@ -39,12 +39,14 @@ class OverlayInputs : public Overlay
 
         virtual void onConfigChanged()
         {
+            // Position/dimensions might have changed
             const int x = g_cfg.getInt(m_name,"x_pos");
             const int y = g_cfg.getInt(m_name,"y_pos");
             const int w = g_cfg.getInt(m_name,"width");
             const int h = g_cfg.getInt(m_name,"height");
             setWindowPosAndSize( x, y, w, h );
 
+            // Width might have changed, reset tracker values
             m_throttleVtx.resize( w );
             m_brakeVtx.resize( w );
             m_steerVtx.resize( w );

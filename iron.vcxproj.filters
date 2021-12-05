@@ -15,6 +15,7 @@
     <ClCompile Include="lodepng\lodepng.cpp">
       <Filter>lodepng</Filter>
     </ClCompile>
+    <ClCompile Include="Config.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="irsdk">
