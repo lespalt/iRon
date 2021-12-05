@@ -66,9 +66,8 @@ class OverlayRelative : public Overlay
             float4 bgcol = g_cfg.getFloat4( m_name, "background_col" );
             glClearColor( bgcol.r, bgcol.g, bgcol.b, bgcol.a );
             glClear(GL_COLOR_BUFFER_BIT);
-
             
-            m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0 );
+            m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 2.0f*fabsf(sinf(float(GetTickCount())/2000.0f)) );
 
             glFlush();
             SwapBuffers( m_hdc );

@@ -31,6 +31,9 @@ SOFTWARE.
 #include <utility>
 #include "lodepng/lodepng.h"
 
+#ifndef GL_GENERATE_MIPMAP
+#define GL_GENERATE_MIPMAP 0x8191
+#endif
 
 inline void glerr()
 {
@@ -80,10 +83,11 @@ class Font
             glEnable( GL_TEXTURE_2D );
             glGenTextures( 1, &m_fntTex );
             glBindTexture( GL_TEXTURE_2D, m_fntTex );
+            glTexParameteri( GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
             glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, m_common.scaleW, m_common.scaleH, 0, GL_RGBA, GL_UNSIGNED_BYTE, pngBuf );
             free( pngBuf );
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+            glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
             glDisable( GL_TEXTURE_2D );
 
             return true;
@@ -101,7 +105,7 @@ class Font
             m_kernings.clear();
         }
 
-        void render( const std::string& text, int x, int y )
+        void render( const std::string& text, float x, float y, float scale=1.0f )
         {
             glEnable( GL_TEXTURE_2D );
             glBindTexture( GL_TEXTURE_2D, m_fntTex );
@@ -122,9 +126,9 @@ class Font
                 }
 
                 const float left     = 0.5f + float(x + cd.xoffset + kerning);
-                const float right    = 0.5f + float(x + cd.xoffset + cd.width + kerning);
-                const float top      = 0.5f + float(y + m_common.lineHeight - cd.yoffset);
-                const float bottom   = 0.5f + float(y + m_common.lineHeight - cd.yoffset - cd.height);
+                const float right    = 0.5f + float(x + cd.xoffset + kerning + cd.width * scale );
+                const float top      = 0.5f + float(y + (m_common.lineHeight-cd.yoffset) * scale);
+                const float bottom   = 0.5f + float(y + (m_common.lineHeight-cd.yoffset-cd.height) * scale);
 
                 const float tcleft   = (float(cd.x)+0.5f) / float(m_common.scaleW);
                 const float tcright  = (float(cd.x+cd.width)+0.5f) / float(m_common.scaleW);
@@ -143,7 +147,7 @@ class Font
                 glTexCoord2f( tcright, tctop );
                 glVertex2f( right, top );
 
-                x += cd.xadvance;
+                x += cd.xadvance * scale;
                 prevId = id;
             }
             glEnd();
