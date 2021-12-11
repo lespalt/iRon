@@ -25,117 +25,37 @@ SOFTWARE.
 #pragma once
 
 #include <windows.h>
-#include <dwmapi.h>
-#include <GL\gl.h>
-
-
-static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam )
-{
-    return DefWindowProc(hwnd,msg,wparam,lparam);
-}
+#include <string>
 
 class Overlay
 {
     public:
 
-        Overlay( const std::string name )
-            : m_name( name )
-        {}
+                        Overlay( const std::string name );
+        virtual         ~Overlay();
 
-        virtual ~Overlay()
-        {
-            enable( false );
-        }
+        std::string     getName() const;
 
-        virtual void onEnable() {}
-        virtual void onDisable() {}
-        virtual void onConfigChanged() {}
-        virtual void update() {}
+        void            enable( bool on );
+        void            enableUiEdit( bool on );
+        void            configChanged();
 
-        virtual std::string getName() const
-        {
-            return m_name;
-        }
+        void            update();
 
-        virtual void enable( bool on )
-        {
-            if( on && !m_hwnd )  // enable
-            {
-                // Create a window with a GL context.
-                
-                const char* const wndclassName = "overlay";
-                WNDCLASSEX wndclass = {};
-                if( !GetClassInfoEx( 0, wndclassName, &wndclass ) )  // only the first overlay we open registers the window class
-                {
-                    wndclass.cbSize = sizeof(WNDCLASSEX);
-                    wndclass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-                    wndclass.lpfnWndProc = windowProc;
-                    wndclass.lpszClassName = wndclassName;
-                    wndclass.hbrBackground = CreateSolidBrush(0);
-                    RegisterClassEx(&wndclass);
-                }
-
-                m_hwnd = CreateWindowEx( WS_EX_TOPMOST, wndclassName, m_name.c_str(), WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
-
-                PIXELFORMATDESCRIPTOR pfd = {};
-                pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-                pfd.nVersion = 1;
-                pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_SUPPORT_COMPOSITION;
-                pfd.iPixelType = PFD_TYPE_RGBA;
-                pfd.cColorBits = 24;
-                pfd.cAlphaBits = 8;
-                pfd.cDepthBits = 32;
-
-                m_hdc = GetDC( m_hwnd );
-                if( !SetPixelFormat(m_hdc, ChoosePixelFormat(m_hdc, &pfd), &pfd) )
-                    printf("SetPixelFormat failed\n");
-
-                m_hglrc = wglCreateContext( m_hdc );
-                if( !m_hglrc )
-                    printf("wglCreateContext failed\n");
-
-                wglMakeCurrent( m_hdc, m_hglrc );
-                glEnable( GL_BLEND );
-                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-                glEnable( GL_LINE_SMOOTH );
-                glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
-
-                // The following enables composition of our window into the desktop
-                DWM_BLURBEHIND bb = {};
-                bb.dwFlags = DWM_BB_ENABLE;
-                bb.fEnable = true;
-                DwmEnableBlurBehindWindow(m_hwnd, &bb);
-
-                m_enabled = true;
-                onEnable();  // trigger overlay-specific enable logic
-            }
-            else if( !on && m_hwnd ) // disable
-            {
-                onDisable();  // trigger overlay-specific disable logic
-                wglDeleteContext( m_hglrc );
-                DestroyWindow( m_hwnd );
-                m_hwnd = 0;
-                m_hdc = 0;
-                m_hglrc = 0;
-                m_enabled = false;
-            }
-        }
+        void            setWindowPosAndSize( int x, int y, int w, int h );
+        void            saveWindowPosAndSize();
+        void            resizeGlViewport();
 
     protected:
 
-        virtual void setWindowPosAndSize( int x, int y, int w, int h )
-        {
-            SetWindowPos( m_hwnd, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE|SWP_SHOWWINDOW );
-            wglMakeCurrent( m_hdc, m_hglrc );
-            glViewport(0, 0, w, h);
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            glOrtho(0,w,0,h,1,-1);
-        }
+        virtual void    onEnable();
+        virtual void    onDisable();
+        virtual void    onUpdate();
+        virtual void    onConfigChanged();
 
-        std::string   m_name;
-        HWND          m_hwnd = 0;
-        HDC           m_hdc = 0;
-        HGLRC         m_hglrc = 0;
-        bool          m_enabled = false;
+        std::string     m_name;
+        HWND            m_hwnd = 0;
+        HDC             m_hdc = 0;
+        HGLRC           m_hglrc = 0;
+        bool            m_enabled = false;
 };

@@ -37,6 +37,8 @@ class OverlayInputs : public Overlay
             : Overlay("OverlayInputs")
         {}
 
+    protected:
+
         virtual void onConfigChanged()
         {
             // Position/dimensions might have changed
@@ -58,7 +60,7 @@ class OverlayInputs : public Overlay
             }
         }
 
-        virtual void update()
+        virtual void onUpdate()
         {
             if( !m_enabled )
                 return;
@@ -137,6 +139,8 @@ class OverlayInputs : public Overlay
             glFlush();
             SwapBuffers( m_hdc );
         }
+
+    protected:
 
         std::vector<float2> m_throttleVtx;
         std::vector<float2> m_brakeVtx;

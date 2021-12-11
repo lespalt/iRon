@@ -150,6 +150,7 @@
     <ClCompile Include="irsdk\yaml_parser.cpp" />
     <ClCompile Include="lodepng\lodepng.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Overlay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Overlay.h" />
     <ClInclude Include="OverlayRelative.h" />
     <ClInclude Include="picojson.h" />
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />

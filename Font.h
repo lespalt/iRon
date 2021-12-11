@@ -30,20 +30,8 @@ SOFTWARE.
 #include <map>
 #include <utility>
 #include "lodepng/lodepng.h"
+#include "util.h"
 
-#ifndef GL_GENERATE_MIPMAP
-#define GL_GENERATE_MIPMAP 0x8191
-#endif
-
-inline void glerr()
-{
-    GLenum err = glGetError();
-    if( err ) {
-        printf("OpenGL error: %d\n", (int)err );
-    } else {
-        printf("OpenGL: no error\n");
-    }
-}
 
 //
 // Rendering of fonts exported with BMFont (AngelCode.com).
@@ -105,14 +93,17 @@ class Font
             m_kernings.clear();
         }
 
-        void render( const std::string& text, float x, float y, float scale=1.0f )
+        void render( const std::string& text, float x, float y, float lineheight, const float4& color )
         {
+            const float scale = lineheight / m_common.lineHeight;
+
+            glColor4fv( &color );
             glEnable( GL_TEXTURE_2D );
             glBindTexture( GL_TEXTURE_2D, m_fntTex );
 
             int prevId = -1;
 
-            glBegin( GL_QUADS );
+            glBegin( GL_QUADS );            
             for( int i=0; i<(int)text.length(); ++i )
             {
                 const int id = (int)(unsigned char)text[i];
@@ -153,6 +144,7 @@ class Font
             glEnd();
 
             glDisable( GL_TEXTURE_2D );
+            glColor4f( 1, 1, 1, 1 );
         }
 
     private:

@@ -16,6 +16,7 @@
       <Filter>lodepng</Filter>
     </ClCompile>
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Overlay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="irsdk">
@@ -48,6 +49,7 @@
     <ClInclude Include="lodepng\lodepng.h">
       <Filter>lodepng</Filter>
     </ClInclude>
+    <ClInclude Include="util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

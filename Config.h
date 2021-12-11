@@ -28,46 +28,32 @@ SOFTWARE.
 #include <atomic>
 #include <thread>
 #include "picojson.h"
-
-struct float2
-{
-    union { float r; float x; };
-    union { float g; float y; };
-    float* operator&() { return &x; }
-    const float* operator&() const { return &x; }
-};
-
-struct float4
-{
-    union { float r; float x; };
-    union { float g; float y; };
-    union { float b; float z; };
-    union { float a; float w; };
-    float* operator&() { return &x; }
-    const float* operator&() const { return &x; }
-};
+#include "util.h"
 
 class Config
 {
     public:
 
         bool    load();
+        bool    save();
 
         void    watchForChanges();
         bool    hasChanged();
 
-        bool    getBool( const std::string& component, const std::string& key );
-        int     getInt( const std::string& component, const std::string& key );
-        float   getFloat( const std::string& component, const std::string& key );
-        float4  getFloat4( const std::string& component, const std::string& key );
+        bool        getBool( const std::string& component, const std::string& key );
+        int         getInt( const std::string& component, const std::string& key );
+        float       getFloat( const std::string& component, const std::string& key );
+        float4      getFloat4( const std::string& component, const std::string& key );
+        std::string getString( const std::string& component, const std::string& key );
+
+        void        setInt( const std::string& component, const std::string& key, int v );
 
     private:
-
-        bool    loadFile( const char* fname, std::string& output );
 
         picojson::object    m_pj;
         std::atomic<bool>   m_hasChanged = false;
         std::thread         m_configWatchThread;
+        std::string         m_filename = "config/config.json";
 };
 
 extern Config        g_cfg;

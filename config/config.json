@@ -1,26 +1,61 @@
 {
-    "OverlayInputs":
-    {
-        "enabled": true,
-        "x_pos": 3540,
-        "y_pos": 1361,
-        "width": 600,
-        "height": 62,
-        "background_col": [0,0,0,0.6],
-        "throttle_col": [0.38,0.91,0.31,0.8],
-        "brake_col": [0.93,0.03,0.13,0.8],
-        "steering_col": [1,1,1,0.3],
-        "throttle_fill_col": [0.2,0.45,0.15,0.6],
-        "brake_fill_col": [0.46,0.01,0.06,0.6]
-    },
-
-    "OverlayRelative":
-    {
-        "enabled": true,
-        "x_pos": 3640,
-        "y_pos": 400,
-        "width": 600,
-        "height": 400,
-        "background_col": [0.2,0,0,0.1]
-    }
-} 
+  "General": {
+    "ui_edit_hotkey_is_alt_and_this_letter": "j"
+  },
+  "OverlayInputs": {
+    "background_col": [
+      0,
+      0,
+      0,
+      0.59999999999999998
+    ],
+    "brake_col": [
+      0.93000000000000005,
+      0.029999999999999999,
+      0.13,
+      0.80000000000000004
+    ],
+    "brake_fill_col": [
+      0.46000000000000002,
+      0.01,
+      0.059999999999999998,
+      0.59999999999999998
+    ],
+    "enabled": true,
+    "height": 289,
+    "steering_col": [
+      1,
+      1,
+      1,
+      0.29999999999999999
+    ],
+    "throttle_col": [
+      0.38,
+      0.91000000000000003,
+      0.31,
+      0.80000000000000004
+    ],
+    "throttle_fill_col": [
+      0.20000000000000001,
+      0.45000000000000001,
+      0.14999999999999999,
+      0.59999999999999998
+    ],
+    "width": 444,
+    "x_pos": 4394,
+    "y_pos": 188
+  },
+  "OverlayRelative": {
+    "background_col": [
+      0.20000000000000001,
+      0,
+      0,
+      0.10000000000000001
+    ],
+    "enabled": true,
+    "height": 304,
+    "width": 509,
+    "x_pos": 4373,
+    "y_pos": 495
+  }
+}

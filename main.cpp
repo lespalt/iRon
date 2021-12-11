@@ -22,6 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+
+// TODO:
+// - beautify json saving
+// - enable/disable UI edit
+// - visually indicate UI edit
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
@@ -38,27 +44,32 @@ static void handleConfigChange( std::vector<Overlay*> overlays )
     for( Overlay* o : overlays )
     {
         o->enable( g_cfg.getBool(o->getName(),"enabled") );
-        o->onConfigChanged();
+        o->configChanged();
     }
 }
 
 int main()
 {
     // Bump priority up so we get time from the sim
-    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);  
+    SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 
     // Load the config and watch it for changes
     g_cfg.load();
     g_cfg.watchForChanges();
-    
+
+    // Register hotkey to enable/disable position/size changes.
+    const int hotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter" )[0];
+    RegisterHotKey( NULL, 0, MOD_ALT, toupper(hotkey) );
+
+    // Create and initialize overlays by triggering all config handling logic
     std::vector<Overlay*> overlays;
     overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
-
-    // Initialize by triggering all config handling logic
     handleConfigChange( overlays );
 
     bool connected = false;
+    bool uiEdit = false;
+
     while( true )
     {
         bool prevConnected = connected;
@@ -83,6 +94,13 @@ int main()
         MSG msg = {};
         while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
+            if( msg.message == WM_HOTKEY )
+            {
+                uiEdit = !uiEdit;
+                for( Overlay* o : overlays )
+                    o->enableUiEdit( uiEdit );
+            }
+
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }

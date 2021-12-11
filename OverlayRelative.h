@@ -35,6 +35,8 @@ class OverlayRelative : public Overlay
             : Overlay("OverlayRelative")
         {}
 
+    protected:
+
         virtual void onEnable()
         {
             m_fnt.load("arial-black");
@@ -55,7 +57,7 @@ class OverlayRelative : public Overlay
             setWindowPosAndSize( x, y, w, h );
         }
 
-        virtual void update()
+        virtual void onUpdate()
         {
             if( !m_enabled )
                 return;
@@ -67,7 +69,8 @@ class OverlayRelative : public Overlay
             glClearColor( bgcol.r, bgcol.g, bgcol.b, bgcol.a );
             glClear(GL_COLOR_BUFFER_BIT);
             
-            m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 2.0f*fabsf(sinf(float(GetTickCount())/2000.0f)) );
+            //m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 2.0f*fabsf(sinf(float(GetTickCount())/2000.0f)) );
+            m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 32, float4(0,1,1,0.5) );
 
             glFlush();
             SwapBuffers( m_hdc );

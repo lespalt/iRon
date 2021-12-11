@@ -29,7 +29,7 @@ static void configWatcher( std::atomic<bool>* m_hasChanged )
 bool Config::load()
 {
     std::string json;
-    if( !loadFile("config/config.json", json) )
+    if( !loadFile(m_filename, json) )
     {
         printf("Could not load config file\n");
         return false;
@@ -46,6 +46,13 @@ bool Config::load()
     m_pj = pjval.get<picojson::object>();
     m_hasChanged = false;
     return true;
+}
+
+bool Config::save()
+{
+    const picojson::value value = picojson::value( m_pj );
+    const std::string json = value.serialize(true);
+    return saveFile( m_filename, json );
 }
 
 void Config::watchForChanges()
@@ -89,22 +96,15 @@ float4 Config::getFloat4( const std::string& component, const std::string& key )
     return ret;
 }
 
-bool Config::loadFile( const char* fname, std::string& output )
+std::string Config::getString( const std::string& component, const std::string& key )
 {
-    FILE* fp = fopen( fname, "rb" );
-    if( !fp )
-        return false;
+    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
+    return pjcomp[key].get<std::string>();
+}
 
-    fseek( fp, 0, SEEK_END );
-    const long sz = ftell( fp );
-    fseek( fp, 0, SEEK_SET );
-
-    char* buf = new char[sz];
-
-    fread( buf, 1, sz, fp );
-    fclose( fp );
-    output = std::string( buf, sz );
-
-    delete[] buf;
-    return true;
+void Config::setInt( const std::string& component, const std::string& key, int v )
+{
+    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
+    double d = double(v);
+    pjcomp[key].set<double>( d );
 }
