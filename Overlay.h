@@ -26,6 +26,7 @@ SOFTWARE.
 
 #include <windows.h>
 #include <string>
+#include "Font.h"
 
 class Overlay
 {
@@ -35,6 +36,7 @@ class Overlay
         virtual         ~Overlay();
 
         std::string     getName() const;
+        bool            getUiEditEnabled() const;
 
         void            enable( bool on );
         void            enableUiEdit( bool on );
@@ -58,4 +60,10 @@ class Overlay
         HDC             m_hdc = 0;
         HGLRC           m_hglrc = 0;
         bool            m_enabled = false;
+        bool            m_uiEditEnabled = false;
+        int             m_xpos = 0;
+        int             m_ypos = 0;
+        int             m_width = 0;
+        int             m_height = 0;
+        Font            m_fnt;
 };

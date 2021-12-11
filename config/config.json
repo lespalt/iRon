@@ -22,7 +22,7 @@
       0.59999999999999998
     ],
     "enabled": true,
-    "height": 289,
+    "height": 106,
     "steering_col": [
       1,
       1,
@@ -41,9 +41,9 @@
       0.14999999999999999,
       0.59999999999999998
     ],
-    "width": 444,
-    "x_pos": 4394,
-    "y_pos": 188
+    "width": 705,
+    "x_pos": 3592,
+    "y_pos": 1188
   },
   "OverlayRelative": {
     "background_col": [
@@ -53,9 +53,9 @@
       0.10000000000000001
     ],
     "enabled": true,
-    "height": 304,
-    "width": 509,
-    "x_pos": 4373,
-    "y_pos": 495
+    "height": 264,
+    "width": 429,
+    "x_pos": 4560,
+    "y_pos": 1036
   }
 }

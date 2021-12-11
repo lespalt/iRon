@@ -71,9 +71,6 @@ class OverlayRelative : public Overlay
             
             //m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 2.0f*fabsf(sinf(float(GetTickCount())/2000.0f)) );
             m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 32, float4(0,1,1,0.5) );
-
-            glFlush();
-            SwapBuffers( m_hdc );
         }
 
     protected:

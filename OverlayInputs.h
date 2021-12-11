@@ -135,9 +135,6 @@ class OverlayInputs : public Overlay
             for( int i=0; i<(int)m_steerVtx.size(); ++i )
                 glVertex2f(m_steerVtx[i].x,m_steerVtx[i].y*(h-1));
             glEnd();
-
-            glFlush();
-            SwapBuffers( m_hdc );
         }
 
     protected:

@@ -25,8 +25,9 @@ SOFTWARE.
 
 // TODO:
 // - beautify json saving
-// - enable/disable UI edit
-// - visually indicate UI edit
+// - overlay default font mgmt
+// - gettextextent
+// - window pos/size info in ui edit
 
 #include <stdlib.h>
 #include <stdio.h>
