@@ -55,11 +55,6 @@ class OverlayInputs : public Overlay
 
         virtual void onUpdate()
         {
-            if( !m_enabled )
-                return;
-
-            wglMakeCurrent( m_hdc, m_hglrc );
-
             const float w = (float)m_width;
             const float h = (float)m_height;
 

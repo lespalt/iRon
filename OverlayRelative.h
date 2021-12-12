@@ -24,6 +24,8 @@ SOFTWARE.
 
 #pragma once
 
+#include <vector>
+#include <algorithm>
 #include "Overlay.h"
 #include "Font.h"
 
@@ -49,18 +51,68 @@ class OverlayRelative : public Overlay
 
         virtual void onUpdate()
         {
-            if( !m_enabled )
-                return;
-
-            wglMakeCurrent( m_hdc, m_hglrc );
-
             // Clear background
             float4 bgcol = g_cfg.getFloat4( m_name, "background_col" );
             glClearColor( bgcol.r, bgcol.g, bgcol.b, bgcol.a );
             glClear(GL_COLOR_BUFFER_BIT);
             
-            //m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 2.0f*fabsf(sinf(float(GetTickCount())/2000.0f)) );
-            m_fnt.render( "äLTo testgI.!?ü+Frènch", 0, 0, 32, float4(0,1,1,0.5) );
+            struct CarIdx {
+                int carIdx;
+                float delta;
+            };
+            std::vector<CarIdx> relatives;
+            relatives.reserve( IR_MAX_CARS );
+
+            // Populate cars with the ones for which a relative/delta comparison is valid
+            for( int i=0; i<IR_MAX_CARS; ++i )
+            {
+                if( i == ir_session.driverCarIdx || ir_CarIdxLap.getInt(i) >= 0 )
+                {
+                    CarIdx ci;
+                    ci.carIdx = i;
+                    ci.delta = 12.3f;
+                    relatives.push_back( ci );
+                }
+            }
+
+            // Sort by delta
+            std::sort( relatives.begin(), relatives.end(), 
+                []( const CarIdx& a, const CarIdx&b ) { return a.delta < b.delta; } );
+
+            // Locate our driver's index in the new array
+            int driverCarIdx = -1;
+            for( int i=0; i<(int)relatives.size(); ++i )
+            {
+                if( relatives[i].carIdx == ir_session.driverCarIdx ) {
+                    driverCarIdx = i;
+                    break;
+                }
+            }
+
+            // Something's wrong if we didn't find our driver. Bail.
+            if( driverCarIdx < 0 )
+                return;
+
+            const float fontSize = 64;
+
+            // Display such that our driver is in the vertical center of the are where we're listing cars
+            const float carAreaTop = m_height - 40.0f;
+            const float carAreaBot = 40.0f;
+            const float ystart = (carAreaTop-carAreaBot) / 2.0f + fontSize / 2.0f;
+
+            float y = ystart;
+            for( int i=driverCarIdx; i>=0 && y<=carAreaTop-fontSize; --i, y+=fontSize )
+            {
+                const Car& car = ir_session.cars[relatives[i].carIdx];
+                m_fnt.render( car.userName, 0, y, fontSize, float4(1,1,1,1) );
+            }
+
+            y = ystart - fontSize;
+            for( int i=driverCarIdx+1; i<(int)relatives.size() && y>=carAreaBot; ++i, y-=fontSize )
+            {
+                const Car& car = ir_session.cars[relatives[i].carIdx];
+                m_fnt.render( car.userName, 0, y, fontSize, float4(1,1,1,1) );
+            }
         }
 
     protected:

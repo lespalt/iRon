@@ -211,6 +211,11 @@ void Overlay::configChanged()
 
 void Overlay::update()
 {
+    if( !m_enabled )
+        return;
+
+    wglMakeCurrent( m_hdc, m_hglrc );
+
     onUpdate();
 
     if( m_uiEditEnabled )
