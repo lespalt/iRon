@@ -23,9 +23,6 @@ SOFTWARE.
 */
 
 
-// TODO:
-// - beautify json saving
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>

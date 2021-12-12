@@ -42,10 +42,10 @@ class OverlayInputs : public Overlay
         virtual void onConfigChanged()
         {
             // Position/dimensions might have changed
-            const int x = g_cfg.getInt(m_name,"x_pos");
-            const int y = g_cfg.getInt(m_name,"y_pos");
-            const int w = g_cfg.getInt(m_name,"width");
-            const int h = g_cfg.getInt(m_name,"height");
+            const int x = g_cfg.getInt(m_name,"window_pos_x");
+            const int y = g_cfg.getInt(m_name,"window_pos_y");
+            const int w = g_cfg.getInt(m_name,"window_size_x");
+            const int h = g_cfg.getInt(m_name,"window_size_y");
             setWindowPosAndSize( x, y, w, h );
 
             // Width might have changed, reset tracker values
@@ -67,8 +67,8 @@ class OverlayInputs : public Overlay
 
             wglMakeCurrent( m_hdc, m_hglrc );
 
-            const float w = (float)g_cfg.getInt(m_name,"width");
-            const float h = (float)g_cfg.getInt(m_name,"height");
+            const float w = (float)g_cfg.getInt(m_name,"window_size_x");
+            const float h = (float)g_cfg.getInt(m_name,"window_size_y");
 
             // Advance input vertices
             for( int i=0; i<(int)m_throttleVtx.size()-1; ++i )

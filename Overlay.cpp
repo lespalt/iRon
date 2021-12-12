@@ -46,7 +46,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
             LRESULT hit = DefWindowProc( hwnd, msg, wparam, lparam );
             if( hit == HTCLIENT )
             {
-                // check if we hit the edge area of the window to allow resizing despite having no border
+                // check if we hit the corner area of the window to allow resizing despite having no border
                 RECT r;
                 GetWindowRect( hwnd, &r );
                 const int cur_x = GET_X_LPARAM( lparam ) - r.left;
@@ -63,16 +63,6 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
                     return HTBOTTOMLEFT;
                 if( cur_x > w-border && cur_y > h-border )
                     return HTBOTTOMRIGHT;
-                /*
-                if( cur_x < border )
-                    return HTLEFT;
-                if( cur_x > w-border )
-                    return HTRIGHT;
-                if( cur_y < border )
-                    return HTTOP;
-                if( cur_y > h-border )
-                    return HTBOTTOM;
-                */
 
                 // say we hit the caption to allow dragging the window from the client area
                 hit = HTCAPTION;
@@ -273,10 +263,10 @@ void Overlay::saveWindowPosAndSize()
     m_width = r.right - r.left;
     m_height = r.bottom - r.top;
 
-    g_cfg.setInt( m_name, "x_pos", m_xpos );
-    g_cfg.setInt( m_name, "y_pos", m_ypos );
-    g_cfg.setInt( m_name, "width", m_width );
-    g_cfg.setInt( m_name, "height", m_height  );
+    g_cfg.setInt( m_name, "window_pos_x", m_xpos );
+    g_cfg.setInt( m_name, "window_pos_y", m_ypos );
+    g_cfg.setInt( m_name, "window_size_x", m_width );
+    g_cfg.setInt( m_name, "window_size_y", m_height  );
 
     g_cfg.save();
 }

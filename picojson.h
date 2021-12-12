@@ -493,7 +493,8 @@ inline std::string value::to_str() const {
   case number_type: {
     char buf[256];
     double tmp;
-    SNPRINTF(buf, sizeof(buf), fabs(u_.number_) < (1ULL << 53) && modf(u_.number_, &tmp) == 0 ? "%.f" : "%.17g", u_.number_);
+    //SNPRINTF(buf, sizeof(buf), fabs(u_.number_) < (1ULL << 53) && modf(u_.number_, &tmp) == 0 ? "%.f" : "%.17g", u_.number_);  // lespalt: replaced with line below since we don't want/need too much precision clutter in a hand-edited json file
+    SNPRINTF(buf, sizeof(buf), fabs(u_.number_) < (1ULL << 53) && modf(u_.number_, &tmp) == 0 ? "%.f" : "%.2g", u_.number_);
 #if PICOJSON_USE_LOCALE
     char *decimal_point = localeconv()->decimal_point;
     if (strcmp(decimal_point, ".") != 0) {
@@ -593,14 +594,14 @@ template <typename Iter> void value::_serialize(Iter oi, int indent) const {
         *oi++ = ',';
       }
       if (indent != -1) {
-        _indent(oi, indent);
+        //_indent(oi, indent);   lespalt: removed, we only have small arrays and want them in one line
       }
       i->_serialize(oi, indent);
     }
     if (indent != -1) {
       --indent;
       if (!u_.array_->empty()) {
-        _indent(oi, indent);
+        //_indent(oi, indent);   lespalt: removed, we only have small arrays and want them in one line
       }
     }
     *oi++ = ']';
