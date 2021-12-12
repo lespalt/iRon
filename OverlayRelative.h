@@ -47,16 +47,6 @@ class OverlayRelative : public Overlay
             m_fnt.unload();
         }
 
-        virtual void onConfigChanged()
-        {
-            // Position/dimensions might have changed
-            const int x = g_cfg.getInt(m_name,"window_pos_x");
-            const int y = g_cfg.getInt(m_name,"window_pos_y");
-            const int w = g_cfg.getInt(m_name,"window_size_x");
-            const int h = g_cfg.getInt(m_name,"window_size_y");
-            setWindowPosAndSize( x, y, w, h );
-        }
-
         virtual void onUpdate()
         {
             if( !m_enabled )

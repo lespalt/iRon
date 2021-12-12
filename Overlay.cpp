@@ -41,6 +41,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
     switch( msg )
     {
+        // handle moving/resizing
         case WM_NCHITTEST:
         {
             LRESULT hit = DefWindowProc( hwnd, msg, wparam, lparam );
@@ -196,6 +197,13 @@ void Overlay::enableUiEdit( bool on )
 
 void Overlay::configChanged()
 {
+    // Position/dimensions might have changed
+    const int x = g_cfg.getInt(m_name,"window_pos_x");
+    const int y = g_cfg.getInt(m_name,"window_pos_y");
+    const int w = g_cfg.getInt(m_name,"window_size_x");
+    const int h = g_cfg.getInt(m_name,"window_size_y");
+    setWindowPosAndSize( x, y, w, h );
+
     onConfigChanged();
 }
 
@@ -205,6 +213,8 @@ void Overlay::update()
 
     if( m_uiEditEnabled )
     {
+        // Draw highlight frame and resize corner indicators
+
         const float w = (float)m_width;
         const float h = (float)m_height;
         wglMakeCurrent( m_hdc, m_hglrc );

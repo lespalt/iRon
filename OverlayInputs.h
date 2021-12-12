@@ -41,18 +41,11 @@ class OverlayInputs : public Overlay
 
         virtual void onConfigChanged()
         {
-            // Position/dimensions might have changed
-            const int x = g_cfg.getInt(m_name,"window_pos_x");
-            const int y = g_cfg.getInt(m_name,"window_pos_y");
-            const int w = g_cfg.getInt(m_name,"window_size_x");
-            const int h = g_cfg.getInt(m_name,"window_size_y");
-            setWindowPosAndSize( x, y, w, h );
-
             // Width might have changed, reset tracker values
-            m_throttleVtx.resize( w );
-            m_brakeVtx.resize( w );
-            m_steerVtx.resize( w );
-            for( int i=0; i<w; ++i )
+            m_throttleVtx.resize( m_width );
+            m_brakeVtx.resize( m_width );
+            m_steerVtx.resize( m_width );
+            for( int i=0; i<m_width; ++i )
             {
                 m_throttleVtx[i].x = float(i);
                 m_brakeVtx[i].x = float(i);
@@ -67,8 +60,8 @@ class OverlayInputs : public Overlay
 
             wglMakeCurrent( m_hdc, m_hglrc );
 
-            const float w = (float)g_cfg.getInt(m_name,"window_size_x");
-            const float h = (float)g_cfg.getInt(m_name,"window_size_y");
+            const float w = (float)m_width;
+            const float h = (float)m_height;
 
             // Advance input vertices
             for( int i=0; i<(int)m_throttleVtx.size()-1; ++i )
