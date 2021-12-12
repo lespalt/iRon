@@ -44,11 +44,12 @@ class Overlay
 
         void            update();
 
-        void            setWindowPosAndSize( int x, int y, int w, int h );
+        void            setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindowPos=true );
         void            saveWindowPosAndSize();
-        void            resizeGlViewport();
 
     protected:
+
+        void            resizeGlViewport();
 
         virtual void    onEnable();
         virtual void    onDisable();

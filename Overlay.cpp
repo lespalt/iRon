@@ -71,15 +71,17 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
             return hit;
         }
         case WM_MOVING:
-        {
-            if( o )
-                o->saveWindowPosAndSize();
-            break;
-        }
         case WM_SIZE:
         {
-            if( o ) {
-                o->resizeGlViewport();
+            if( o )
+            {
+                RECT r;
+                GetWindowRect( hwnd, &r );
+                const int x = r.left;
+                const int y = r.top;
+                const int w = r.right - r.left;
+                const int h = r.bottom - r.top;
+                o->setWindowPosAndSize( x, y, w, h, false );
                 o->saveWindowPosAndSize();
             }
             break;
@@ -258,21 +260,21 @@ void Overlay::update()
     SwapBuffers( m_hdc );
 }
 
-void Overlay::setWindowPosAndSize( int x, int y, int w, int h )
+void Overlay::setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindowPos )
 {
-    SetWindowPos( m_hwnd, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE|SWP_SHOWWINDOW );
+    if( callSetWindowPos )
+        SetWindowPos( m_hwnd, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE|SWP_SHOWWINDOW );
+    
+    m_xpos = x;
+    m_ypos = y;
+    m_width = w;
+    m_height = h;
+
     resizeGlViewport();
 }
 
 void Overlay::saveWindowPosAndSize()
 {
-    RECT r;
-    GetWindowRect( m_hwnd, &r );
-    m_xpos = r.left;
-    m_ypos = r.top;
-    m_width = r.right - r.left;
-    m_height = r.bottom - r.top;
-
     g_cfg.setInt( m_name, "window_pos_x", m_xpos );
     g_cfg.setInt( m_name, "window_pos_y", m_ypos );
     g_cfg.setInt( m_name, "window_size_x", m_width );
@@ -285,13 +287,6 @@ void Overlay::resizeGlViewport()
 {
     if( !m_hglrc )
         return;
-
-    RECT r;
-    GetWindowRect( m_hwnd, &r );
-    m_xpos = r.left;
-    m_ypos = r.top;
-    m_width = r.right - r.left;
-    m_height = r.bottom - r.top;
 
     wglMakeCurrent( m_hdc, m_hglrc );
     glViewport(0, 0, m_width, m_height);

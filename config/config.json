@@ -10,17 +10,17 @@
     "steering_col": [1,1,1,0.3],
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
-    "window_pos_x": 3524,
-    "window_pos_y": 686,
-    "window_size_x": 524,
-    "window_size_y": 150
+    "window_pos_x": 3921,
+    "window_pos_y": 493,
+    "window_size_x": 620,
+    "window_size_y": 251
   },
   "OverlayRelative": {
     "background_col": [0.2,0,0,0.1],
     "enabled": true,
-    "window_pos_x": 4517,
-    "window_pos_y": 1026,
-    "window_size_x": 544,
-    "window_size_y": 300
+    "window_pos_x": 3499,
+    "window_pos_y": 915,
+    "window_size_x": 824,
+    "window_size_y": 271
   }
 }
