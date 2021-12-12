@@ -25,9 +25,6 @@ SOFTWARE.
 
 // TODO:
 // - beautify json saving
-// - overlay default font mgmt
-// - gettextextent
-// - window pos/size info in ui edit
 
 #include <stdlib.h>
 #include <stdio.h>

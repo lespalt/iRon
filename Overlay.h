@@ -65,5 +65,4 @@ class Overlay
         int             m_ypos = 0;
         int             m_width = 0;
         int             m_height = 0;
-        Font            m_fnt;
 };

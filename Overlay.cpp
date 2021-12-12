@@ -30,7 +30,7 @@ SOFTWARE.
 #include "Overlay.h"
 #include "Config.h"
 
-static const int ResizeBorderWidth = 30;
+static const int ResizeBorderWidth = 20;
 
 static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
@@ -63,6 +63,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
                     return HTBOTTOMLEFT;
                 if( cur_x > w-border && cur_y > h-border )
                     return HTBOTTOMRIGHT;
+                /*
                 if( cur_x < border )
                     return HTLEFT;
                 if( cur_x > w-border )
@@ -71,6 +72,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
                     return HTTOP;
                 if( cur_y > h-border )
                     return HTBOTTOM;
+                */
 
                 // say we hit the caption to allow dragging the window from the client area
                 hit = HTCAPTION;
@@ -182,14 +184,12 @@ void Overlay::enable( bool on )
         // Finalize enable.
         //
 
-        m_fnt.load("arial-black");
         m_enabled = true;
         onEnable();
     }
     else if( !on && m_hwnd ) // disable
     {
         onDisable();
-        m_fnt.unload();
         wglDeleteContext( m_hglrc );
         DestroyWindow( m_hwnd );
         m_hwnd = 0;
@@ -252,10 +252,6 @@ void Overlay::update()
         glVertex2f(b,h-b);
         glVertex2f(b,h);
         glEnd();
-
-        char s[128];
-        sprintf( s, "%d x %d", m_width, m_height );
-        m_fnt.render( s, m_width/2, m_height/2, 16, float4(1,1,1,0.5f) );
     }
 
     glFlush();
