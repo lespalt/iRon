@@ -319,21 +319,27 @@ Session ir_session;
 
 static bool parseYamlInt(const char *yamlStr, const char *path, int *dest)
 {
-    if(dest)
+    int count = 0;
+    const char *s = nullptr;
+
+    if( parseYaml(yamlStr, path, &s, &count) )
     {
-        (*dest) = 0;
+        *dest = atoi( s );
+        return true;
+    }
 
-        if(yamlStr && path)
-        {
-            int count;
-            const char *strPtr;
+    return false;
+}
 
-            if(parseYaml(yamlStr, path, &strPtr, &count))
-            {
-                (*dest) = atoi(strPtr);
-                return true;
-            }
-        }
+static bool parseYamlFloat(const char *yamlStr, const char *path, float *dest)
+{
+    int count = 0;
+    const char *s = nullptr;
+
+    if( parseYaml(yamlStr, path, &s, &count) )
+    {
+        (*dest) = (float)atof( s );
+        return true;
     }
 
     return false;
@@ -341,28 +347,25 @@ static bool parseYamlInt(const char *yamlStr, const char *path, int *dest)
 
 static bool parseYamlStr(const char *yamlStr, const char *path, std::string& dest)
 {
-    if(yamlStr && path)
+    int count = 0;
+    const char *s = nullptr;
+
+    if( parseYaml(yamlStr, path, &s, &count) )
     {
-        int count;
-        const char *strPtr;
-
-        if(parseYaml(yamlStr, path, &strPtr, &count))
+        // strip leading quotes
+        if( *s == '"' )
         {
-            // strip leading quotes
-            if(*strPtr == '"')
-            {
-                strPtr++;
-                count--;
-            }
-
-            dest.assign( strPtr, count );
-
-            // strip trailing quotes
-            if( !dest.empty() && dest[dest.length()-1]=='"' )
-                dest.pop_back();
-
-            return true;
+            s++;
+            count--;
         }
+
+        dest.assign( s, count );
+
+        // strip trailing quotes
+        if( !dest.empty() && dest[dest.length()-1]=='"' )
+            dest.pop_back();
+
+        return true;
     }
 
     return false;
@@ -381,10 +384,17 @@ bool ir_tick()
     {
         const char* sessionYaml = irsdk.getSessionStr();
 
+#ifdef _DEBUG
+        printf("%s\n", sessionYaml);
+        FILE* fp = fopen("sessionYaml.txt","ab");
+        fprintf(fp,"\n\n==== NEW SESSION STRING ======================================\n");
+        fprintf(fp,"%s",sessionYaml);
+        fclose(fp);
+#endif
+
         char path[256];
 
         parseYamlInt( sessionYaml, "DriverInfo:DriverCarIdx:", &ir_session.driverCarIdx );
-        printf("Driver Car Idx: %d\n", ir_session.driverCarIdx );
 
         for( int i=0; i<IR_MAX_CARS; ++i )
         {
@@ -392,7 +402,10 @@ bool ir_tick()
             parseYamlStr( sessionYaml, path, ir_session.cars[i].userName );
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", i );
-            parseYamlStr( sessionYaml, path, ir_session.cars[i].carNumber );
+            parseYamlStr( sessionYaml, path, ir_session.cars[i].carNumberStr );
+
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumberRaw:", i );
+            parseYamlInt( sessionYaml, path, &ir_session.cars[i].carNumber );
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicString:", i );
             parseYamlStr( sessionYaml, path, ir_session.cars[i].licenseStr );
@@ -402,6 +415,15 @@ bool ir_tick()
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}IRating:", i );
             parseYamlInt( sessionYaml, path, &ir_session.cars[i].irating );
+
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsPaceCar:", i );
+            parseYamlInt( sessionYaml, path, &ir_session.cars[i].isPaceCar );
+
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CurDriverIncidentCount:", i );
+            parseYamlInt( sessionYaml, path, &ir_session.cars[i].incidentCount );
+
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarClassEstLapTime:", i );
+            parseYamlFloat( sessionYaml, path, &ir_session.cars[i].carClassEstLapTime );
         }
     }
 

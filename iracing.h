@@ -33,11 +33,15 @@ SOFTWARE.
 
 struct Car
 {
-    std::string userName;
-    std::string carNumber;
-    std::string licenseStr;
-    int license = -1;
-    int irating = -1;
+    std::string     userName;
+    int             carNumber = -1;
+    std::string     carNumberStr;
+    std::string     licenseStr;
+    int             license = -1;
+    int             irating = -1;
+    int             isPaceCar = false;
+    int             incidentCount = -1;
+    float           carClassEstLapTime = -1;
 };
 
 struct Session
