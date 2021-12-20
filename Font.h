@@ -116,15 +116,15 @@ class Font
                         kerning = it->second;
                 }
 
-                const float left     = 0.5f + float(x + cd.xoffset + kerning);
-                const float right    = 0.5f + float(x + cd.xoffset + kerning + cd.width * scale );
-                const float top      = 0.5f + float(y + (m_common.lineHeight-cd.yoffset) * scale);
-                const float bottom   = 0.5f + float(y + (m_common.lineHeight-cd.yoffset-cd.height) * scale);
+                const float left     = 0.5f + x + cd.xoffset * scale;
+                const float right    = left + cd.width * scale;
+                const float top      = 0.5f + y + float(m_common.lineHeight-cd.yoffset) * scale;
+                const float bottom   = 0.5f + y + float(m_common.lineHeight-cd.yoffset-cd.height) * scale;
 
-                const float tcleft   = (float(cd.x)+0.5f) / float(m_common.scaleW);
-                const float tcright  = (float(cd.x+cd.width)+0.5f) / float(m_common.scaleW);
-                const float tctop    = (float(cd.y)+0.5f) / float(m_common.scaleH);
-                const float tcbottom = (float(cd.y+cd.height)+0.5f) / float(m_common.scaleH);
+                const float tcleft   = (0.5f+cd.x)            / float(m_common.scaleW);
+                const float tcright  = (0.5f+cd.x+cd.width)   / float(m_common.scaleW);
+                const float tctop    = (0.5f+cd.y)            / float(m_common.scaleH);
+                const float tcbottom = (0.5f+cd.y+cd.height)  / float(m_common.scaleH);
 
                 glTexCoord2f( tcleft, tctop );
                 glVertex2f( left, top );
@@ -137,9 +137,9 @@ class Font
 
                 glTexCoord2f( tcright, tctop );
                 glVertex2f( right, top );
-
-                x += cd.xadvance * scale;
+                
                 prevId = id;
+                x += float(cd.xadvance+kerning) * scale;
             }
             glEnd();
 
