@@ -22,12 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#pragma comment(lib,"dxgi.lib")
+#pragma comment(lib,"d3d11.lib")
+#pragma comment(lib,"d2d1.lib")
+#pragma comment(lib,"dcomp.lib")
+#pragma comment(lib,"dwrite.lib")
+
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include <Windows.h>
+#include <windows.h>
 #include "iracing.h"
 #include "Config.h"
 #include "OverlayRelative.h"
@@ -99,6 +105,12 @@ int main()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
+#ifdef _DEBUG
+        if( GetAsyncKeyState(VK_ESCAPE) )
+            break;
+#endif
+
     }
 
     for( Overlay* o : overlays )

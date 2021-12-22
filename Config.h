@@ -24,7 +24,7 @@ SOFTWARE.
 
 #pragma once
 
-#include <Windows.h>
+#include <windows.h>
 #include <atomic>
 #include <thread>
 #include "picojson.h"

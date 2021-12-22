@@ -25,13 +25,18 @@ SOFTWARE.
 
 #pragma once
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string>
-#include <gl/GL.h>
+#include <windows.h>
+#include <d2d1_3.h>
 
-#ifndef GL_GENERATE_MIPMAP
-#define GL_GENERATE_MIPMAP 0x8191
-#endif
+#define HRCHECK( x_ ) do{ \
+    HRESULT hr_ = x_; \
+    if( FAILED(hr_) ) { \
+        printf("ERROR: failed call to %s (%s:%d), hr=0x%x\n", #x_, __FILE__, __LINE__,hr_); \
+        exit(1); \
+    } } while(0)
 
 struct float2
 {
@@ -51,19 +56,11 @@ struct float4
     union { float a; float w; };
     float4() = default;
     float4( float _x, float _y, float _z, float _w ) : x(_x), y(_y), z(_z), w(_w) {}
+    float4( const D2D1_COLOR_F& c ) : r(c.r), g(c.g), b(c.b), a(c.a) {}
+    operator D2D1_COLOR_F() { return {r,g,b,a}; }
     float* operator&() { return &x; }
     const float* operator&() const { return &x; }
 };
-
-inline void glerr()
-{
-    GLenum err = glGetError();
-    if( err ) {
-        printf("OpenGL error: %d\n", (int)err );
-    } else {
-        printf("OpenGL: no error\n");
-    }
-}
 
 inline bool loadFile( const std::string& fname, std::string& output )
 {

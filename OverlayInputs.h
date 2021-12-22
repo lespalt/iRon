@@ -55,6 +55,7 @@ class OverlayInputs : public Overlay
 
         virtual void onUpdate()
         {
+#if 0
             const float w = (float)m_width;
             const float h = (float)m_height;
 
@@ -123,6 +124,7 @@ class OverlayInputs : public Overlay
             for( int i=0; i<(int)m_steerVtx.size(); ++i )
                 glVertex2f(m_steerVtx[i].x,m_steerVtx[i].y*(h-1));
             glEnd();
+#endif
         }
 
     protected:

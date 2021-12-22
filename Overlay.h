@@ -26,7 +26,12 @@ SOFTWARE.
 
 #include <windows.h>
 #include <string>
-#include "Font.h"
+#include <dxgi1_6.h>
+#include <d3d11_4.h>
+#include <d2d1_3.h>
+#include <dcomp.h>
+#include <dwrite.h>
+#include <wrl.h>
 
 class Overlay
 {
@@ -49,8 +54,6 @@ class Overlay
 
     protected:
 
-        void            resizeGlViewport();
-
         virtual void    onEnable();
         virtual void    onDisable();
         virtual void    onUpdate();
@@ -58,12 +61,19 @@ class Overlay
 
         std::string     m_name;
         HWND            m_hwnd = 0;
-        HDC             m_hdc = 0;
-        HGLRC           m_hglrc = 0;
         bool            m_enabled = false;
         bool            m_uiEditEnabled = false;
         int             m_xpos = 0;
         int             m_ypos = 0;
         int             m_width = 0;
         int             m_height = 0;
+
+        Microsoft::WRL::ComPtr<ID3D11Device>            m_d3dDevice;
+        Microsoft::WRL::ComPtr<IDXGISwapChain1>         m_swapChain;
+        Microsoft::WRL::ComPtr<ID2D1Factory2>           m_d2dFactory;
+        Microsoft::WRL::ComPtr<ID2D1RenderTarget>       m_renderTarget;
+        Microsoft::WRL::ComPtr<IDCompositionDevice>     m_compositionDevice;
+        Microsoft::WRL::ComPtr<IDCompositionTarget>     m_compositionTarget;
+        Microsoft::WRL::ComPtr<IDCompositionVisual>     m_compositionVisual;
+        Microsoft::WRL::ComPtr<IDWriteFactory>          m_dwriteFactory;
 };

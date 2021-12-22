@@ -45,7 +45,6 @@
     <ClInclude Include="OverlayInputs.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="picojson.h" />
-    <ClInclude Include="Font.h" />
     <ClInclude Include="lodepng\lodepng.h">
       <Filter>lodepng</Filter>
     </ClInclude>

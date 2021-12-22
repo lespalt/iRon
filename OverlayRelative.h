@@ -27,7 +27,6 @@ SOFTWARE.
 #include <vector>
 #include <algorithm>
 #include "Overlay.h"
-#include "Font.h"
 
 class OverlayRelative : public Overlay
 {
@@ -41,16 +40,24 @@ class OverlayRelative : public Overlay
 
         virtual void onEnable()
         {
-            m_fnt.load("arial-black");
         }
 
         virtual void onDisable()
         {
-            m_fnt.unload();
         }
 
         virtual void onUpdate()
         {
+
+            m_renderTarget->BeginDraw();
+            
+            // Clear background
+            m_renderTarget->Clear( g_cfg.getFloat4( m_name, "background_col" ) );
+
+
+            m_renderTarget->EndDraw();
+
+#if 0
             // Clear background
             float4 bgcol = g_cfg.getFloat4( m_name, "background_col" );
             glClearColor( bgcol.r, bgcol.g, bgcol.b, bgcol.a );
@@ -126,9 +133,8 @@ class OverlayRelative : public Overlay
                 sprintf( s, "%2d #%2d %s %.2f  %s", ir_CarIdxPosition.getInt(ci.carIdx), car.carNumber, car.userName.c_str(), ci.delta, car.licenseStr.c_str() );
                 m_fnt.render( s, 0, y, fontSize, col );
             }
+#endif
         }
 
     protected:
-
-        Font    m_fnt;
 };

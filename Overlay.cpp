@@ -25,10 +25,10 @@ SOFTWARE.
 
 #include <windows.h>
 #include <windowsx.h>
-#include <dwmapi.h>
-#include <GL\gl.h>
 #include "Overlay.h"
 #include "Config.h"
+
+using namespace Microsoft::WRL;
 
 static const int ResizeBorderWidth = 20;
 
@@ -120,7 +120,7 @@ void Overlay::enable( bool on )
     if( on && !m_hwnd )  // enable
     {
         //
-        // Create window.
+        // Create window
         //
 
         const char* const wndclassName = "overlay";
@@ -135,47 +135,79 @@ void Overlay::enable( bool on )
             RegisterClassEx(&wndclass);
         }
 
-        m_hwnd = CreateWindowEx( WS_EX_TOPMOST|WS_EX_TOOLWINDOW, wndclassName, m_name.c_str(), WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
+        m_hwnd = CreateWindowEx( WS_EX_TOPMOST|WS_EX_TOOLWINDOW|WS_EX_NOREDIRECTIONBITMAP, wndclassName, m_name.c_str(), WS_POPUP|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, NULL, NULL, NULL, NULL );
         SetWindowLongPtr( m_hwnd, GWLP_USERDATA, (LONG_PTR)this );
 
-        //
-        // Create and configure GL context.
-        //
-
-        PIXELFORMATDESCRIPTOR pfd = {};
-        pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER | PFD_SUPPORT_COMPOSITION;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 24;
-        pfd.cAlphaBits = 8;
-        pfd.cDepthBits = 32;
-
-        m_hdc = GetDC( m_hwnd );
-        if( !SetPixelFormat(m_hdc, ChoosePixelFormat(m_hdc, &pfd), &pfd) )
-            printf("SetPixelFormat failed\n");
-
-        m_hglrc = wglCreateContext( m_hdc );
-        if( !m_hglrc )
-            printf("wglCreateContext failed\n");
-
-        wglMakeCurrent( m_hdc, m_hglrc );
-        glEnable( GL_BLEND );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-        glEnable( GL_LINE_SMOOTH );
-        glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+        RECT r;
+        GetWindowRect( m_hwnd, &r );
+        const int width = r.right - r.left;
+        const int height = r.bottom - r.top;
 
         //
-        // The following enables composition of our window into the desktop.
+        // Create the unsettling amount of stuff that's needed to get a window to
+        // properly alpha-blend our Direct2D rendering into the desktop.
+        // See: https://docs.microsoft.com/en-us/archive/msdn-magazine/2014/june/windows-with-c-high-performance-window-layering-using-the-windows-composition-engine
         //
 
-        DWM_BLURBEHIND bb = {};
-        bb.dwFlags = DWM_BB_ENABLE;
-        bb.fEnable = true;
-        DwmEnableBlurBehindWindow(m_hwnd, &bb);                
+#ifdef _DEBUG
+        const bool isdebug = true;
+#else
+        const bool isdebug = false;
+#endif
+
+        // D3D11 device
+        HRCHECK(D3D11CreateDevice( NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, D3D11_CREATE_DEVICE_SINGLETHREADED | D3D11_CREATE_DEVICE_BGRA_SUPPORT, NULL, 0, D3D11_SDK_VERSION, &m_d3dDevice, NULL, NULL ));
+
+        // DXGI device
+        ComPtr<IDXGIDevice> dxgiDevice;
+        HRCHECK(m_d3dDevice.As(&dxgiDevice));
+
+        // DXGI factory
+        ComPtr<IDXGIFactory2> dxgiFactory;
+        HRCHECK(CreateDXGIFactory2( isdebug ? DXGI_CREATE_FACTORY_DEBUG : 0, IID_PPV_ARGS(&dxgiFactory) ));
+
+        // DXGI Swap chain
+        DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+        swapChainDesc.Width            = width;
+        swapChainDesc.Height           = height;
+        swapChainDesc.Format           = DXGI_FORMAT_B8G8R8A8_UNORM;
+        swapChainDesc.BufferUsage      = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.SwapEffect       = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+        swapChainDesc.BufferCount      = 2;                              
+        swapChainDesc.SampleDesc.Count = 1;                              
+        swapChainDesc.AlphaMode        = DXGI_ALPHA_MODE_PREMULTIPLIED;
+        HRCHECK(dxgiFactory->CreateSwapChainForComposition( dxgiDevice.Get(), &swapChainDesc, NULL, &m_swapChain ));
+        HRCHECK(dxgiFactory->MakeWindowAssociation( m_hwnd, DXGI_MWA_NO_ALT_ENTER ));
+
+        // DXGI surface
+        ComPtr<IDXGISurface2> dxgiSurface;
+        HRCHECK(m_swapChain->GetBuffer( 0, IID_PPV_ARGS(&dxgiSurface) ));
+
+        // D2D factory
+        D2D1_FACTORY_OPTIONS factoryOptions = {};
+        factoryOptions.debugLevel = isdebug ? D2D1_DEBUG_LEVEL_INFORMATION : D2D1_DEBUG_LEVEL_NONE;
+        HRCHECK(D2D1CreateFactory( D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(m_d2dFactory), &factoryOptions, &m_d2dFactory ));
+
+        // D2D render target
+        D2D1_RENDER_TARGET_PROPERTIES targetProperties = {};
+        targetProperties.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
+        targetProperties.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
+        targetProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
+        HRCHECK(m_d2dFactory->CreateDxgiSurfaceRenderTarget( dxgiSurface.Get(), &targetProperties, &m_renderTarget ));
+
+        // Composition stuff
+        HRCHECK(DCompositionCreateDevice( dxgiDevice.Get(), IID_PPV_ARGS(&m_compositionDevice) ));
+        HRCHECK(m_compositionDevice->CreateTargetForHwnd( m_hwnd, true, &m_compositionTarget ));
+        HRCHECK(m_compositionDevice->CreateVisual( &m_compositionVisual ));
+        HRCHECK(m_compositionVisual->SetContent(m_swapChain.Get()));
+        HRCHECK(m_compositionTarget->SetRoot(m_compositionVisual.Get()));
+        HRCHECK(m_compositionDevice->Commit());
+
+        // DirectWrite factory
+        HRCHECK(DWriteCreateFactory( DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(m_dwriteFactory.GetAddressOf()) ));
 
         //
-        // Finalize enable.
+        // Finalize enable
         //
 
         m_enabled = true;
@@ -184,11 +216,18 @@ void Overlay::enable( bool on )
     else if( !on && m_hwnd ) // disable
     {
         onDisable();
-        wglDeleteContext( m_hglrc );
+
+        m_dwriteFactory.Reset();
+        m_compositionVisual.Reset();
+        m_compositionTarget.Reset();
+        m_compositionDevice.Reset();
+        m_renderTarget.Reset();
+        m_d2dFactory.Reset();
+        m_swapChain.Reset();
+        m_d3dDevice.Reset();
+
         DestroyWindow( m_hwnd );
         m_hwnd = 0;
-        m_hdc = 0;
-        m_hglrc = 0;
         m_enabled = false;
     }
 }
@@ -215,14 +254,12 @@ void Overlay::update()
     if( !m_enabled )
         return;
 
-    wglMakeCurrent( m_hdc, m_hglrc );
-
     onUpdate();
 
     if( m_uiEditEnabled )
     {
         // Draw highlight frame and resize corner indicators
-
+#if 0
         const float w = (float)m_width;
         const float h = (float)m_height;
         wglMakeCurrent( m_hdc, m_hglrc );
@@ -234,7 +271,7 @@ void Overlay::update()
         glVertex2f(w-1,h-1);
         glVertex2f(0,h-1);
         glVertex2f(0,0);
-        glEnd();
+        glEnd();             e10 4     9a 3
 
         const float b = (float)ResizeBorderWidth;
         glBegin(GL_LINE_STRIP);
@@ -260,10 +297,10 @@ void Overlay::update()
         glVertex2f(b,h-b);
         glVertex2f(b,h);
         glEnd();
+#endif
     }
 
-    glFlush();
-    SwapBuffers( m_hdc );
+    HRCHECK(m_swapChain->Present( 1, 0 ));
 }
 
 void Overlay::setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindowPos )
@@ -276,7 +313,19 @@ void Overlay::setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindo
     m_width = w;
     m_height = h;
 
-    resizeGlViewport();
+    m_renderTarget.Reset();  // need to release all references to swap chain's back buffers before calling ResizeBuffers
+
+    HRCHECK(m_swapChain->ResizeBuffers( 0, w, h, DXGI_FORMAT_UNKNOWN, 0 ));
+
+    // Recreate render target
+    ComPtr<IDXGISurface2> dxgiSurface;
+    HRCHECK(m_swapChain->GetBuffer( 0, IID_PPV_ARGS(&dxgiSurface) ));
+    D2D1_RENDER_TARGET_PROPERTIES targetProperties = {};
+    targetProperties.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
+    targetProperties.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
+    targetProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
+    HRCHECK(m_d2dFactory->CreateDxgiSurfaceRenderTarget( dxgiSurface.Get(), &targetProperties, &m_renderTarget ));
+
 }
 
 void Overlay::saveWindowPosAndSize()
@@ -287,18 +336,6 @@ void Overlay::saveWindowPosAndSize()
     g_cfg.setInt( m_name, "window_size_y", m_height  );
 
     g_cfg.save();
-}
-
-void Overlay::resizeGlViewport()
-{
-    if( !m_hglrc )
-        return;
-
-    wglMakeCurrent( m_hdc, m_hglrc );
-    glViewport(0, 0, m_width, m_height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0,m_width,0,m_height,1,-1);
 }
 
 void Overlay::onEnable() {}
