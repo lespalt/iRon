@@ -51,9 +51,6 @@ class OverlayRelative : public Overlay
 
             m_renderTarget->BeginDraw();
             
-            // Clear background
-            m_renderTarget->Clear( g_cfg.getFloat4( m_name, "background_col" ) );
-
 
             m_renderTarget->EndDraw();
 

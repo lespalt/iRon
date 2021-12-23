@@ -76,4 +76,5 @@ class Overlay
         Microsoft::WRL::ComPtr<IDCompositionTarget>     m_compositionTarget;
         Microsoft::WRL::ComPtr<IDCompositionVisual>     m_compositionVisual;
         Microsoft::WRL::ComPtr<IDWriteFactory>          m_dwriteFactory;
+        Microsoft::WRL::ComPtr<ID2D1SolidColorBrush>    m_brush;
 };

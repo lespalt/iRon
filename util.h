@@ -44,6 +44,8 @@ struct float2
     union { float g; float y; };
     float2() = default;
     float2( float _x, float _y ) : x(_x), y(_y) {}
+    float2( const D2D1_POINT_2F& p ) : x(p.x), y(p.y) {}
+    operator D2D1_POINT_2F() { return {x,y}; }
     float* operator&() { return &x; }
     const float* operator&() const { return &x; }
 };

@@ -3,24 +3,27 @@
     "ui_edit_hotkey_is_alt_and_this_letter": "j"
   },
   "OverlayInputs": {
-    "background_col": [0,0,0,0.6],
+    "background_col": [0,0,0,0.5],
     "brake_col": [0.93,0.03,0.13,0.8],
     "brake_fill_col": [0.46,0.01,0.06,0.6],
+    "corner_radius": 0,
     "enabled": true,
+    "line_thickness": 2,
     "steering_col": [1,1,1,0.3],
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
-    "window_pos_x": 3643,
-    "window_pos_y": 1295,
-    "window_size_x": 106,
-    "window_size_y": 60
+    "window_pos_x": 4000,
+    "window_pos_y": 819,
+    "window_size_x": 436,
+    "window_size_y": 121
   },
   "OverlayRelative": {
-    "background_col": [1,1,0,0.5],
+    "background_col": [0,0,0,0.5],
+    "corner_radius": 20,
     "enabled": true,
-    "window_pos_x": 3360,
-    "window_pos_y": 249,
-    "window_size_x": 1046,
-    "window_size_y": 546
+    "window_pos_x": 4195,
+    "window_pos_y": 303,
+    "window_size_x": 631,
+    "window_size_y": 397
   }
 }

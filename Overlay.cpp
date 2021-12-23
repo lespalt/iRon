@@ -30,7 +30,7 @@ SOFTWARE.
 
 using namespace Microsoft::WRL;
 
-static const int ResizeBorderWidth = 20;
+static const int ResizeBorderWidth = 25;
 
 static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam )
 {
@@ -55,13 +55,15 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
                 const int w = r.right - r.left;
                 const int h = r.bottom - r.top;
                 const int border = ResizeBorderWidth;
-
+                /*  Disabled these corners because using them doesn't let us update the window contents 
+                    fast enough for some reason, leading to a weird window-wobble appearance when resizing.
                 if( cur_x < border && cur_y < border )
                     return HTTOPLEFT;
                 if( cur_x > w-border && cur_y < border )
                     return HTTOPRIGHT;
                 if( cur_x < border && cur_y > h-border )
                     return HTBOTTOMLEFT;
+                */
                 if( cur_x > w-border && cur_y > h-border )
                     return HTBOTTOMRIGHT;
 
@@ -206,6 +208,9 @@ void Overlay::enable( bool on )
         // DirectWrite factory
         HRCHECK(DWriteCreateFactory( DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(m_dwriteFactory.GetAddressOf()) ));
 
+        // Default brush
+        HRCHECK(m_renderTarget->CreateSolidColorBrush( float4(0,0,0,1), &m_brush ));
+
         //
         // Finalize enable
         //
@@ -254,50 +259,39 @@ void Overlay::update()
     if( !m_enabled )
         return;
 
+    const float w = (float)m_width;
+    const float h = (float)m_height;
+    const float cornerRadius = g_cfg.getFloat( m_name, "corner_radius" );
+
+    // Clear/draw background
+    {
+        m_renderTarget->BeginDraw();
+        m_renderTarget->Clear( float4(0,0,0,0) );
+        D2D1_ROUNDED_RECT rr;
+        rr.rect = { 0.5f, 0.5f, w-0.5f, h-0.5f };
+        rr.radiusX = cornerRadius;
+        rr.radiusY = cornerRadius;
+        m_brush->SetColor( g_cfg.getFloat4( m_name, "background_col" ) );
+        m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+        m_renderTarget->EndDraw();
+    }
+
+    // Overlay-specific logic and rendering
     onUpdate();
 
     if( m_uiEditEnabled )
     {
         // Draw highlight frame and resize corner indicators
-#if 0
-        const float w = (float)m_width;
-        const float h = (float)m_height;
-        wglMakeCurrent( m_hdc, m_hglrc );
-        glLineWidth( 2 );
-        glColor4f(1,1,1,0.6f);
-        glBegin(GL_LINE_STRIP);
-        glVertex2f(0,0);
-        glVertex2f(w-1,0);
-        glVertex2f(w-1,h-1);
-        glVertex2f(0,h-1);
-        glVertex2f(0,0);
-        glEnd();             e10 4     9a 3
-
-        const float b = (float)ResizeBorderWidth;
-        glBegin(GL_LINE_STRIP);
-        glVertex2f(0,b);
-        glVertex2f(b,b);
-        glVertex2f(b,0);
-        glEnd();
-
-        glBegin(GL_LINE_STRIP);
-        glVertex2f(w-b,0);
-        glVertex2f(w-b,b);
-        glVertex2f(w,b);
-        glEnd();
-
-        glBegin(GL_LINE_STRIP);
-        glVertex2f(w-b,h);
-        glVertex2f(w-b,h-b);
-        glVertex2f(w,h-b);
-        glEnd();
-
-        glBegin(GL_LINE_STRIP);
-        glVertex2f(0,h-b);
-        glVertex2f(b,h-b);
-        glVertex2f(b,h);
-        glEnd();
-#endif
+        m_renderTarget->BeginDraw();
+        D2D1_ROUNDED_RECT rr;
+        rr.rect = { 0.5f, 0.5f, w-0.5f, h-0.5f };
+        rr.radiusX = cornerRadius;
+        rr.radiusY = cornerRadius;
+        m_brush->SetColor( float4(1,1,1,0.7f) );
+        m_renderTarget->DrawRoundedRectangle( &rr, m_brush.Get(), 2 );
+        m_renderTarget->DrawLine( float2(w-0.5f,h-0.5f-ResizeBorderWidth), float2(w-0.5f-ResizeBorderWidth,h-0.5f-ResizeBorderWidth), m_brush.Get(), 2 );
+        m_renderTarget->DrawLine( float2(w-0.5f-ResizeBorderWidth,h-0.5f), float2(w-0.5f-ResizeBorderWidth,h-0.5f-ResizeBorderWidth), m_brush.Get(), 2 );
+        m_renderTarget->EndDraw();
     }
 
     HRCHECK(m_swapChain->Present( 1, 0 ));
