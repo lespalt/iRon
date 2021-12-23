@@ -40,26 +40,23 @@ class OverlayRelative : public Overlay
 
         virtual void onEnable()
         {
+            onConfigChanged();  // trigger font load
         }
 
         virtual void onDisable()
         {
+            m_textFormat.Reset();
+        }
+
+        virtual void onConfigChanged()
+        {
+            const float fontSize = g_cfg.getFloat( m_name, "font_size" );
+            HRCHECK(m_dwriteFactory->CreateTextFormat( L"Arial", NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
+            m_textFormat->SetLineSpacing( DWRITE_LINE_SPACING_METHOD_UNIFORM, fontSize, fontSize );
         }
 
         virtual void onUpdate()
         {
-
-            m_renderTarget->BeginDraw();
-            
-
-            m_renderTarget->EndDraw();
-
-#if 0
-            // Clear background
-            float4 bgcol = g_cfg.getFloat4( m_name, "background_col" );
-            glClearColor( bgcol.r, bgcol.g, bgcol.b, bgcol.a );
-            glClear(GL_COLOR_BUFFER_BIT);
-
             struct CarInfo {
                 int carIdx;
                 float delta;
@@ -98,7 +95,7 @@ class OverlayRelative : public Overlay
             if( driverCarInfoIdx < 0 )
                 return;
 
-            const float fontSize      = 21;
+            const float fontSize = g_cfg.getFloat( m_name, "font_size" );
             const float4 ownCol       = float4( 241.f/255.f, 175.f/255.f, 34.f/255.f, 1 );
             const float4 sameLapCol   = float4( 1, 1, 1, 1 );
             const float4 lapAheadCol  = float4( 231.f/255.f, 44.f/255.f, 44.f/255.f, 1 );
@@ -112,6 +109,7 @@ class OverlayRelative : public Overlay
 
             float y = ydriver + entriesAbove * fontSize;
 
+            m_renderTarget->BeginDraw();
             for( int i=driverCarInfoIdx-entriesAbove; i<(int)relatives.size() && y>=listingAreaBot; ++i, y-=fontSize )
             {
                 if( i < 0 )
@@ -126,12 +124,17 @@ class OverlayRelative : public Overlay
                 else if( ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
                     col.a *= 0.5f;
 
-                char s[1024];
-                sprintf( s, "%2d #%2d %s %.2f  %s", ir_CarIdxPosition.getInt(ci.carIdx), car.carNumber, car.userName.c_str(), ci.delta, car.licenseStr.c_str() );
-                m_fnt.render( s, 0, y, fontSize, col );
+                wchar_t s[1024];
+                swprintf( s, sizeof(s), L"%2d #%2d %S %S   %.2f", ir_CarIdxPosition.getInt(ci.carIdx), car.carNumber, car.userName.c_str(), car.licenseStr.c_str(), ci.delta );
+
+                D2D1_RECT_F r = { 0, y, (float)m_width, y+fontSize };
+                m_brush->SetColor( col );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get() );
             }
-#endif
+            m_renderTarget->EndDraw();
         }
 
     protected:
+
+        Microsoft::WRL::ComPtr<IDWriteTextFormat> m_textFormat;
 };
