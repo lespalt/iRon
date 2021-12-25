@@ -44,9 +44,7 @@ class OverlayRelative : public Overlay
         }
 
         virtual void onDisable()
-        {
-            m_textFormat.Reset();
-        }
+        {}
 
         virtual void onConfigChanged()
         {
@@ -237,7 +235,6 @@ class OverlayRelative : public Overlay
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
                 m_brush->SetColor( col );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
-                xr -= m_safetyWidth * 1.2f;
             }
 
             m_renderTarget->EndDraw();
