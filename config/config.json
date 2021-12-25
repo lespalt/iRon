@@ -12,19 +12,22 @@
     "steering_col": [1,1,1,0.3],
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
-    "window_pos_x": 3580,
-    "window_pos_y": 709,
-    "window_size_x": 436,
-    "window_size_y": 121
+    "window_pos_x": 5392,
+    "window_pos_y": 535,
+    "window_size_x": 476,
+    "window_size_y": 101
   },
   "OverlayRelative": {
     "background_col": [0,0,0,0.7],
     "corner_radius": 6,
     "enabled": true,
+    "font": "Calibri",
     "font_size": 17,
-    "window_pos_x": 4692,
-    "window_pos_y": 1007,
-    "window_size_x": 395,
-    "window_size_y": 222
+    "font_weight": 500,
+    "line_spacing": 6,
+    "window_pos_x": 5622,
+    "window_pos_y": 984,
+    "window_size_x": 463,
+    "window_size_y": 211
   }
 }

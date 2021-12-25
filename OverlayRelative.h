@@ -50,9 +50,13 @@ class OverlayRelative : public Overlay
 
         virtual void onConfigChanged()
         {
+            const std::string font = g_cfg.getString( m_name, "font" );
             const float fontSize = g_cfg.getFloat( m_name, "font_size" );
-            HRCHECK(m_dwriteFactory->CreateTextFormat( L"Arial", NULL, DWRITE_FONT_WEIGHT_REGULAR, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
-            m_textFormat->SetLineSpacing( DWRITE_LINE_SPACING_METHOD_UNIFORM, fontSize, fontSize );
+            const int fontWeight = g_cfg.getInt( m_name, "font_weight" );
+            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, (DWRITE_FONT_WEIGHT)fontWeight, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
+            m_textFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+            m_textFormat->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+            //m_textFormat->SetLineSpacing( DWRITE_LINE_SPACING_METHOD_UNIFORM, 0, 0 );
         }
 
         virtual void onUpdate()
@@ -65,52 +69,70 @@ class OverlayRelative : public Overlay
             relatives.reserve( IR_MAX_CARS );
 
             // Populate cars with the ones for which a relative/delta comparison is valid
-            const float driverEstTime = ir_CarIdxEstTime.getFloat(ir_session.driverCarIdx);
+            const float selfEstTime     = ir_CarIdxEstTime.getFloat(ir_session.driverCarIdx);
+            const float selfLapDistPct  = ir_CarIdxLapDistPct.getFloat(ir_session.driverCarIdx);
+
             for( int i=0; i<IR_MAX_CARS; ++i )
             {
                 if( (i == ir_session.driverCarIdx || ir_CarIdxLap.getInt(i) >= 0) && !ir_session.cars[i].isPaceCar )
                 {
+                    // If the other car is up to half a lap in front, we consider the delta 'ahead', otherwise 'behind'.
+
+                    // Does the delta between us and the other car span across the start/finish line?
+                    const bool wrap = fabsf(ir_CarIdxLapDistPct.getFloat(i) - selfLapDistPct) > 0.5f;
+
+                    float delta = 0;
+                    const float L = ir_session.cars[i].carClassEstLapTime;
+                    const float C = ir_CarIdxEstTime.getFloat(i);
+                    const float S = selfEstTime;
+
+                    if( wrap )
+                        delta = S > C ? (C-S)+L : (C-S)-L;
+                    else
+                        delta = C - S;
+
                     CarInfo ci;
                     ci.carIdx = i;
-                    ci.delta = driverEstTime - ir_CarIdxEstTime.getFloat(i);
+                    ci.delta = delta;
                     relatives.push_back( ci );
                 }
             }
 
             // Sort by delta
             std::sort( relatives.begin(), relatives.end(), 
-                []( const CarInfo& a, const CarInfo&b ) { return a.delta < b.delta; } );
+                []( const CarInfo& a, const CarInfo&b ) { return a.delta > b.delta; } );
 
             // Locate our driver's index in the new array
-            int driverCarInfoIdx = -1;
+            int selfCarInfoIdx = -1;
             for( int i=0; i<(int)relatives.size(); ++i )
             {
                 if( relatives[i].carIdx == ir_session.driverCarIdx ) {
-                    driverCarInfoIdx = i;
+                    selfCarInfoIdx = i;
                     break;
                 }
             }
 
             // Something's wrong if we didn't find our driver. Bail.
-            if( driverCarInfoIdx < 0 )
+            if( selfCarInfoIdx < 0 )
                 return;
 
-            const float fontSize = g_cfg.getFloat( m_name, "font_size" );
-            const float4 ownCol       = float4( 241.f/255.f, 175.f/255.f, 34.f/255.f, 1 );
+            const float fontSize      = g_cfg.getFloat( m_name, "font_size" );
+            const float lineSpacing   = g_cfg.getFloat( m_name, "line_spacing" );
+            const float lineHeight    = fontSize + lineSpacing;
+            const float4 selfCol       = float4( 241.f/255.f, 175.f/255.f, 34.f/255.f, 1 );
             const float4 sameLapCol   = float4( 1, 1, 1, 1 );
             const float4 lapAheadCol  = float4( 231.f/255.f, 44.f/255.f, 44.f/255.f, 1 );
 
-
             // Display such that our driver is in the vertical center of the area where we're listing cars
-            const float listingAreaTop  = m_height - 40.0f;
-            const float listingAreaBot  = 40.0f;
-            const float ydriver         = listingAreaBot + (listingAreaTop-listingAreaBot) / 2.0f - fontSize / 2.0f;
-            const int   entriesAbove    = int( (listingAreaTop - ydriver) / fontSize ) - 1;
+            const float listingAreaTop  = 40.0f;
+            const float listingAreaBot  = m_height - 40.0f;
+            const float yself         = listingAreaTop + (listingAreaBot-listingAreaTop) / 2.0f;
+            const int   entriesAbove    = int( (yself - lineHeight/2 - listingAreaTop) / lineHeight );
 
-            float y = ydriver + entriesAbove * fontSize;
+            float y = yself - entriesAbove * lineHeight;
 
             m_renderTarget->BeginDraw();
-            for( int i=driverCarInfoIdx-entriesAbove; i<(int)relatives.size() && y>=listingAreaBot; ++i, y-=fontSize )
+            for( int i=selfCarInfoIdx-entriesAbove; i<(int)relatives.size() && y<=listingAreaBot-lineHeight/2; ++i, y+=lineHeight )
             {
                 if( i < 0 )
                     continue;
@@ -119,18 +141,23 @@ class OverlayRelative : public Overlay
                 const Car&     car = ir_session.cars[ci.carIdx];
 
                 float4 col = sameLapCol;
-                if( i==driverCarInfoIdx )
-                    col = ownCol;
+                if( i==selfCarInfoIdx )
+                    col = selfCol;
                 else if( ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
                     col.a *= 0.5f;
 
                 wchar_t s[1024];
                 swprintf( s, sizeof(s), L"%2d #%2d %S %S   %.2f", ir_CarIdxPosition.getInt(ci.carIdx), car.carNumber, car.userName.c_str(), car.licenseStr.c_str(), ci.delta );
 
-                D2D1_RECT_F r = { 0, y, (float)m_width, y+fontSize };
+                D2D1_RECT_F r = { 0, y-lineHeight/2, (float)m_width, y+lineHeight/2 };
                 m_brush->SetColor( col );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get() );
+
+                col.a *= 0.1f;
+                m_brush->SetColor( col );
+                m_renderTarget->DrawRectangle( &r, m_brush.Get() );
             }
+
             m_renderTarget->EndDraw();
         }
 

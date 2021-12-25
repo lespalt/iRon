@@ -107,8 +107,8 @@ int main()
         }
 
 #ifdef _DEBUG
-        if( GetAsyncKeyState(VK_ESCAPE) )
-            break;
+       // if( GetAsyncKeyState(VK_ESCAPE) )
+         //   break;
 #endif
 
     }

@@ -95,3 +95,8 @@ inline bool saveFile( const std::string& fname, const std::string& s )
     fclose( fp );
     return true;
 }
+
+inline std::wstring toWide( const std::string& narrow )
+{
+    return std::wstring(narrow.begin(),narrow.end());
+}
