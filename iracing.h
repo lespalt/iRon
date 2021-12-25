@@ -28,6 +28,7 @@ SOFTWARE.
 #include "irsdk/irsdk_client.h"
 #include "irsdk/yaml_parser.h"
 #include <string>
+#include "util.h"
 
 #define IR_MAX_CARS 64
 
@@ -37,9 +38,13 @@ struct Car
     int             carNumber = -1;
     std::string     carNumberStr;
     std::string     licenseStr;
-    int             license = -1;
+    char            licenseChar;
+    float           licenseSR = -1;
+    std::string     licenseColStr;
+    float4          licenseCol;
     int             irating = -1;
-    int             isPaceCar = false;
+    int             isPaceCar = 0;
+    int             isSpectator = 0;
     int             incidentCount = -1;
     float           carClassEstLapTime = -1;
 };

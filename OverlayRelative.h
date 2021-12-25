@@ -56,7 +56,17 @@ class OverlayRelative : public Overlay
             HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, (DWRITE_FONT_WEIGHT)fontWeight, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
             m_textFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
             m_textFormat->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
-            //m_textFormat->SetLineSpacing( DWRITE_LINE_SPACING_METHOD_UNIFORM, 0, 0 );
+
+            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, (DWRITE_FONT_WEIGHT)fontWeight, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*0.8f, L"en-us", &m_textFormatSmall ));
+            m_textFormatSmall->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+            m_textFormatSmall->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+
+            // Determine minimum widths of fixed-width columns
+            m_posWidth     = computeTextExtent( L"P99", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
+            m_numWidth     = computeTextExtent( L"#99", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
+            m_deltaWidth   = computeTextExtent( L"999.9", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
+            m_iratingWidth = computeTextExtent( L"999.9k", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x;
+            m_safetyWidth  = computeTextExtent( L"A 4.44", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x;
         }
 
         virtual void onUpdate()
@@ -74,7 +84,8 @@ class OverlayRelative : public Overlay
 
             for( int i=0; i<IR_MAX_CARS; ++i )
             {
-                if( (i == ir_session.driverCarIdx || ir_CarIdxLap.getInt(i) >= 0) && !ir_session.cars[i].isPaceCar )
+                const Car& car = ir_session.cars[i];
+                if( (i == ir_session.driverCarIdx || ir_CarIdxLap.getInt(i) >= 0) && !car.isPaceCar && !car.isSpectator && car.carNumber>=0 )
                 {
                     // If the other car is up to half a lap in front, we consider the delta 'ahead', otherwise 'behind'.
 
@@ -122,18 +133,32 @@ class OverlayRelative : public Overlay
             const float4 selfCol       = float4( 241.f/255.f, 175.f/255.f, 34.f/255.f, 1 );
             const float4 sameLapCol   = float4( 1, 1, 1, 1 );
             const float4 lapAheadCol  = float4( 231.f/255.f, 44.f/255.f, 44.f/255.f, 1 );
+            const float4 iratingTextCol   = g_cfg.getFloat4( m_name, "irating_text_col" );
+            const float4 iratingBgCol = g_cfg.getFloat4( m_name, "irating_background_col" );
+            const float4 licenseTextCol   = g_cfg.getFloat4( m_name, "license_text_col" );
+            const float  licenseBgAlpha = g_cfg.getFloat( m_name, "license_background_alpha" );
+            const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col" );
 
             // Display such that our driver is in the vertical center of the area where we're listing cars
-            const float listingAreaTop  = 40.0f;
-            const float listingAreaBot  = m_height - 40.0f;
+            const float listingAreaTop  = 10.0f;
+            const float listingAreaBot  = m_height - 10.0f;
             const float yself         = listingAreaTop + (listingAreaBot-listingAreaTop) / 2.0f;
             const int   entriesAbove    = int( (yself - lineHeight/2 - listingAreaTop) / lineHeight );
 
             float y = yself - entriesAbove * lineHeight;
 
             m_renderTarget->BeginDraw();
-            for( int i=selfCarInfoIdx-entriesAbove; i<(int)relatives.size() && y<=listingAreaBot-lineHeight/2; ++i, y+=lineHeight )
+            for( int cnt=0, i=selfCarInfoIdx-entriesAbove; i<(int)relatives.size() && y<=listingAreaBot-lineHeight/2; ++i, y+=lineHeight, ++cnt )
             {
+                // Alternating line backgrounds
+                if( cnt & 1 )
+                {
+                    D2D1_RECT_F r = { 0, y-lineHeight/2, (float)m_width,  y+lineHeight/2 };
+                    m_brush->SetColor( alternateLineBgCol );
+                    m_renderTarget->FillRectangle( &r, m_brush.Get() );
+                }
+
+                // Skip if we don't have a car to list for this line
                 if( i < 0 )
                     continue;
 
@@ -146,16 +171,73 @@ class OverlayRelative : public Overlay
                 else if( ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
                     col.a *= 0.5f;
 
-                wchar_t s[1024];
-                swprintf( s, sizeof(s), L"%2d #%2d %S %S   %.2f", ir_CarIdxPosition.getInt(ci.carIdx), car.carNumber, car.userName.c_str(), car.licenseStr.c_str(), ci.delta );
+                // Track fixed-width column offsets from left and right side so we can give a dynamically computed width to the name column
+                float xl = 10.0f;
+                float xr = m_width-10.0f;
 
-                D2D1_RECT_F r = { 0, y-lineHeight/2, (float)m_width, y+lineHeight/2 };
+                wchar_t s[512];
+                D2D1_RECT_F r = {};
+                D2D1_ROUNDED_RECT rr = {};
+                
+                // Position
                 m_brush->SetColor( col );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get() );
+                swprintf( s, sizeof(s), L"P%d", ir_CarIdxPosition.getInt(ci.carIdx) );
+                r = { xl, y-lineHeight/2, xl+m_posWidth, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                xl += m_posWidth * 1.5f;
 
-                col.a *= 0.1f;
+                // Car number
+                swprintf( s, sizeof(s), L"#%S", car.carNumberStr.c_str() );
+                r = { xl, y-lineHeight/2, xl+m_numWidth, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
                 m_brush->SetColor( col );
-                m_renderTarget->DrawRectangle( &r, m_brush.Get() );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                xl += m_numWidth * 1.5f;
+
+                // Delta
+                swprintf( s, sizeof(s), L"%.1f", ci.delta );
+                r = { xr-m_deltaWidth, y-lineHeight/2, xr, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
+                m_brush->SetColor( col );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                xr -= m_deltaWidth * 1.2f;
+
+                // Irating
+                swprintf( s, sizeof(s), L"%.1fk", (float)car.irating/1000.0f );
+                r = { xr-m_iratingWidth, y-lineHeight/2, xr, y+lineHeight/2 };
+                rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                rr.radiusX = 3;
+                rr.radiusY = 3;
+                m_brush->SetColor( iratingBgCol );
+                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_brush->SetColor( iratingTextCol );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                xr -= m_iratingWidth * 1.2f;
+
+                // License/SR
+                swprintf( s, sizeof(s), L"%C %.1f", car.licenseChar, car.licenseSR );
+                r = { xr-m_safetyWidth, y-lineHeight/2, xr, y+lineHeight/2 };
+                rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                rr.radiusX = 3;
+                rr.radiusY = 3;
+                float4 c = car.licenseCol;
+                c.a = licenseBgAlpha;
+                m_brush->SetColor( c );
+                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_brush->SetColor( licenseTextCol );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                xr -= m_safetyWidth * 1.2f;
+
+                // Name
+                swprintf( s, sizeof(s), L"%S", car.userName.c_str() );
+                r = { xl, y-lineHeight/2, xr, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_brush->SetColor( col );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                xr -= m_safetyWidth * 1.2f;
             }
 
             m_renderTarget->EndDraw();
@@ -163,5 +245,13 @@ class OverlayRelative : public Overlay
 
     protected:
 
-        Microsoft::WRL::ComPtr<IDWriteTextFormat> m_textFormat;
+        Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormat;
+        Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatSmall;
+
+        float       m_posWidth = 0;
+        float       m_numWidth = 0;
+        float       m_deltaWidth = 0;
+        float       m_iratingWidth = 0;
+        float       m_safetyWidth = 0;
+        
 };

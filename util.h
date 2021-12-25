@@ -30,6 +30,7 @@ SOFTWARE.
 #include <string>
 #include <windows.h>
 #include <d2d1_3.h>
+#include <dwrite.h>
 
 #define HRCHECK( x_ ) do{ \
     HRESULT hr_ = x_; \
@@ -45,7 +46,7 @@ struct float2
     float2() = default;
     float2( float _x, float _y ) : x(_x), y(_y) {}
     float2( const D2D1_POINT_2F& p ) : x(p.x), y(p.y) {}
-    operator D2D1_POINT_2F() { return {x,y}; }
+    operator D2D1_POINT_2F() const { return {x,y}; }
     float* operator&() { return &x; }
     const float* operator&() const { return &x; }
 };
@@ -59,7 +60,7 @@ struct float4
     float4() = default;
     float4( float _x, float _y, float _z, float _w ) : x(_x), y(_y), z(_z), w(_w) {}
     float4( const D2D1_COLOR_F& c ) : r(c.r), g(c.g), b(c.b), a(c.a) {}
-    operator D2D1_COLOR_F() { return {r,g,b,a}; }
+    operator D2D1_COLOR_F() const { return {r,g,b,a}; }
     float* operator&() { return &x; }
     const float* operator&() const { return &x; }
 };
@@ -99,4 +100,17 @@ inline bool saveFile( const std::string& fname, const std::string& s )
 inline std::wstring toWide( const std::string& narrow )
 {
     return std::wstring(narrow.begin(),narrow.end());
+}
+
+inline float2 computeTextExtent( const wchar_t* str, IDWriteFactory* factory, IDWriteTextFormat* textFormat )
+{
+    IDWriteTextLayout* textLayout = 0;
+
+    factory->CreateTextLayout( str, (int)wcslen(str), textFormat, 99999, 99999, &textLayout );
+    DWRITE_TEXT_METRICS m = {};
+    textLayout->GetMetrics( &m );
+
+    textLayout->Release();
+
+    return float2( m.width, m.height );
 }

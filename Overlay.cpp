@@ -85,7 +85,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
                 const int h = r.bottom - r.top;
                 o->setWindowPosAndSize( x, y, w, h, false );
                 o->saveWindowPosAndSize();
-                o->update(); // draw window content while moving/resizing
+                o->update(true); // draw window content while moving/resizing
             }
             break;
         }
@@ -254,10 +254,15 @@ void Overlay::configChanged()
     onConfigChanged();
 }
 
-void Overlay::update()
+void Overlay::update( bool ignoreUpdateDelay )
 {
     if( !m_enabled )
         return;
+
+    const DWORD ticks = GetTickCount();
+    if( ticks - m_lastUpdateTicks < (DWORD)g_cfg.getInt(m_name,"update_delay_msec") && !ignoreUpdateDelay )
+        return;
+    m_lastUpdateTicks = ticks;
 
     const float w = (float)m_width;
     const float h = (float)m_height;
