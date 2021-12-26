@@ -32,6 +32,14 @@ SOFTWARE.
 
 #define IR_MAX_CARS 64
 
+enum class ConnectionStatus
+{
+    UNKNOWN,
+    DISCONNECTED,
+    CONNECTED,
+    DRIVING
+};
+
 struct Car
 {
     std::string     userName;
@@ -349,9 +357,9 @@ extern irsdkCVar ir_LFSHshockVel_ST;    // float[6] LFSH shock velocity at 360 H
 
 extern Session ir_session;
 
-// Return whether we're (still) connected, and keep the session updated.
+// Keep the session data updated.
 // Will block for around 16 milliseconds.
-bool ir_tick();
+ConnectionStatus ir_tick();
 
 // Print all the variables the sim supports.
 void ir_printVariables();

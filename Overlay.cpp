@@ -240,10 +240,14 @@ void Overlay::enable( bool on )
 void Overlay::enableUiEdit( bool on )
 {
     m_uiEditEnabled = on;
+    update( true );
 }
 
 void Overlay::configChanged()
 {
+    if( !m_enabled )
+        return;
+
     // Position/dimensions might have changed
     const int x = g_cfg.getInt(m_name,"window_pos_x");
     const int y = g_cfg.getInt(m_name,"window_pos_y");

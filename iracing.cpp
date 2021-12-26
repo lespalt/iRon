@@ -372,14 +372,14 @@ static bool parseYamlStr(const char *yamlStr, const char *path, std::string& des
     return false;
 }
 
-bool ir_tick()
+ConnectionStatus ir_tick()
 {
     irsdkClient& irsdk = irsdkClient::instance();
 
     irsdk.waitForData(16);
 
     if( !irsdk.isConnected() )
-        return false;
+        return ConnectionStatus::DISCONNECTED;
 
     if( irsdk.wasSessionStrUpdated() )
     {
@@ -388,7 +388,7 @@ bool ir_tick()
         std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
 
 #ifdef _DEBUG
-        printf("%s\n", sessionYaml);
+        //printf("%s\n", sessionYaml);
         FILE* fp = fopen("sessionYaml.txt","ab");
         fprintf(fp,"\n\n==== NEW SESSION STRING ======================================\n");
         fprintf(fp,"%s",sessionYaml);
@@ -451,7 +451,7 @@ bool ir_tick()
         }
     }
 
-    return true;
+    return ir_IsOnTrack.getBool() ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;
 }
 
 void ir_printVariables()

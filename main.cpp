@@ -68,16 +68,30 @@ int main()
     overlays.push_back( new OverlayInputs() );
     handleConfigChange( overlays );
 
-    bool connected = false;
-    bool uiEdit = false;
+    ConnectionStatus  status = ConnectionStatus::UNKNOWN;
+    bool              uiEdit = false;
 
     while( true )
     {
-        bool prevConnected = connected;
-        connected = ir_tick();
-        if( connected != prevConnected )
+        ConnectionStatus prevStatus = status;
+        status = ir_tick();
+        if( status != prevStatus )
         {
-            printf( connected ? "iRacing: connected\n" : "iRacing: disconnected\n" );
+            if( status == ConnectionStatus::DISCONNECTED )
+                printf("Waiting for iRacing connection...\n");
+            else if( status == ConnectionStatus::CONNECTED )
+                printf("Connected to iRacing\n");
+
+            // Disable all overlays if we're not in the car, otherwise enable the ones selected in config
+            if( status != ConnectionStatus::DRIVING )
+            {
+                for( Overlay* o : overlays )
+                    o->enable( false );
+            }
+            else
+            {
+                handleConfigChange( overlays );
+            }
         }
 
         // Update roughly every 16ms
@@ -105,12 +119,6 @@ int main()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
-#ifdef _DEBUG
-       // if( GetAsyncKeyState(VK_ESCAPE) )
-         //   break;
-#endif
-
     }
 
     for( Overlay* o : overlays )
