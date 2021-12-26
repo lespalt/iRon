@@ -237,7 +237,7 @@ class OverlayRelative : public Overlay
                 m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                 m_brush->SetColor( licenseTextCol );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
-                xr -= m_safetyWidth * 1.2f;
+                xr -= m_safetyWidth * 1.3f;
 
                 // Delta
                 swprintf( s, sizeof(s), L"%.1f", ci.delta );

@@ -383,6 +383,9 @@ ConnectionStatus ir_tick()
 
     if( irsdk.wasSessionStrUpdated() )
     {
+        for( int i=0; i<IR_MAX_CARS; ++i )
+            ir_session.cars[i] = Car();
+
         const char* sessionYaml = irsdk.getSessionStr();
 #ifdef _DEBUG
         //printf("%s\n", sessionYaml);

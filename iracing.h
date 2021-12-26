@@ -53,10 +53,10 @@ struct Car
     int             carNumber = -1;
     std::string     carNumberStr;
     std::string     licenseStr;
-    char            licenseChar;
+    char            licenseChar = 'R';
     float           licenseSR = -1;
     std::string     licenseColStr;
-    float4          licenseCol;
+    float4          licenseCol = float4(0,0,0,1);
     int             irating = -1;
     int             isPaceCar = 0;
     int             isSpectator = 0;
