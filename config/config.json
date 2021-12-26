@@ -13,8 +13,8 @@
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
     "update_delay_msec": 0,
-    "window_pos_x": 3669,
-    "window_pos_y": 1211,
+    "window_pos_x": 6305,
+    "window_pos_y": 1234,
     "window_size_x": 314,
     "window_size_y": 84
   },
@@ -28,13 +28,17 @@
     "font_weight": 500,
     "irating_background_col": [1,1,1,0.85],
     "irating_text_col": [0,0,0,0.9],
+    "lap_ahead_col": [0.9,0.17,0.17,1],
+    "lap_behind_col": [0,0.71,0.95,1],
     "license_background_alpha": 0.8,
     "license_text_col": [1,1,1,0.9],
     "line_spacing": 6,
+    "same_lap_col": [1,1,1,1],
+    "self_col": [0.94,0.67,0.13,1],
     "update_delay_msec": 250,
-    "window_pos_x": 4641,
-    "window_pos_y": 1222,
-    "window_size_x": 469,
-    "window_size_y": 213
+    "window_pos_x": 1964,
+    "window_pos_y": 718,
+    "window_size_x": 457,
+    "window_size_y": 709
   }
 }
