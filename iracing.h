@@ -45,6 +45,7 @@ struct Car
     int             irating = -1;
     int             isPaceCar = 0;
     int             isSpectator = 0;
+    int             isBuddy = 0;
     int             incidentCount = -1;
     float           carClassEstLapTime = -1;
 };

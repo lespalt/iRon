@@ -126,6 +126,16 @@ std::string Config::getString( const std::string& component, const std::string& 
     return pjcomp[key].get<std::string>();
 }
 
+std::vector<std::string> Config::getStringVec( const std::string& component, const std::string& key )
+{
+    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
+    picojson::array& arr = pjcomp[key].get<picojson::array>();
+    std::vector<std::string> ret;
+    for( picojson::value& val : arr )
+        ret.push_back( val.get<std::string>() );
+    return ret;
+}
+
 void Config::setInt( const std::string& component, const std::string& key, int v )
 {
     picojson::object& pjcomp = m_pj[component].get<picojson::object>();

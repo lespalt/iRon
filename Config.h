@@ -27,6 +27,7 @@ SOFTWARE.
 #include <windows.h>
 #include <atomic>
 #include <thread>
+#include <vector>
 #include "picojson.h"
 #include "util.h"
 
@@ -40,13 +41,14 @@ class Config
         void    watchForChanges();
         bool    hasChanged();
 
-        bool        getBool( const std::string& component, const std::string& key );
-        int         getInt( const std::string& component, const std::string& key );
-        float       getFloat( const std::string& component, const std::string& key );
-        float4      getFloat4( const std::string& component, const std::string& key );
-        std::string getString( const std::string& component, const std::string& key );
+        bool                     getBool( const std::string& component, const std::string& key );
+        int                      getInt( const std::string& component, const std::string& key );
+        float                    getFloat( const std::string& component, const std::string& key );
+        float4                   getFloat4( const std::string& component, const std::string& key );
+        std::string              getString( const std::string& component, const std::string& key );
+        std::vector<std::string> getStringVec( const std::string& component, const std::string& key );
 
-        void        setInt( const std::string& component, const std::string& key, int v );
+        void                     setInt( const std::string& component, const std::string& key, int v );
 
     private:
 

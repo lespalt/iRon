@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include "iracing.h"
+#include "Config.h"
 
 irsdkCVar ir_SessionTime("SessionTime");    // double[1] Seconds since session start (s)
 irsdkCVar ir_SessionTick("SessionTick");    // int[1] Current update number ()
@@ -384,6 +385,8 @@ bool ir_tick()
     {
         const char* sessionYaml = irsdk.getSessionStr();
 
+        std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
+
 #ifdef _DEBUG
         printf("%s\n", sessionYaml);
         FILE* fp = fopen("sessionYaml.txt","ab");
@@ -440,33 +443,13 @@ bool ir_tick()
             car.licenseCol.g = float((licColHex >>  8) & 0xff) / 255.f;
             car.licenseCol.b = float((licColHex >>  0) & 0xff) / 255.f;
             car.licenseCol.a = 1;
+
+            for( const std::string& name : buddies ) {
+                if( name == car.userName )
+                    car.isBuddy = 1;
+            }
         }
     }
-
-#if 0
-    printf("SESSION flags 0x%x, rem.laps %d, session num %d, state %d, time %f, time remain %f, session ID %d\n",
-        ir_SessionFlags.getInt(), ir_SessionLapsRemain.getInt(), ir_SessionNum.getInt(), ir_SessionState.getInt(), ir_SessionTime.getDouble(), ir_SessionTimeRemain.getDouble(), ir_SessionUniqueID.getInt() );
-    printf("on track: %d,  on track car: %d\n", (int)ir_IsOnTrack.getBool(), (int)ir_IsOnTrackCar.getBool() );
-
-    for( int i=0; i<64; ++i )
-    {
-        /*
-        if( ir_CarIdxEstTime.isValid() && ir_CarIdxLap.getInt(i)>=0 ) {
-            printf("pos: %d, lap: %d, inpit: %d, rel: %.2f   %s  [%d %s] %d", ir_CarIdxPosition.getInt(i), ir_CarIdxLap.getInt(i), (int)ir_CarIdxOnPitRoad.getBool(i),
-                ir_CarIdxEstTime.getFloat(i)-ir_CarIdxEstTime.getFloat(ir_session.driverCarIdx), 
-                ir_session.cars[i].userName.c_str(), ir_session.cars[i].license, ir_session.cars[i].licenseStr.c_str(), ir_session.cars[i].irating );
-            if( ir_session.driverCarIdx == i )
-                printf( "  <=====\n");
-            else printf("\n");
-        }
-        */
-
-        printf("[%d]  pos %d, lap %d, inpit %d, estTime %f, aroundlap %f%%\n",
-            i, ir_CarIdxPosition.getInt(i), ir_CarIdxLap.getInt(i), (int)ir_CarIdxOnPitRoad.getBool(i),ir_CarIdxEstTime.getFloat(i), ir_CarIdxLapDistPct.getFloat(i) );
-
-    }
-    printf("\n\n");
-#endif
 
     return true;
 }

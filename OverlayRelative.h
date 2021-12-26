@@ -149,6 +149,7 @@ class OverlayRelative : public Overlay
             const float4 licenseTextCol     = g_cfg.getFloat4( m_name, "license_text_col" );
             const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha" );
             const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col" );
+            const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
             const float  listingAreaTop     = 10.0f;
             const float  listingAreaBot     = m_height - 10.0f;
             const float  yself              = listingAreaTop + (listingAreaBot-listingAreaTop) / 2.0f;
@@ -206,7 +207,7 @@ class OverlayRelative : public Overlay
                 swprintf( s, sizeof(s), L"#%S", car.carNumberStr.c_str() );
                 r = { xl, y-lineHeight/2, xl+m_numWidth, y+lineHeight/2 };
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-                m_brush->SetColor( col );
+                m_brush->SetColor( car.isBuddy ? buddyCol : col );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
                 xl += m_numWidth * 1.5f;
 

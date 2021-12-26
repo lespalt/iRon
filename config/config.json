@@ -1,5 +1,6 @@
 {
   "General": {
+    "buddies": ["Dave Kaemmer","Ian Sudol","Matt Holden"],
     "ui_edit_hotkey_is_alt_and_this_letter": "j"
   },
   "OverlayInputs": {
@@ -21,6 +22,7 @@
   "OverlayRelative": {
     "alternate_line_background_col": [0.5,0.5,0.5,0],
     "background_col": [0,0,0,0.7],
+    "buddy_col": [0.2,0.8,0,1],
     "corner_radius": 6,
     "enabled": true,
     "font": "Calibri Bold",
@@ -36,9 +38,9 @@
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
     "update_delay_msec": 250,
-    "window_pos_x": 1964,
-    "window_pos_y": 718,
-    "window_size_x": 457,
-    "window_size_y": 709
+    "window_pos_x": 4661,
+    "window_pos_y": 1211,
+    "window_size_x": 450,
+    "window_size_y": 219
   }
 }
