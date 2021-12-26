@@ -40,8 +40,15 @@ enum class ConnectionStatus
     DRIVING
 };
 
-struct Car
+enum class SessionType
 {
+    UNKNOWN,
+    PRACTICE,
+    RACE
+};
+
+struct Car
+{    
     std::string     userName;
     int             carNumber = -1;
     std::string     carNumberStr;
@@ -60,8 +67,9 @@ struct Car
 
 struct Session
 {
-    Car cars[IR_MAX_CARS];
-    int driverCarIdx = -1;
+    SessionType     sessionType = SessionType::UNKNOWN;
+    Car             cars[IR_MAX_CARS];
+    int             driverCarIdx = -1;
 };
 
 extern irsdkCVar ir_SessionTime;    // double[1] Seconds since session start (s)

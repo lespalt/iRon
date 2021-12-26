@@ -112,7 +112,7 @@ class OverlayRelative : public Overlay
                     CarInfo ci;
                     ci.carIdx = i;
                     ci.delta = delta;
-                    ci.lapDelta = lapDelta;
+                    ci.lapDelta = ir_session.sessionType==SessionType::PRACTICE ? 0 : lapDelta;
                     relatives.push_back( ci );
                 }
             }

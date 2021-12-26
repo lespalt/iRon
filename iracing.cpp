@@ -384,9 +384,6 @@ ConnectionStatus ir_tick()
     if( irsdk.wasSessionStrUpdated() )
     {
         const char* sessionYaml = irsdk.getSessionStr();
-
-        std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
-
 #ifdef _DEBUG
         //printf("%s\n", sessionYaml);
         FILE* fp = fopen("sessionYaml.txt","ab");
@@ -395,7 +392,18 @@ ConnectionStatus ir_tick()
         fclose(fp);
 #endif
 
+        std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
+
         char path[256];
+
+        std::string sessionTypeStr;
+        sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionType:", ir_SessionNum.getInt() );
+        parseYamlStr( sessionYaml, path, sessionTypeStr );
+        if( sessionTypeStr == "Practice" )
+            ir_session.sessionType = SessionType::PRACTICE;
+        else if( sessionTypeStr == "Race" )
+            ir_session.sessionType = SessionType::RACE;
+
 
         parseYamlInt( sessionYaml, "DriverInfo:DriverCarIdx:", &ir_session.driverCarIdx );
 
@@ -405,6 +413,10 @@ ConnectionStatus ir_tick()
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}UserName:", i );
             parseYamlStr( sessionYaml, path, car.userName );
+            for( const std::string& name : buddies ) {
+                if( name == car.userName )
+                    car.isBuddy = 1;
+            }
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", i );
             parseYamlStr( sessionYaml, path, car.carNumberStr );
@@ -414,9 +426,18 @@ ConnectionStatus ir_tick()
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicString:", i );
             parseYamlStr( sessionYaml, path, car.licenseStr );
+            car.licenseChar = car.licenseStr.empty() ? 'R' : car.licenseStr[0];
+            const std::string SRstr = car.licenseStr.empty() ? "0" : std::string( car.licenseStr.begin()+1, car.licenseStr.end() );
+            car.licenseSR = (float)atof( SRstr.c_str() );
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicColor:", i );
             parseYamlStr( sessionYaml, path, car.licenseColStr );
+            unsigned licColHex = 0;
+            sscanf( car.licenseColStr.c_str(), "0x%x", &licColHex );
+            car.licenseCol.r = float((licColHex >> 16) & 0xff) / 255.f;
+            car.licenseCol.g = float((licColHex >>  8) & 0xff) / 255.f;
+            car.licenseCol.b = float((licColHex >>  0) & 0xff) / 255.f;
+            car.licenseCol.a = 1;
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}IRating:", i );
             parseYamlInt( sessionYaml, path, &car.irating );
@@ -432,22 +453,6 @@ ConnectionStatus ir_tick()
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarClassEstLapTime:", i );
             parseYamlFloat( sessionYaml, path, &car.carClassEstLapTime );
-
-            car.licenseChar = car.licenseStr.empty() ? 'R' : car.licenseStr[0];
-            const std::string SRstr = car.licenseStr.empty() ? "0" : std::string( car.licenseStr.begin()+1, car.licenseStr.end() );
-            car.licenseSR = (float)atof( SRstr.c_str() );
-
-            unsigned licColHex = 0;
-            sscanf( car.licenseColStr.c_str(), "0x%x", &licColHex );
-            car.licenseCol.r = float((licColHex >> 16) & 0xff) / 255.f;
-            car.licenseCol.g = float((licColHex >>  8) & 0xff) / 255.f;
-            car.licenseCol.b = float((licColHex >>  0) & 0xff) / 255.f;
-            car.licenseCol.a = 1;
-
-            for( const std::string& name : buddies ) {
-                if( name == car.userName )
-                    car.isBuddy = 1;
-            }
         }
     }
 
