@@ -79,7 +79,7 @@ int main()
         {
             if( status == ConnectionStatus::DISCONNECTED )
                 printf("Waiting for iRacing connection...\n");
-            else if( status == ConnectionStatus::CONNECTED )
+            else
                 printf("Connected to iRacing\n");
 
             // Disable all overlays if we're not in the car, otherwise enable the ones selected in config

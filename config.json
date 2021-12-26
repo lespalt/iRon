@@ -8,7 +8,7 @@
     "brake_col": [0.93,0.03,0.13,0.8],
     "brake_fill_col": [0.46,0.01,0.06,0.6],
     "corner_radius": 2,
-    "enabled": false,
+    "enabled": true,
     "line_thickness": 2,
     "steering_col": [1,1,1,0.3],
     "throttle_col": [0.38,0.91,0.31,0.8],
@@ -38,9 +38,9 @@
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
     "update_delay_msec": 250,
-    "window_pos_x": 4658,
-    "window_pos_y": 1142,
-    "window_size_x": 450,
-    "window_size_y": 219
+    "window_pos_x": 5500,
+    "window_pos_y": 488,
+    "window_size_x": 701,
+    "window_size_y": 579
   }
 }

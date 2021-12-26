@@ -22,9 +22,6 @@
     <Filter Include="irsdk">
       <UniqueIdentifier>{a67f493c-b77c-46e5-be0b-98bb42ae3d17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="config">
-      <UniqueIdentifier>{ae484a03-949d-4920-a25a-ebebfd86d64a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="lodepng">
       <UniqueIdentifier>{c7064565-9ebe-4e9f-ade3-27845f74f593}</UniqueIdentifier>
     </Filter>
@@ -54,8 +51,6 @@
     <None Include="LICENSE" />
     <None Include="README.md" />
     <None Include=".gitignore" />
-    <None Include="config\config.json">
-      <Filter>config</Filter>
-    </None>
+    <None Include="config.json" />
   </ItemGroup>
 </Project>

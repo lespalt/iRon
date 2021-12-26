@@ -55,7 +55,7 @@ class Config
         picojson::object    m_pj;
         std::atomic<bool>   m_hasChanged = false;
         std::thread         m_configWatchThread;
-        std::string         m_filename = "config/config.json";
+        std::string         m_filename = "config.json";
 };
 
 extern Config        g_cfg;

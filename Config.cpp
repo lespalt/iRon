@@ -30,7 +30,7 @@ Config              g_cfg;
 
 static void configWatcher( std::atomic<bool>* m_hasChanged )
 {
-    HANDLE dir = CreateFile( "config", FILE_LIST_DIRECTORY, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL );
+    HANDLE dir = CreateFile( ".", FILE_LIST_DIRECTORY, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL );
     if( dir == INVALID_HANDLE_VALUE )
     {
         printf( "Could not start config watch thread.\n" );
