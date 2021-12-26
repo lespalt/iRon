@@ -40,11 +40,11 @@ SOFTWARE.
 #include "OverlayInputs.h"
 
 
-static void handleConfigChange( std::vector<Overlay*> overlays )
+static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus status )
 {
     for( Overlay* o : overlays )
     {
-        o->enable( g_cfg.getBool(o->getName(),"enabled") );
+        o->enable( g_cfg.getBool(o->getName(),"enabled") && status == ConnectionStatus::DRIVING );
         o->configChanged();
     }
 }
@@ -62,11 +62,10 @@ int main()
     const int hotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter" )[0];
     RegisterHotKey( NULL, 0, MOD_ALT, toupper(hotkey) );
 
-    // Create and initialize overlays by triggering all config handling logic
+    // Create overlays
     std::vector<Overlay*> overlays;
     overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
-    handleConfigChange( overlays );
 
     ConnectionStatus  status = ConnectionStatus::UNKNOWN;
     bool              uiEdit = false;
@@ -82,16 +81,8 @@ int main()
             else
                 printf("Connected to iRacing\n");
 
-            // Disable all overlays if we're not in the car, otherwise enable the ones selected in config
-            if( status != ConnectionStatus::DRIVING )
-            {
-                for( Overlay* o : overlays )
-                    o->enable( false );
-            }
-            else
-            {
-                handleConfigChange( overlays );
-            }
+            // Enable user-selected overlays, but only if we're driving
+            handleConfigChange( overlays, status );
         }
 
         // Update roughly every 16ms
@@ -102,7 +93,7 @@ int main()
         if( g_cfg.hasChanged() )
         {
             g_cfg.load();
-            handleConfigChange( overlays );
+            handleConfigChange( overlays, status );
         }
 
         // Message pump
