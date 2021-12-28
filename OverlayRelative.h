@@ -197,7 +197,8 @@ class OverlayRelative : public Overlay
                 
                 // Position
                 m_brush->SetColor( col );
-                swprintf( s, sizeof(s), L"P%d", ir_CarIdxPosition.getInt(ci.carIdx) );
+                const int pos = ir_CarIdxPosition.getInt(ci.carIdx) > 0 ? ir_CarIdxPosition.getInt(ci.carIdx) : car.qualifyingResultPosition;
+                swprintf( s, sizeof(s), L"P%d", pos );
                 r = { xl, y-lineHeight/2, xl+m_posWidth, y+lineHeight/2 };
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );

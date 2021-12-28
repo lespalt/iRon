@@ -456,6 +456,9 @@ ConnectionStatus ir_tick()
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarClassEstLapTime:", i );
             parseYamlFloat( sessionYaml, path, &car.carClassEstLapTime );
+
+            sprintf( path, "QualifyResultsInfo:Results:CarIdx:{%d}Position:", i );
+            parseYamlInt( sessionYaml, path, &car.qualifyingResultPosition );
         }
     }
 

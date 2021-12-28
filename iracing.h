@@ -50,19 +50,20 @@ enum class SessionType
 struct Car
 {    
     std::string     userName;
-    int             carNumber = -1;
+    int             carNumber = 0;
     std::string     carNumberStr;
     std::string     licenseStr;
     char            licenseChar = 'R';
-    float           licenseSR = -1;
+    float           licenseSR = 0;
     std::string     licenseColStr;
     float4          licenseCol = float4(0,0,0,1);
-    int             irating = -1;
+    int             irating = 0;
     int             isPaceCar = 0;
     int             isSpectator = 0;
     int             isBuddy = 0;
-    int             incidentCount = -1;
-    float           carClassEstLapTime = -1;
+    int             incidentCount = 0;
+    float           carClassEstLapTime = 0;
+    int             qualifyingResultPosition = 0;
 };
 
 struct Session
