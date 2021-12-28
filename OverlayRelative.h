@@ -27,6 +27,8 @@ SOFTWARE.
 #include <vector>
 #include <algorithm>
 #include "Overlay.h"
+#include "iracing.h"
+#include "Config.h"
 
 class OverlayRelative : public Overlay
 {
@@ -152,7 +154,10 @@ class OverlayRelative : public Overlay
             const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
             const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
             const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col" );
-            const float  listingAreaTop     = 10.0f;
+            const bool   minimapEnabled        = g_cfg.getBool( m_name, "minimap_enabled" );
+            const bool   minimapIsRelative  = g_cfg.getBool( m_name, "minimap_is_relative" );
+            const float4 minimapBgCol       = g_cfg.getFloat4( m_name, "minimap_background_col" );
+            const float  listingAreaTop     = minimapEnabled ? 30 : 10.0f;
             const float  listingAreaBot     = m_height - 10.0f;
             const float  yself              = listingAreaTop + (listingAreaBot-listingAreaTop) / 2.0f;
             const int    entriesAbove       = int( (yself - lineHeight/2 - listingAreaTop) / lineHeight );
@@ -261,6 +266,75 @@ class OverlayRelative : public Overlay
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
                 m_brush->SetColor( col );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            }
+
+            if( minimapEnabled )
+            {
+                const float y = 10;
+                const float x = 10;
+                const float h = 15;
+                const float w = (float)m_width - 2*x;
+                D2D1_RECT_F r = { x, y, x+w, y+h };
+                m_brush->SetColor( minimapBgCol );
+                m_renderTarget->FillRectangle( &r, m_brush.Get() );
+
+                const float dx = 2;
+
+                // phases: lap down, same lap, lap ahead, buddies, self
+                for( int phase=0; phase<5; ++phase )
+                {
+                    float4 baseCol = float4(0,0,0,0);
+                    switch(phase)
+                    {
+                        case 0: baseCol = lapBehindCol; break;
+                        case 1: baseCol = sameLapCol; break;
+                        case 2: baseCol = lapAheadCol; break;
+                        case 3: baseCol = buddyCol; break;
+                        case 4: baseCol = selfCol; break;
+                        default: break;
+                    }
+
+                    for( int i=0; i<(int)relatives.size(); ++i )
+                    {
+                        const CarInfo& ci     = relatives[i];
+                        const Car&     car    = ir_session.cars[ci.carIdx];
+                        const bool     isSelf = i == selfCarInfoIdx;
+
+                        if( phase == 0 && ci.lapDelta >= 0 )
+                            continue;
+                        if( phase == 1 && ci.lapDelta != 0 )
+                            continue;
+                        if( phase == 2 && ci.lapDelta <= 0 )
+                            continue;
+                        if( phase == 3 && !car.isBuddy )
+                            continue;
+                        if( phase == 4 && !isSelf )
+                            continue;
+                        
+                        float e = ir_CarIdxLapDistPct.getFloat(ci.carIdx);
+
+                        const float eself = ir_CarIdxLapDistPct.getFloat(ir_session.driverCarIdx);
+
+                        if( minimapIsRelative )
+                        {
+                            e = e - eself + 0.5f;
+                            while( e > 1 )
+                                e -= 1;
+                            while( e < 0 )
+                                e += 1;
+                        }
+                        e = e * w + x;
+
+                        float4 col = baseCol;
+                        if( !isSelf && ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
+                            col.a *= 0.5f;
+
+                        const float dy = isSelf ? 4.0f : 0.0f;
+                        r = {e-dx, y+2-dy, e+dx, y+h-2+dy};
+                        m_brush->SetColor( col );
+                        m_renderTarget->FillRectangle( &r, m_brush.Get() );
+                    }
+                }
             }
 
             m_renderTarget->EndDraw();

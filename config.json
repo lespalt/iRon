@@ -14,8 +14,8 @@
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
     "update_delay_msec": 0,
-    "window_pos_x": 6305,
-    "window_pos_y": 1234,
+    "window_pos_x": 6301,
+    "window_pos_y": 1242,
     "window_size_x": 314,
     "window_size_y": 84
   },
@@ -23,6 +23,8 @@
     "alternate_line_background_col": [0.5,0.5,0.5,0],
     "background_col": [0,0,0,0.7],
     "buddy_col": [0.2,0.8,0,1],
+    "car_number_background_col": [1,1,1,0.9],
+    "car_number_text_col": [0,0,0,0.9],
     "corner_radius": 6,
     "enabled": true,
     "font": "Calibri Bold",
@@ -35,14 +37,15 @@
     "license_background_alpha": 0.8,
     "license_text_col": [1,1,1,0.9],
     "line_spacing": 6,
+    "minimap_background_col": [1,1,1,0.13],
+    "minimap_enabled": true,
+    "minimap_is_relative": true,
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
-    "update_delay_msec": 250,
-    "window_pos_x": 4596,
-    "window_pos_y": 1122,
-    "window_size_x": 511,
-    "window_size_y": 263,
-    "car_number_background_col": [1,1,1,0.9],
-    "car_number_text_col": [0,0,0,0.9]
+    "update_delay_msec": 0,
+    "window_pos_x": 4533,
+    "window_pos_y": 1170,
+    "window_size_x": 560,
+    "window_size_y": 242
   }
 }
