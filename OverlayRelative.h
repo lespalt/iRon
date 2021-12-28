@@ -61,7 +61,7 @@ class OverlayRelative : public Overlay
 
             // Determine minimum widths of fixed-width columns
             m_posWidth     = computeTextExtent( L"P99", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
-            m_numWidth     = computeTextExtent( L"#99", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
+            m_numWidth     = computeTextExtent( L"#999", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
             m_deltaWidth   = computeTextExtent( L"999.9", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
             m_iratingWidth = computeTextExtent( L"999.9k", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x;
             m_safetyWidth  = computeTextExtent( L"A 4.44", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x;
@@ -150,6 +150,8 @@ class OverlayRelative : public Overlay
             const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha" );
             const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col" );
             const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
+            const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
+            const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col" );
             const float  listingAreaTop     = 10.0f;
             const float  listingAreaBot     = m_height - 10.0f;
             const float  yself              = listingAreaTop + (listingAreaBot-listingAreaTop) / 2.0f;
@@ -207,8 +209,13 @@ class OverlayRelative : public Overlay
                 // Car number
                 swprintf( s, sizeof(s), L"#%S", car.carNumberStr.c_str() );
                 r = { xl, y-lineHeight/2, xl+m_numWidth, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-                m_brush->SetColor( car.isBuddy ? buddyCol : col );
+                rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
+                rr.radiusX = 3;
+                rr.radiusY = 3;
+                m_brush->SetColor( i==selfCarInfoIdx ? selfCol : (car.isBuddy ? buddyCol : carNumberBgCol) );
+                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_brush->SetColor( carNumberTextCol );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
                 xl += m_numWidth * 1.5f;
 
