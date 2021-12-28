@@ -14,8 +14,8 @@
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
     "update_delay_msec": 0,
-    "window_pos_x": 6301,
-    "window_pos_y": 1242,
+    "window_pos_x": 2925,
+    "window_pos_y": 452,
     "window_size_x": 314,
     "window_size_y": 84
   },
@@ -43,8 +43,8 @@
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
     "update_delay_msec": 0,
-    "window_pos_x": 4533,
-    "window_pos_y": 1170,
+    "window_pos_x": 2925,
+    "window_pos_y": 541,
     "window_size_x": 560,
     "window_size_y": 242
   }

@@ -154,7 +154,7 @@ class OverlayRelative : public Overlay
             const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
             const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
             const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col" );
-            const bool   minimapEnabled        = g_cfg.getBool( m_name, "minimap_enabled" );
+            const bool   minimapEnabled     = g_cfg.getBool( m_name, "minimap_enabled" );
             const bool   minimapIsRelative  = g_cfg.getBool( m_name, "minimap_is_relative" );
             const float4 minimapBgCol       = g_cfg.getFloat4( m_name, "minimap_background_col" );
             const float  listingAreaTop     = minimapEnabled ? 30 : 10.0f;
@@ -276,9 +276,7 @@ class OverlayRelative : public Overlay
                 const float w = (float)m_width - 2*x;
                 D2D1_RECT_F r = { x, y, x+w, y+h };
                 m_brush->SetColor( minimapBgCol );
-                m_renderTarget->FillRectangle( &r, m_brush.Get() );
-
-                const float dx = 2;
+                m_renderTarget->FillRectangle( &r, m_brush.Get() );                
 
                 // phases: lap down, same lap, lap ahead, buddies, self
                 for( int phase=0; phase<5; ++phase )
@@ -329,6 +327,7 @@ class OverlayRelative : public Overlay
                         if( !isSelf && ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
                             col.a *= 0.5f;
 
+                        const float dx = 2;
                         const float dy = isSelf ? 4.0f : 0.0f;
                         r = {e-dx, y+2-dy, e+dx, y+h-2+dy};
                         m_brush->SetColor( col );
@@ -350,5 +349,4 @@ class OverlayRelative : public Overlay
         float       m_deltaWidth = 0;
         float       m_iratingWidth = 0;
         float       m_safetyWidth = 0;
-        
 };
