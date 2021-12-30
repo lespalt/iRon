@@ -410,30 +410,30 @@ ConnectionStatus ir_tick()
 
         parseYamlInt( sessionYaml, "DriverInfo:DriverCarIdx:", &ir_session.driverCarIdx );
 
-        for( int i=0; i<IR_MAX_CARS; ++i )
+        for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
         {
-            Car& car = ir_session.cars[i];
+            Car& car = ir_session.cars[carIdx];
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}UserName:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}UserName:", carIdx );
             parseYamlStr( sessionYaml, path, car.userName );
             for( const std::string& name : buddies ) {
                 if( name == car.userName )
                     car.isBuddy = 1;
             }
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", carIdx );
             parseYamlStr( sessionYaml, path, car.carNumberStr );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumberRaw:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumberRaw:", carIdx );
             parseYamlInt( sessionYaml, path, &car.carNumber );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicString:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicString:", carIdx );
             parseYamlStr( sessionYaml, path, car.licenseStr );
             car.licenseChar = car.licenseStr.empty() ? 'R' : car.licenseStr[0];
             const std::string SRstr = car.licenseStr.empty() ? "0" : std::string( car.licenseStr.begin()+1, car.licenseStr.end() );
             car.licenseSR = (float)atof( SRstr.c_str() );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicColor:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}LicColor:", carIdx );
             parseYamlStr( sessionYaml, path, car.licenseColStr );
             unsigned licColHex = 0;
             sscanf( car.licenseColStr.c_str(), "0x%x", &licColHex );
@@ -442,23 +442,31 @@ ConnectionStatus ir_tick()
             car.licenseCol.b = float((licColHex >>  0) & 0xff) / 255.f;
             car.licenseCol.a = 1;
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}IRating:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}IRating:", carIdx );
             parseYamlInt( sessionYaml, path, &car.irating );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsPaceCar:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsPaceCar:", carIdx );
             parseYamlInt( sessionYaml, path, &car.isPaceCar );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsSpectator:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsSpectator:", carIdx );
             parseYamlInt( sessionYaml, path, &car.isSpectator );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CurDriverIncidentCount:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CurDriverIncidentCount:", carIdx );
             parseYamlInt( sessionYaml, path, &car.incidentCount );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarClassEstLapTime:", i );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarClassEstLapTime:", carIdx );
             parseYamlFloat( sessionYaml, path, &car.carClassEstLapTime );
+        }
 
-            sprintf( path, "QualifyResultsInfo:Results:CarIdx:{%d}Position:", i );
-            parseYamlInt( sessionYaml, path, &car.qualifyingResultPosition );
+        for( int pos=0; pos<IR_MAX_CARS; ++pos )
+        {
+            sprintf( path, "QualifyResultsInfo:Results:Position:{%d}CarIdx:", pos );
+
+            int carIdx = -1;
+            parseYamlInt( sessionYaml, path, &carIdx );
+
+            if( carIdx >= 0 )
+                ir_session.cars[carIdx].qualifyingResultPosition = pos + 1;
         }
     }
 
