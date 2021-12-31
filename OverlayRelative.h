@@ -64,7 +64,7 @@ class OverlayRelative : public Overlay
             // Determine minimum widths of fixed-width columns
             m_posWidth     = computeTextExtent( L"P99", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
             m_numWidth     = computeTextExtent( L"#999", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
-            m_deltaWidth   = computeTextExtent( L"999.9", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
+            m_deltaWidth   = computeTextExtent( L"999.9 (+99)", m_dwriteFactory.Get(), m_textFormat.Get() ).x;
             m_iratingWidth = computeTextExtent( L"999.9k", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x;
             m_safetyWidth  = computeTextExtent( L"A 4.44", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x;
         }
@@ -111,10 +111,22 @@ class OverlayRelative : public Overlay
                         delta = C - S;
                     }
 
+                    // Assume no lap delta in practice, because we don't want to show drivers as lapped/lapping there.
+                    // Also reset it during initial pacing, since iRacing for some reason starts counting
+                    // during the pace lap but then resets the counter a couple seconds in, confusing the logic.
+                    // To find out whether we're pacing, apparently it isn't enough to check ir_PaceMode, because
+                    // iRacing doesn't set it to irsdk_PaceModeNotPacing as one would expect. So in addition we check
+                    // the session state, since initial pacing apparently counts as "parade laps".
+                    if( ir_session.sessionType==SessionType::PRACTICE ||
+                        ((ir_PaceMode.getInt()==irsdk_PaceModeSingleFileStart || ir_PaceMode.getInt()==irsdk_PaceModeDoubleFileStart) && ir_SessionState.getInt()==irsdk_StateParadeLaps) )
+                    {
+                        lapDelta = 0;
+                    }
+
                     CarInfo ci;
                     ci.carIdx = i;
                     ci.delta = delta;
-                    ci.lapDelta = ir_session.sessionType==SessionType::PRACTICE ? 0 : lapDelta;
+                    ci.lapDelta = lapDelta;
                     relatives.push_back( ci );
                 }
             }
@@ -253,7 +265,10 @@ class OverlayRelative : public Overlay
                 xr -= m_safetyWidth * 1.3f;
 
                 // Delta
-                swprintf( s, sizeof(s), L"%.1f", ci.delta );
+                if( ci.lapDelta )
+                    swprintf( s, sizeof(s), L"%.1f (%+d)", ci.delta, ci.lapDelta );
+                else
+                    swprintf( s, sizeof(s), L"%.1f", ci.delta );
                 r = { xr-m_deltaWidth, y-lineHeight/2, xr, y+lineHeight/2 };
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
                 m_brush->SetColor( col );
