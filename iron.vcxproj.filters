@@ -37,6 +37,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="picojson.h" />
     <ClInclude Include="util.h" />
+    <ClInclude Include="OverlayStandings.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

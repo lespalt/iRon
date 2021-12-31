@@ -162,6 +162,7 @@
     <ClInclude Include="irsdk\yaml_parser.h" />
     <ClInclude Include="Overlay.h" />
     <ClInclude Include="OverlayRelative.h" />
+    <ClInclude Include="OverlayStandings.h" />
     <ClInclude Include="picojson.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>

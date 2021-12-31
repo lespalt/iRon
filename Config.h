@@ -49,6 +49,7 @@ class Config
         std::vector<std::string> getStringVec( const std::string& component, const std::string& key );
 
         void                     setInt( const std::string& component, const std::string& key, int v );
+        void                     setBool( const std::string& component, const std::string& key, bool v );
 
     private:
 

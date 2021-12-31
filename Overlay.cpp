@@ -36,7 +36,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 {
     Overlay* o = (Overlay*)GetWindowLongPtr( hwnd, GWLP_USERDATA );
 
-    if( !o || !o->getUiEditEnabled() )
+    if( !o || !o->isUiEditEnabled() )
         return DefWindowProc( hwnd, msg, wparam, lparam );
 
     switch( msg )
@@ -110,11 +110,6 @@ Overlay::~Overlay()
 std::string Overlay::getName() const
 {
     return m_name;
-}
-
-bool Overlay::getUiEditEnabled() const
-{
-    return m_uiEditEnabled;
 }
 
 void Overlay::enable( bool on )
@@ -237,10 +232,20 @@ void Overlay::enable( bool on )
     }
 }
 
+bool Overlay::isEnabled() const
+{
+    return m_enabled;
+}
+
 void Overlay::enableUiEdit( bool on )
 {
     m_uiEditEnabled = on;
     update( true );
+}
+
+bool Overlay::isUiEditEnabled() const
+{
+    return m_uiEditEnabled;
 }
 
 void Overlay::configChanged()
@@ -262,11 +267,6 @@ void Overlay::update( bool ignoreUpdateDelay )
 {
     if( !m_enabled )
         return;
-
-    const DWORD ticks = GetTickCount();
-    if( ticks - m_lastUpdateTicks < (DWORD)g_cfg.getInt(m_name,"update_delay_msec") && !ignoreUpdateDelay )
-        return;
-    m_lastUpdateTicks = ticks;
 
     const float w = (float)m_width;
     const float h = (float)m_height;
@@ -339,6 +339,11 @@ void Overlay::saveWindowPosAndSize()
     g_cfg.setInt( m_name, "window_size_y", m_height  );
 
     g_cfg.save();
+}
+
+bool Overlay::shouldEnableOnlyWhileDriving() const
+{
+    return true;
 }
 
 void Overlay::onEnable() {}

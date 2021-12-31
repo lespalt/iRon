@@ -142,3 +142,9 @@ void Config::setInt( const std::string& component, const std::string& key, int v
     double d = double(v);
     pjcomp[key].set<double>( d );
 }
+
+void Config::setBool( const std::string& component, const std::string& key, bool v )
+{
+    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
+    pjcomp[key].set<bool>( v );
+}

@@ -13,11 +13,10 @@
     "steering_col": [1,1,1,0.3],
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
-    "update_delay_msec": 0,
-    "window_pos_x": 2925,
-    "window_pos_y": 452,
-    "window_size_x": 314,
-    "window_size_y": 84
+    "window_pos_x": 1618,
+    "window_pos_y": 45,
+    "window_size_x": 245,
+    "window_size_y": 112
   },
   "OverlayRelative": {
     "alternate_line_background_col": [0.5,0.5,0.5,0],
@@ -42,10 +41,22 @@
     "minimap_is_relative": true,
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
-    "update_delay_msec": 0,
-    "window_pos_x": 2925,
-    "window_pos_y": 541,
-    "window_size_x": 560,
-    "window_size_y": 242
+    "window_pos_x": 4587,
+    "window_pos_y": 1114,
+    "window_size_x": 530,
+    "window_size_y": 327
+  },
+  "OverlayStandings": {
+    "background_col": [0,0,0,0.7],
+    "corner_radius": 6,
+    "enabled": true,
+    "font": "Calibri Bold",
+    "font_size": 16,
+    "font_weight": 500,
+    "line_spacing": 8,
+    "window_pos_x": 1885,
+    "window_pos_y": 37,
+    "window_size_x": 653,
+    "window_size_y": 1366
   }
 }

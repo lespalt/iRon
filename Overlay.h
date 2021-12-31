@@ -41,10 +41,14 @@ class Overlay
         virtual         ~Overlay();
 
         std::string     getName() const;
-        bool            getUiEditEnabled() const;
+        virtual bool    shouldEnableOnlyWhileDriving() const;
 
         void            enable( bool on );
+        bool            isEnabled() const;
+
         void            enableUiEdit( bool on );
+        bool            isUiEditEnabled() const;
+
         void            configChanged();
 
         void            update( bool ignoreUpdateDelay=false );
@@ -67,7 +71,6 @@ class Overlay
         int             m_ypos = 0;
         int             m_width = 0;
         int             m_height = 0;
-        DWORD           m_lastUpdateTicks = 0;
 
         Microsoft::WRL::ComPtr<ID3D11Device>            m_d3dDevice;
         Microsoft::WRL::ComPtr<IDXGISwapChain1>         m_swapChain;

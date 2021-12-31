@@ -38,13 +38,17 @@ SOFTWARE.
 #include "Config.h"
 #include "OverlayRelative.h"
 #include "OverlayInputs.h"
+#include "OverlayStandings.h"
 
 
 static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus status )
 {
     for( Overlay* o : overlays )
     {
-        o->enable( g_cfg.getBool(o->getName(),"enabled") && status == ConnectionStatus::DRIVING );
+        o->enable( g_cfg.getBool(o->getName(),"enabled") && (
+            status == ConnectionStatus::DRIVING ||
+            status == ConnectionStatus::CONNECTED && !o->shouldEnableOnlyWhileDriving()
+            ));
         o->configChanged();
     }
 }
@@ -61,11 +65,16 @@ int main()
     // Register hotkey to enable/disable position/size changes.
     const int hotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter" )[0];
     RegisterHotKey( NULL, 0, MOD_ALT, toupper(hotkey) );
+    
+    // Register hotkey to enable/disable standings overlay.
+    // TODO: make this more flexible/configurable. Perhaps use DInput so we can map it to non-keyboard keys?
+    RegisterHotKey( NULL, 1, MOD_CONTROL, 'S' );
 
     // Create overlays
     std::vector<Overlay*> overlays;
     overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
+    overlays.push_back( new OverlayStandings() );
 
     ConnectionStatus  status = ConnectionStatus::UNKNOWN;
     bool              uiEdit = false;
@@ -102,9 +111,18 @@ int main()
         {
             if( msg.message == WM_HOTKEY )
             {
-                uiEdit = !uiEdit;
-                for( Overlay* o : overlays )
-                    o->enableUiEdit( uiEdit );
+                if( msg.wParam == 0 )
+                {
+                    uiEdit = !uiEdit;
+                    for( Overlay* o : overlays )
+                        o->enableUiEdit( uiEdit );
+                }
+                else if( msg.wParam == 1 )
+                {
+                    g_cfg.setBool( "OverlayStandings", "enabled", !g_cfg.getBool("OverlayStandings","enabled") );
+                    g_cfg.save();
+                    handleConfigChange( overlays, status );
+                }
             }
 
             TranslateMessage(&msg);
