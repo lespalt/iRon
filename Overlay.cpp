@@ -341,9 +341,14 @@ void Overlay::saveWindowPosAndSize()
     g_cfg.save();
 }
 
-bool Overlay::shouldEnableOnlyWhileDriving() const
+bool Overlay::canEnableWhileNotDriving() const
 {
-    return true;
+    return false;
+}
+
+bool Overlay::canEnableWhileDisconnected() const
+{
+    return false;
 }
 
 void Overlay::onEnable() {}

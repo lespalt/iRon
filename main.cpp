@@ -39,6 +39,7 @@ SOFTWARE.
 #include "OverlayRelative.h"
 #include "OverlayInputs.h"
 #include "OverlayStandings.h"
+#include "OverlayDebug.h"
 
 
 static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus status )
@@ -47,7 +48,8 @@ static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus
     {
         o->enable( g_cfg.getBool(o->getName(),"enabled") && (
             status == ConnectionStatus::DRIVING ||
-            status == ConnectionStatus::CONNECTED && !o->shouldEnableOnlyWhileDriving()
+            status == ConnectionStatus::CONNECTED && o->canEnableWhileNotDriving() ||
+            status == ConnectionStatus::DISCONNECTED && o->canEnableWhileDisconnected()
             ));
         o->configChanged();
     }
@@ -68,13 +70,16 @@ int main()
     
     // Register hotkey to enable/disable standings overlay.
     // TODO: make this more flexible/configurable. Perhaps use DInput so we can map it to non-keyboard keys?
-    RegisterHotKey( NULL, 1, MOD_CONTROL, 'S' );
+    RegisterHotKey( NULL, 1, MOD_CONTROL, ' ' );
 
     // Create overlays
     std::vector<Overlay*> overlays;
     overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
     overlays.push_back( new OverlayStandings() );
+#ifdef _DEBUG
+    overlays.push_back( new OverlayDebug() );
+#endif
 
     ConnectionStatus  status = ConnectionStatus::UNKNOWN;
     bool              uiEdit = false;
@@ -93,6 +98,8 @@ int main()
             // Enable user-selected overlays, but only if we're driving
             handleConfigChange( overlays, status );
         }
+
+        dbg( "connection status: %d, session type: %d, session state: %d, pace mode: %d, on track: %d", (int)ir_session.sessionType, (int)status, ir_SessionState.getInt(), ir_PaceMode.getInt(), (int)ir_IsOnTrackCar.getBool() );
 
         // Update roughly every 16ms
         for( Overlay* o : overlays )
@@ -126,7 +133,7 @@ int main()
             }
 
             TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            DispatchMessage(&msg);            
         }
     }
 

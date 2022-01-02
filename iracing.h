@@ -370,5 +370,11 @@ extern Session ir_session;
 // Will block for around 16 milliseconds.
 ConnectionStatus ir_tick();
 
+// Return whether we're doing pace laps before race start.
+bool ir_isPacing();
+
+// Estimate time for a full lap.
+float ir_estimateLaptime();
+
 // Print all the variables the sim supports.
 void ir_printVariables();

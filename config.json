@@ -3,6 +3,15 @@
     "buddies": ["Dave Kaemmer","Ian Sudol","Matt Holden"],
     "ui_edit_hotkey_is_alt_and_this_letter": "j"
   },
+  "OverlayDebug": {
+    "background_col": [0,0,0,0.8],
+    "corner_radius": 6,
+    "enabled": true,
+    "window_pos_x": 5197,
+    "window_pos_y": 16,
+    "window_size_x": 892,
+    "window_size_y": 1346
+  },
   "OverlayInputs": {
     "background_col": [0,0,0,0.5],
     "brake_col": [0.93,0.03,0.13,0.8],

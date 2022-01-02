@@ -24,8 +24,10 @@ SOFTWARE.
 
 #pragma once
 
+#include <assert.h>
 #include "Overlay.h"
 #include "Config.h"
+#include "OverlayDebug.h"
 
 class OverlayStandings : public Overlay
 {
@@ -53,18 +55,16 @@ public:
     virtual void onUpdate()
     {
         struct CarInfo {
-            int carIdx = 0;
-            int pos = 0;
-            int lapDelta = 0;
+            int     carIdx = 0;
+            int     lapCount = 0;
+            float   estTimeAroundLap = 0;
+            int     lapDelta = 0;
+            float   delta = 0;
         };
         std::vector<CarInfo> carInfo;
         carInfo.reserve( IR_MAX_CARS );
 
-        const float  fontSize           = g_cfg.getFloat( m_name, "font_size" );
-        const float  lineSpacing        = g_cfg.getFloat( m_name, "line_spacing" );
-        const float  lineHeight         = fontSize + lineSpacing;
-
-        // Compute positions
+        // Init array
         for( int i=0; i<IR_MAX_CARS; ++i )
         {
             const Car& car = ir_session.cars[i];
@@ -72,50 +72,49 @@ public:
             if( car.isPaceCar || car.isSpectator || car.userName.empty() )
                 continue;
 
-            const int pos = ir_CarIdxPosition.getInt(i) > 0 ? ir_CarIdxPosition.getInt(i) : car.qualifyingResultPosition;
-
             CarInfo ci;
             ci.carIdx = i;
-            ci.pos = pos;
+            ci.lapCount = ir_isPacing() ? 0 : ir_CarIdxLap.getInt(i);   // correct for iRacing starting to count laps during pacing just to reset it again
+            ci.estTimeAroundLap = ir_CarIdxEstTime.getFloat(i);
             carInfo.push_back( ci );
         }
 
+        // Sort by position
         std::sort( carInfo.begin(), carInfo.end(),
-            []( const CarInfo& a, const CarInfo& b ) { return a.pos < b.pos; } );
+            []( const CarInfo& a, const CarInfo& b ) { 
+                if( a.lapCount != b.lapCount )
+                    return a.lapCount > b.lapCount;
+                return a.estTimeAroundLap > b.estTimeAroundLap;
+            } );
 
-        /*
-        // Compute lap delta to leader
+        // Compute delta to leader
         for( int i=0; i<(int)carInfo.size(); ++i )
         {
-            const int carIdxLeader = carInfo[0].carIdx;
-            const int carIdx       = carInfo[i].carIdx;
+            const CarInfo& ciLeader = carInfo[0];
+            CarInfo&       ci       = carInfo[i];
 
-            const int lapcountLeader = ir_CarIdxLap.getInt(carIdxLeader);
-            const int lapcount       = ir_CarIdxLap.getInt(carIdx);
-
-            int lapDelta = lapcount - lapcountLeader;
-
-            // Correct for leader having passed start/finish while current car hasn't yet
-            if( ir_CarIdxLapDistPct.getFloat(carIdxLeader) < ir_CarIdxLapDistPct.getFloat(carIdx) )
-                lapDelta += 1;
-
-            carInfo[i].lapDelta = lapDelta;
+            if( ci.lapCount == ciLeader.lapCount )
+            {
+                assert( ciLeader.estTimeAroundLap >= ci.estTimeAroundLap );
+                ci.lapDelta = 0;
+                ci.delta = ci.estTimeAroundLap - ciLeader.estTimeAroundLap;
+            }
+            else
+            {
+                assert( ciLeader.lapCount > ci.lapCount );
+                if( ciLeader.estTimeAroundLap > ci.estTimeAroundLap ) {
+                    ci.lapDelta = ci.lapCount - ciLeader.lapCount;
+                    ci.delta = ci.estTimeAroundLap - ciLeader.estTimeAroundLap;
+                } else {
+                    ci.lapDelta = ci.lapCount + 1 - ciLeader.lapCount;
+                    ci.delta =  ci.estTimeAroundLap - ciLeader.estTimeAroundLap - ir_estimateLaptime();
+                }
+            }
         }
-        */
 
-        // Compute lap delta to leader
-        for( int i=0; i<(int)carInfo.size(); ++i )
-        {
-            const int carIdxLeader = carInfo[0].carIdx;
-            const int carIdx       = carInfo[i].carIdx;
-
-            const int lapcountLeader = ir_CarIdxLapCompleted.getInt(carIdxLeader);
-            const int lapcount       = ir_CarIdxLapCompleted.getInt(carIdx);
-
-            int lapDelta = lapcount - lapcountLeader;
-
-            carInfo[i].lapDelta = lapDelta;
-        }
+        const float  fontSize           = g_cfg.getFloat( m_name, "font_size" );
+        const float  lineSpacing        = g_cfg.getFloat( m_name, "line_spacing" );
+        const float  lineHeight         = fontSize + lineSpacing;
 
         m_renderTarget->BeginDraw();
 
@@ -124,31 +123,33 @@ public:
             const CarInfo&  ci  = carInfo[i];
             const Car&      car = ir_session.cars[ci.carIdx];
 
-            if( car.isPaceCar || car.isSpectator || car.userName.empty() )
-                continue;
-
-            const int pos = ir_CarIdxPosition.getInt(ci.carIdx) > 0 ? ir_CarIdxPosition.getInt(ci.carIdx) : car.qualifyingResultPosition;
-
             D2D1_RECT_F r = {};
 
             float y = 10 + lineHeight/2 + i*lineHeight;
 
             wchar_t s[512];
             wchar_t diffToLeader[64];
-            swprintf( diffToLeader, sizeof(diffToLeader), ci.lapDelta ? L"%.0fL" : L"%.3fs", ci.lapDelta ? (float)ci.lapDelta : ir_CarIdxF2Time.getFloat(ci.carIdx) );
-            swprintf( s, sizeof(s), L"P%d  #%S  %S  %S  %.1fk %dx %s", pos, car.carNumberStr.c_str(), car.userName.c_str(), car.licenseStr.c_str(), (float)car.irating/1000.0f, car.incidentCount, diffToLeader );
+            swprintf( diffToLeader, sizeof(diffToLeader), ci.lapDelta ? L"%.0fL" : L"%.3fs", ci.lapDelta ? (float)ci.lapDelta : ci.delta );
+            swprintf( s, sizeof(s), L"P%d  #%S  %S  %S  %.1fk %dx %s", i+1, car.carNumberStr.c_str(), car.userName.c_str(), car.licenseStr.c_str(), (float)car.irating/1000.0f, car.incidentCount, diffToLeader );
             r = { 10, y-lineHeight/2, (float)m_width-10, y+lineHeight/2 };
             //m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
             m_brush->SetColor( float4(1,1,1,1) );
+            if( ci.carIdx == ir_session.driverCarIdx )
+                m_brush->SetColor(float4(1,1,0,1));
             m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+
+            float4 dbgcol = float4(1,1,1,0.9f);
+            if( ci.carIdx == ir_session.driverCarIdx )
+                dbgcol = float4(1,1,0,0.9f);
+           // dbg( dbgcol, "%d %s", ir_session.cars[ci.carIdx].lapsComplete, car.userName.c_str() );
         }
 
         m_renderTarget->EndDraw();
     }
 
-    virtual bool shouldEnableOnlyWhileDriving() const
+    virtual bool canEnableWhileNotDriving() const
     {
-        return false;
+        return true;
     }
 
 protected:

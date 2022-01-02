@@ -94,7 +94,7 @@ class OverlayRelative : public Overlay
                     float delta = 0;
                     int   lapDelta = lapcountC - lapcountS;
 
-                    const float L = ir_session.cars[i].carClassEstLapTime;  // TODO: is this good enough to estimate lap time for wrap-around computations?
+                    const float L = ir_estimateLaptime();
                     const float C = ir_CarIdxEstTime.getFloat(i);
                     const float S = ir_CarIdxEstTime.getFloat(ir_session.driverCarIdx);
 
@@ -114,11 +114,7 @@ class OverlayRelative : public Overlay
                     // Assume no lap delta in practice, because we don't want to show drivers as lapped/lapping there.
                     // Also reset it during initial pacing, since iRacing for some reason starts counting
                     // during the pace lap but then resets the counter a couple seconds in, confusing the logic.
-                    // To find out whether we're pacing, apparently it isn't enough to check ir_PaceMode, because
-                    // iRacing doesn't set it to irsdk_PaceModeNotPacing as one would expect. So in addition we check
-                    // the session state, since initial pacing apparently counts as "parade laps".
-                    if( ir_session.sessionType==SessionType::PRACTICE ||
-                        ((ir_PaceMode.getInt()==irsdk_PaceModeSingleFileStart || ir_PaceMode.getInt()==irsdk_PaceModeDoubleFileStart) && ir_SessionState.getInt()==irsdk_StateParadeLaps) )
+                    if( ir_session.sessionType==SessionType::PRACTICE || ir_isPacing() )
                     {
                         lapDelta = 0;
                     }

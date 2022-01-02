@@ -152,9 +152,11 @@
     <ClCompile Include="irsdk\yaml_parser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Overlay.cpp" />
+    <ClCompile Include="OverlayDebug.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
+    <ClInclude Include="OverlayDebug.h" />
     <ClInclude Include="OverlayInputs.h" />
     <ClInclude Include="iracing.h" />
     <ClInclude Include="irsdk\irsdk_client.h" />

@@ -41,7 +41,8 @@ class Overlay
         virtual         ~Overlay();
 
         std::string     getName() const;
-        virtual bool    shouldEnableOnlyWhileDriving() const;
+        virtual bool    canEnableWhileNotDriving() const;
+        virtual bool    canEnableWhileDisconnected() const;
 
         void            enable( bool on );
         bool            isEnabled() const;

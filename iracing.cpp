@@ -473,6 +473,20 @@ ConnectionStatus ir_tick()
     return ir_IsOnTrack.getBool() ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;
 }
 
+bool ir_isPacing()
+{
+    // To find out whether we're pacing, it isn't enough to check ir_PaceMode, because
+    // iRacing doesn't set it to irsdk_PaceModeNotPacing as one would expect. So in addition we check
+    // the session state, since initial pacing apparently counts as "parade laps".
+    return (ir_PaceMode.getInt() == irsdk_PaceModeSingleFileStart || ir_PaceMode.getInt() == irsdk_PaceModeDoubleFileStart) &&
+           (ir_SessionState.getInt() == irsdk_StateParadeLaps || ir_SessionState.getInt() == irsdk_StateWarmup || ir_SessionState.getInt() == irsdk_StateGetInCar);
+}
+
+float ir_estimateLaptime()
+{
+    return ir_session.cars[ir_session.driverCarIdx].carClassEstLapTime;  // TODO: not sure this is a good enough estimate?
+}
+
 void ir_printVariables()
 {
     if( !irsdk_isConnected() )
@@ -487,15 +501,14 @@ void ir_printVariables()
         std::string type;
         switch( var->type )
         {
-            case irsdk_char: type="char"; break;
-            case irsdk_bool: type="bool"; break;
-            case irsdk_int: type="int"; break;
-            case irsdk_bitField: type="bitfield"; break;
-            case irsdk_float: type="float"; break;
-            case irsdk_double: type="double"; break;
+        case irsdk_char: type="char"; break;
+        case irsdk_bool: type="bool"; break;
+        case irsdk_int: type="int"; break;
+        case irsdk_bitField: type="bitfield"; break;
+        case irsdk_float: type="float"; break;
+        case irsdk_double: type="double"; break;
         }
         printf( "irsdkCVar ir_%s(\"%s\");    // %s[%d] %s (%s)\n",
             var->name, var->name, type.c_str(), var->count, var->desc, var->unit );
     }
 }
-
