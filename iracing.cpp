@@ -450,7 +450,7 @@ ConnectionStatus ir_tick()
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsPaceCar:", carIdx );
             parseYamlInt( sessionYaml, path, &car.isPaceCar );
 
-            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarIsSpectator:", carIdx );
+            sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}IsSpectator:", carIdx );
             parseYamlInt( sessionYaml, path, &car.isSpectator );
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CurDriverIncidentCount:", carIdx );
