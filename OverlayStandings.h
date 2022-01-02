@@ -83,6 +83,7 @@ public:
             float   best = 0;
             float   last = 0;
             bool    hasFastestLap = false;
+            int     pitAge = 0;
         };
         std::vector<CarInfo> carInfo;
         carInfo.reserve( IR_MAX_CARS );
@@ -105,6 +106,8 @@ public:
             ci.delta = -ir_CarIdxF2Time.getFloat(i);
             ci.best = ir_CarIdxBestLapTime.getFloat(i);
             ci.last = ir_CarIdxLastLapTime.getFloat(i);
+            ci.pitAge = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
+            dbg("lap: %d, llip: %d, onpitrd: %d", ir_CarIdxLap.getInt(i), car.lastLapInPits, (int)ir_CarIdxOnPitRoad.getBool(i) );
             carInfo.push_back( ci );
 
             if( ci.best >= 0 && ci.best < fastestLapTime ) {
@@ -273,9 +276,9 @@ public:
             // Pit age
             clm = m_columns.get( (int)Columns::PIT );
             m_brush->SetColor( pitCol );
-            if( car.lastLapInPits >= 0 )
+            if( ci.pitAge >= 1 )
             {
-                swprintf( s, _countof(s), L"%d", ir_CarIdxLap.getInt(ci.carIdx) - car.lastLapInPits );
+                swprintf( s, _countof(s), L"%d", ci.pitAge );
                 r = { xoff+clm->textL, y-lineHeight/2+2, xoff+clm->textR, y+lineHeight/2-2 };
                 m_renderTarget->DrawRectangle( &r, m_brush.Get() );
                 m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );

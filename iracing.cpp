@@ -381,8 +381,6 @@ ConnectionStatus ir_tick()
     if( !irsdk.isConnected() )
         return ConnectionStatus::DISCONNECTED;
 
-    bool sessionTypeUpdated = false;
-
     if( irsdk.wasSessionStrUpdated() )
     {
         const char* sessionYaml = irsdk.getSessionStr();
@@ -400,11 +398,8 @@ ConnectionStatus ir_tick()
         std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
 
         // Session type        
-        std::string prevSessionTypeStr = ir_session.sessionTypeStr;
         sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionType:", ir_SessionNum.getInt() );
         parseYamlStr( sessionYaml, path, ir_session.sessionTypeStr );
-        if( ir_session.sessionTypeStr != prevSessionTypeStr )
-            sessionTypeUpdated = true;
         if( ir_session.sessionTypeStr == "Practice" )
             ir_session.sessionType = SessionType::PRACTICE;
         else if( ir_session.sessionTypeStr == "Race" )
@@ -478,13 +473,14 @@ ConnectionStatus ir_tick()
         }
     } // if session string updated
 
-    // Track cars in pits. Reset every time the session type changes.
+    // Track cars in pits. Reset every time we're in the 'warmup' phase (just before starting pace laps).
+    const bool resetPitAge = ir_SessionState.getInt() == irsdk_StateWarmup;
     for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
     {
         Car& car = ir_session.cars[carIdx];
-        if( sessionTypeUpdated )
+        if( resetPitAge )
             car.lastLapInPits = 0;
-        if( ir_CarIdxOnPitRoad.getBool(carIdx) )
+        if( ir_SessionState.getInt() >= 0 /* work around getting garbage sometimes (?) */ && ir_CarIdxOnPitRoad.getBool(carIdx) )
             car.lastLapInPits = ir_CarIdxLap.getInt(carIdx);
     }
 
