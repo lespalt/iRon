@@ -381,11 +381,10 @@ ConnectionStatus ir_tick()
     if( !irsdk.isConnected() )
         return ConnectionStatus::DISCONNECTED;
 
+    bool sessionTypeUpdated = false;
+
     if( irsdk.wasSessionStrUpdated() )
     {
-        for( int i=0; i<IR_MAX_CARS; ++i )
-            ir_session.cars[i] = Car();
-
         const char* sessionYaml = irsdk.getSessionStr();
 #ifdef _DEBUG
         //printf("%s\n", sessionYaml);
@@ -395,18 +394,20 @@ ConnectionStatus ir_tick()
         fclose(fp);
 #endif
 
+        char path[256];
+
         // Buddy list
         std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
 
-        char path[256];
-
-        // Session type
-        std::string sessionTypeStr;
+        // Session type        
+        std::string prevSessionTypeStr = ir_session.sessionTypeStr;
         sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionType:", ir_SessionNum.getInt() );
-        parseYamlStr( sessionYaml, path, sessionTypeStr );
-        if( sessionTypeStr == "Practice" )
+        parseYamlStr( sessionYaml, path, ir_session.sessionTypeStr );
+        if( ir_session.sessionTypeStr != prevSessionTypeStr )
+            sessionTypeUpdated = true;
+        if( ir_session.sessionTypeStr == "Practice" )
             ir_session.sessionType = SessionType::PRACTICE;
-        else if( sessionTypeStr == "Race" )
+        else if( ir_session.sessionTypeStr == "Race" )
             ir_session.sessionType = SessionType::RACE;
 
         // Driver car index
@@ -475,6 +476,16 @@ ConnectionStatus ir_tick()
             if( carIdx >= 0 )
                 ir_session.cars[carIdx].qualifyingResultPosition = pos + 1;
         }
+    } // if session string updated
+
+    // Track cars in pits. Reset every time the session type changes.
+    for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
+    {
+        Car& car = ir_session.cars[carIdx];
+        if( sessionTypeUpdated )
+            car.lastLapInPits = 0;
+        if( ir_CarIdxOnPitRoad.getBool(carIdx) )
+            car.lastLapInPits = ir_CarIdxLap.getInt(carIdx);
     }
 
     return ir_IsOnTrack.getBool() ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;

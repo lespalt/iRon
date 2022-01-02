@@ -65,11 +65,13 @@ struct Car
     int             incidentCount = 0;
     float           carClassEstLapTime = 0;
     int             qualifyingResultPosition = 0;
+    int             lastLapInPits = 0;
 };
 
 struct Session
 {
     SessionType     sessionType = SessionType::UNKNOWN;
+    std::string     sessionTypeStr;
     Car             cars[IR_MAX_CARS];
     int             driverCarIdx = -1;
 };

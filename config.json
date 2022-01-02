@@ -74,10 +74,11 @@
     "license_text_col": [1,1,1,0.9],
     "line_spacing": 8,
     "other_car_col": [1,1,1,0.9],
+    "pit_col": [0.94,0.8,0.13,1],
     "self_col": [0.94,0.67,0.13,1],
-    "window_pos_x": 1476,
-    "window_pos_y": 325,
-    "window_size_x": 788,
-    "window_size_y": 839
+    "window_pos_x": 1600,
+    "window_pos_y": 242,
+    "window_size_x": 760,
+    "window_size_y": 726
   }
 }

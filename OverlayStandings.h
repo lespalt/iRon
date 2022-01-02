@@ -33,7 +33,7 @@ class OverlayStandings : public Overlay
 {
 public:
 
-    enum class Columns { POSITION, CAR_NUMBER, NAME, DELTA, BEST, LAST, LICENSE, IRATING, INCIDENTS };
+    enum class Columns { POSITION, CAR_NUMBER, NAME, DELTA, BEST, LAST, LICENSE, IRATING, INCIDENTS, PIT };
 
     OverlayStandings()
         : Overlay("OverlayStandings")
@@ -62,6 +62,7 @@ public:
         m_columns.add( (int)Columns::POSITION,   computeTextExtent( L"P99", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
         m_columns.add( (int)Columns::CAR_NUMBER, computeTextExtent( L"#999", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
         m_columns.add( (int)Columns::NAME,       0, fontSize/2 );
+        m_columns.add( (int)Columns::PIT,        computeTextExtent( L"P.Age", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
         m_columns.add( (int)Columns::LICENSE,    computeTextExtent( L"A 4.44", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/6 );
         m_columns.add( (int)Columns::IRATING,    computeTextExtent( L"999.9k", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/6 );
         m_columns.add( (int)Columns::INCIDENTS,  computeTextExtent( L"999x", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
@@ -147,6 +148,7 @@ public:
         const float4 iratingBgCol       = g_cfg.getFloat4( m_name, "irating_background_col" );
         const float4 licenseTextCol     = g_cfg.getFloat4( m_name, "license_text_col" );
         const float4 fastestLapCol      = g_cfg.getFloat4( m_name, "fastest_lap_col" );
+        const float4 pitCol             = g_cfg.getFloat4( m_name, "pit_col" );
         const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha" );
 
         const float xoff = 10.0f;
@@ -179,6 +181,12 @@ public:
         r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"Driver" );
         m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
+        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+
+        clm = m_columns.get( (int)Columns::PIT );
+        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+        swprintf( s, _countof(s), L"P.Age" );
+        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
         m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
 
         clm = m_columns.get( (int)Columns::LICENSE );
@@ -261,6 +269,18 @@ public:
             m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
             m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy?buddyCol:otherCarCol) );
             m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+
+            // Pit age
+            clm = m_columns.get( (int)Columns::PIT );
+            m_brush->SetColor( pitCol );
+            if( car.lastLapInPits >= 0 )
+            {
+                swprintf( s, _countof(s), L"%d", ir_CarIdxLap.getInt(ci.carIdx) - car.lastLapInPits );
+                r = { xoff+clm->textL, y-lineHeight/2+2, xoff+clm->textR, y+lineHeight/2-2 };
+                m_renderTarget->DrawRectangle( &r, m_brush.Get() );
+                m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            }
 
             // License/SR
             clm = m_columns.get( (int)Columns::LICENSE );
