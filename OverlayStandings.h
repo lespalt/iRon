@@ -107,12 +107,11 @@ public:
             ci.best = ir_CarIdxBestLapTime.getFloat(i);
             ci.last = ir_CarIdxLastLapTime.getFloat(i);
             ci.pitAge = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
-            dbg("lap: %d, llip: %d, onpitrd: %d", ir_CarIdxLap.getInt(i), car.lastLapInPits, (int)ir_CarIdxOnPitRoad.getBool(i) );
             carInfo.push_back( ci );
 
             if( ci.best >= 0 && ci.best < fastestLapTime ) {
                 fastestLapTime = ci.best;
-                fastestLapIdx = i;
+                fastestLapIdx = (int)carInfo.size()-1;
             }
         }
 
@@ -314,23 +313,26 @@ public:
             m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
 
             // Incidents
-            clm = m_columns.get( (int)Columns::INCIDENTS );
-            m_brush->SetColor( car.incidentCount ? otherCarCol : float4(otherCarCol.r,otherCarCol.g,otherCarCol.b,otherCarCol.a*0.5f) );
-            swprintf( s, _countof(s), L"%dx", car.incidentCount );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            if( car.incidentCount >= 0 )  // sadly we don't see incidents of others while racing
+            {
+                clm = m_columns.get( (int)Columns::INCIDENTS );
+                m_brush->SetColor( car.incidentCount ? otherCarCol : float4(otherCarCol.r,otherCarCol.g,otherCarCol.b,otherCarCol.a*0.5f) );
+                swprintf( s, _countof(s), L"%dx", car.incidentCount );
+                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            }
 
             // Best
             clm = m_columns.get( (int)Columns::BEST );
             if( ci.best <= 0 )
                 s[0] = L'\0';
             else {
-                const int mins = int(ci.last/60.0f);
+                const int mins = int(ci.best/60.0f);
                 if( mins )
-                    swprintf( s, _countof(s), L"%02d:%.03f", mins, fmodf(ci.last,60.0f) );
+                    swprintf( s, _countof(s), L"%d:%05.3f", mins, fmodf(ci.best,60.0f) );
                 else
-                    swprintf( s, _countof(s), L"%.03f", ci.last );
+                    swprintf( s, _countof(s), L"%.03f", ci.best );
             }
             r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
             m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
@@ -344,7 +346,7 @@ public:
             else {
                 const int mins = int(ci.last/60.0f);
                 if( mins )
-                    swprintf( s, _countof(s), L"%02d:%.03f", mins, fmodf(ci.last,60.0f) );
+                    swprintf( s, _countof(s), L"%d:%05.3f", mins, fmodf(ci.last,60.0f) );
                 else
                     swprintf( s, _countof(s), L"%.03f", ci.last );
             }
@@ -358,7 +360,7 @@ public:
             if( ci.position == 1 )
                 s[0] = L'\0';
             else
-                swprintf( s, _countof(s), ci.lapDelta ? L"%.0f L" : L"%.3f", ci.lapDelta ? (float)ci.lapDelta : ci.delta );
+                swprintf( s, _countof(s), ci.lapDelta ? L"%.0f L" : L"%.03f", ci.lapDelta ? (float)ci.lapDelta : ci.delta );
             r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
             m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
             m_brush->SetColor( otherCarCol );
