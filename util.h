@@ -28,6 +28,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <vector>
 #include <windows.h>
 #include <d2d1_3.h>
 #include <dwrite.h>
@@ -114,3 +115,80 @@ inline float2 computeTextExtent( const wchar_t* str, IDWriteFactory* factory, ID
 
     return float2( m.width, m.height );
 }
+
+class ColumnLayout
+{
+    public:
+
+        struct Column
+        {
+            int             id = 0;
+            float           textWidth = 0;
+            float           border = 0;
+            float           textL = 0;
+            float           textR = 0;
+            bool            autoWidth = false;
+        };
+
+        void reset()
+        {
+            m_columns.clear();
+        }
+
+        // Pass in zero width for auto-scale
+        void add( int id, float textWidth, float border )
+        {
+            Column clm;
+            clm.id = id;
+            clm.textWidth = textWidth;
+            clm.border = border;
+            clm.autoWidth = textWidth == 0;
+            m_columns.emplace_back( clm );
+        }
+
+        void layout( float totalWidth )
+        {
+            int autoWidthCnt = 0;
+            float fixedWidth = 0;
+            for( const Column& clm : m_columns )
+            {
+                if( clm.autoWidth )
+                {
+                    autoWidthCnt++;
+                    fixedWidth += clm.border * 2;
+                }
+                else
+                {
+                    fixedWidth += clm.textWidth + clm.border * 2;
+                }
+            }
+
+            const float autoTextWidth = std::max( 0.0f, (totalWidth - fixedWidth) / autoWidthCnt );
+
+            float x = 0;
+            for( Column& clm : m_columns )
+            {
+                if( clm.autoWidth )
+                    clm.textWidth = autoTextWidth;
+
+                clm.textL = x + clm.border;
+                clm.textR = clm.textL + clm.textWidth;
+
+                x = clm.textR + clm.border;
+            }
+        }
+
+        const Column* get( int id ) const
+        {
+            for( int i=0; i<(int)m_columns.size(); ++i )
+            {
+                if( m_columns[i].id == id )
+                    return &m_columns[i];
+            }
+            return nullptr;
+        }
+
+    private:
+
+        std::vector<Column>     m_columns;
+};
