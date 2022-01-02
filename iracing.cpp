@@ -395,10 +395,12 @@ ConnectionStatus ir_tick()
         fclose(fp);
 #endif
 
+        // Buddy list
         std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
 
         char path[256];
 
+        // Session type
         std::string sessionTypeStr;
         sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionType:", ir_SessionNum.getInt() );
         parseYamlStr( sessionYaml, path, sessionTypeStr );
@@ -407,15 +409,19 @@ ConnectionStatus ir_tick()
         else if( sessionTypeStr == "Race" )
             ir_session.sessionType = SessionType::RACE;
 
-
+        // Driver car index
         parseYamlInt( sessionYaml, "DriverInfo:DriverCarIdx:", &ir_session.driverCarIdx );
 
+        // Driver info
         for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
         {
             Car& car = ir_session.cars[carIdx];
 
+            car.isSelf = int( carIdx==ir_session.driverCarIdx );
+
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}UserName:", carIdx );
             parseYamlStr( sessionYaml, path, car.userName );
+            car.isBuddy = 0;
             for( const std::string& name : buddies ) {
                 if( name == car.userName )
                     car.isBuddy = 1;
@@ -458,6 +464,7 @@ ConnectionStatus ir_tick()
             parseYamlFloat( sessionYaml, path, &car.carClassEstLapTime );
         }
 
+        // Qualifying results
         for( int pos=0; pos<IR_MAX_CARS; ++pos )
         {
             sprintf( path, "QualifyResultsInfo:Results:Position:{%d}CarIdx:", pos );

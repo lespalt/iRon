@@ -204,7 +204,7 @@ class OverlayRelative : public Overlay
                 if( ci.lapDelta < 0 )
                     col = lapBehindCol;
 
-                if( i==selfCarInfoIdx )
+                if( car.isSelf )
                     col = selfCol;
                 else if( ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
                     col.a *= 0.5f;
@@ -230,7 +230,7 @@ class OverlayRelative : public Overlay
                 rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
                 rr.radiusX = 3;
                 rr.radiusY = 3;
-                m_brush->SetColor( i==selfCarInfoIdx ? selfCol : (car.isBuddy ? buddyCol : carNumberBgCol) );
+                m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : carNumberBgCol) );
                 m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                 m_brush->SetColor( carNumberTextCol );
@@ -312,7 +312,6 @@ class OverlayRelative : public Overlay
                     {
                         const CarInfo& ci     = relatives[i];
                         const Car&     car    = ir_session.cars[ci.carIdx];
-                        const bool     isSelf = i == selfCarInfoIdx;
 
                         if( phase == 0 && ci.lapDelta >= 0 )
                             continue;
@@ -322,7 +321,7 @@ class OverlayRelative : public Overlay
                             continue;
                         if( phase == 3 && !car.isBuddy )
                             continue;
-                        if( phase == 4 && !isSelf )
+                        if( phase == 4 && !car.isSelf )
                             continue;
                         
                         float e = ir_CarIdxLapDistPct.getFloat(ci.carIdx);
@@ -340,18 +339,17 @@ class OverlayRelative : public Overlay
                         e = e * w + x;
 
                         float4 col = baseCol;
-                        if( !isSelf && ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
+                        if( !car.isSelf && ir_CarIdxOnPitRoad.getBool(ci.carIdx) )
                             col.a *= 0.5f;
 
                         const float dx = 2;
-                        const float dy = isSelf ? 4.0f : 0.0f;
+                        const float dy = car.isSelf ? 4.0f : 0.0f;
                         r = {e-dx, y+2-dy, e+dx, y+h-2+dy};
                         m_brush->SetColor( col );
                         m_renderTarget->FillRectangle( &r, m_brush.Get() );
                     }
                 }
             }
-
             m_renderTarget->EndDraw();
         }
 

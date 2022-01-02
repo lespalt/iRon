@@ -58,6 +58,7 @@ struct Car
     std::string     licenseColStr;
     float4          licenseCol = float4(0,0,0,1);
     int             irating = 0;
+    int             isSelf = 0;
     int             isPaceCar = 0;
     int             isSpectator = 0;
     int             isBuddy = 0;

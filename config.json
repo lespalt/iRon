@@ -50,22 +50,34 @@
     "minimap_is_relative": true,
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
-    "window_pos_x": 4587,
-    "window_pos_y": 1114,
-    "window_size_x": 530,
-    "window_size_y": 327
+    "window_pos_x": 4540,
+    "window_pos_y": 927,
+    "window_size_x": 565,
+    "window_size_y": 463
   },
   "OverlayStandings": {
+    "alternate_line_background_col": [0.5,0.5,0.5,0.05],
     "background_col": [0,0,0,0.7],
+    "buddy_col": [0.2,0.8,0,1],
+    "car_number_background_col": [1,1,1,0.9],
+    "car_number_text_col": [0,0,0,0.9],
     "corner_radius": 6,
     "enabled": true,
+    "fastest_lap_col": [1,0,1,1],
     "font": "Calibri Bold",
-    "font_size": 16,
+    "font_size": 15,
     "font_weight": 500,
+    "header_col": [0.7,0.7,0.7,0.9],
+    "irating_background_col": [1,1,1,0.85],
+    "irating_text_col": [0,0,0,0.9],
+    "license_background_alpha": 0.8,
+    "license_text_col": [1,1,1,0.9],
     "line_spacing": 8,
-    "window_pos_x": 1885,
-    "window_pos_y": 37,
-    "window_size_x": 653,
-    "window_size_y": 1366
+    "other_car_col": [1,1,1,0.9],
+    "self_col": [0.94,0.67,0.13,1],
+    "window_pos_x": 1476,
+    "window_pos_y": 325,
+    "window_size_x": 788,
+    "window_size_y": 839
   }
 }
