@@ -118,7 +118,7 @@ class OverlayRelative : public Overlay
                     // Assume no lap delta in practice, because we don't want to show drivers as lapped/lapping there.
                     // Also reset it during initial pacing, since iRacing for some reason starts counting
                     // during the pace lap but then resets the counter a couple seconds in, confusing the logic.
-                    if( ir_session.sessionType==SessionType::PRACTICE || ir_isPacing() )
+                    if( ir_session.sessionType==SessionType::PRACTICE || ir_isPreStart() )
                     {
                         lapDelta = 0;
                     }
@@ -164,6 +164,7 @@ class OverlayRelative : public Overlay
             const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha" );
             const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col" );
             const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
+            const float4 flaggedCol         = g_cfg.getFloat4( m_name, "flagged_col" );
             const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
             const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col" );
             const bool   minimapEnabled     = g_cfg.getBool( m_name, "minimap_enabled" );
@@ -215,13 +216,15 @@ class OverlayRelative : public Overlay
                 const ColumnLayout::Column* clm = nullptr;
                 
                 // Position
-                clm = m_columns.get( (int)Columns::POSITION );
-                m_brush->SetColor( col );
-                const int pos = ir_CarIdxPosition.getInt(ci.carIdx) > 0 ? ir_CarIdxPosition.getInt(ci.carIdx) : car.qualifyingResultPosition;
-                swprintf( s, _countof(s), L"P%d", pos );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                if( ir_getPosition(ci.carIdx) > 0 )
+                {
+                    clm = m_columns.get( (int)Columns::POSITION );
+                    m_brush->SetColor( col );
+                    swprintf( s, _countof(s), L"P%d", ir_getPosition(ci.carIdx) );
+                    r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                    m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                }
 
                 // Car number
                 clm = m_columns.get( (int)Columns::CAR_NUMBER );
@@ -230,7 +233,7 @@ class OverlayRelative : public Overlay
                 rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
                 rr.radiusX = 3;
                 rr.radiusY = 3;
-                m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : carNumberBgCol) );
+                m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:carNumberBgCol)) );
                 m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
                 m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                 m_brush->SetColor( carNumberTextCol );

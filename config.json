@@ -1,16 +1,17 @@
 {
   "General": {
     "buddies": ["Dave Kaemmer","Ian Sudol"],
+    "flagged": ["John West","Doug Hunt"],
     "ui_edit_hotkey_is_alt_and_this_letter": "j"
   },
   "OverlayDebug": {
     "background_col": [0,0,0,0.8],
     "corner_radius": 6,
     "enabled": true,
-    "window_pos_x": 5347,
-    "window_pos_y": 70,
-    "window_size_x": 750,
-    "window_size_y": 734
+    "window_pos_x": 1420,
+    "window_pos_y": 733,
+    "window_size_x": 659,
+    "window_size_y": 646
   },
   "OverlayInputs": {
     "background_col": [0,0,0,0.5],
@@ -22,19 +23,20 @@
     "steering_col": [1,1,1,0.3],
     "throttle_col": [0.38,0.91,0.31,0.8],
     "throttle_fill_col": [0.2,0.45,0.15,0.6],
-    "window_pos_x": 18,
-    "window_pos_y": 17,
-    "window_size_x": 429,
-    "window_size_y": 60
+    "window_pos_x": 2626,
+    "window_pos_y": 29,
+    "window_size_x": 365,
+    "window_size_y": 84
   },
   "OverlayRelative": {
     "alternate_line_background_col": [0.5,0.5,0.5,0],
     "background_col": [0,0,0,0.7],
-    "buddy_col": [0.2,0.8,0,1],
+    "buddy_col": [0.2,0.75,0,1],
     "car_number_background_col": [1,1,1,0.9],
     "car_number_text_col": [0,0,0,0.9],
     "corner_radius": 6,
     "enabled": true,
+    "flagged_col": [0.6,0.35,0.2,1],
     "font": "Calibri Bold",
     "font_size": 16,
     "font_weight": 500,
@@ -50,20 +52,21 @@
     "minimap_is_relative": true,
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
-    "window_pos_x": 4604,
-    "window_pos_y": 973,
-    "window_size_x": 509,
-    "window_size_y": 463
+    "window_pos_x": 4610,
+    "window_pos_y": 1081,
+    "window_size_x": 507,
+    "window_size_y": 349
   },
   "OverlayStandings": {
     "alternate_line_background_col": [0.5,0.5,0.5,0.1],
     "background_col": [0,0,0,0.7],
-    "buddy_col": [0.2,0.8,0,1],
+    "buddy_col": [0.2,0.75,0,1],
     "car_number_background_col": [1,1,1,0.9],
     "car_number_text_col": [0,0,0,0.9],
     "corner_radius": 6,
     "enabled": true,
     "fastest_lap_col": [1,0,1,1],
+    "flagged_col": [0.68,0.42,0.2,1],
     "font": "Calibri Bold",
     "font_size": 15,
     "font_weight": 500,
@@ -76,9 +79,9 @@
     "other_car_col": [1,1,1,0.9],
     "pit_col": [0.94,0.8,0.13,1],
     "self_col": [0.94,0.67,0.13,1],
-    "window_pos_x": 1620,
-    "window_pos_y": 96,
-    "window_size_x": 898,
-    "window_size_y": 1272
+    "window_pos_x": 1746,
+    "window_pos_y": 8,
+    "window_size_x": 808,
+    "window_size_y": 1422
   }
 }

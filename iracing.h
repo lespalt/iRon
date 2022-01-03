@@ -44,6 +44,7 @@ enum class SessionType
 {
     UNKNOWN,
     PRACTICE,
+    QUALIFY,
     RACE
 };
 
@@ -62,16 +63,18 @@ struct Car
     int             isPaceCar = 0;
     int             isSpectator = 0;
     int             isBuddy = 0;
+    int             isFlagged = 0;
     int             incidentCount = 0;
     float           carClassEstLapTime = 0;
-    int             qualifyingResultPosition = 0;
+    int             practicePosition = 0;
+    int             qualPosition = 0;
+    int             racePosition = 0;
     int             lastLapInPits = 0;
 };
 
 struct Session
 {
     SessionType     sessionType = SessionType::UNKNOWN;
-    std::string     sessionTypeStr;
     Car             cars[IR_MAX_CARS];
     int             driverCarIdx = -1;
 };
@@ -373,11 +376,15 @@ extern Session ir_session;
 // Will block for around 16 milliseconds.
 ConnectionStatus ir_tick();
 
-// Return whether we're doing pace laps before race start.
-bool ir_isPacing();
+// Return whether we're in the process of getting in the car, waiting for folks
+// to grid, or doing pace laps before the actual race start.
+bool ir_isPreStart();
 
 // Estimate time for a full lap.
 float ir_estimateLaptime();
+
+// Get the best known position, from the latest session we can find.
+int ir_getPosition( int carIdx );
 
 // Print all the variables the sim supports.
 void ir_printVariables();

@@ -391,18 +391,21 @@ ConnectionStatus ir_tick()
         fprintf(fp,"%s",sessionYaml);
         fclose(fp);
 #endif
-
         char path[256];
 
-        // Buddy list
+        // Lists
         std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
+        std::vector<std::string> flagged = g_cfg.getStringVec( "General", "flagged" );
 
-        // Session type        
-        sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionType:", ir_SessionNum.getInt() );
-        parseYamlStr( sessionYaml, path, ir_session.sessionTypeStr );
-        if( ir_session.sessionTypeStr == "Practice" )
+        // Current session type
+        std::string sessionNameStr;
+        sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionName:", ir_SessionNum.getInt() );
+        parseYamlStr( sessionYaml, path, sessionNameStr );
+        if( sessionNameStr == "PRACTICE" )
             ir_session.sessionType = SessionType::PRACTICE;
-        else if( ir_session.sessionTypeStr == "Race" )
+        if( sessionNameStr == "QUALIFY" )
+            ir_session.sessionType = SessionType::QUALIFY;
+        else if( sessionNameStr == "RACE" )
             ir_session.sessionType = SessionType::RACE;
 
         // Driver car index
@@ -416,11 +419,22 @@ ConnectionStatus ir_tick()
             car.isSelf = int( carIdx==ir_session.driverCarIdx );
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}UserName:", carIdx );
-            parseYamlStr( sessionYaml, path, car.userName );
+            if( !parseYamlStr( sessionYaml, path, car.userName ) )
+            {
+                car = Car();
+                continue;
+            }
+
             car.isBuddy = 0;
             for( const std::string& name : buddies ) {
                 if( name == car.userName )
                     car.isBuddy = 1;
+            }
+
+            car.isFlagged = 0;
+            for( const std::string& name : flagged ) {
+                if( name == car.userName )
+                    car.isFlagged = 1;
             }
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", carIdx );
@@ -458,18 +472,43 @@ ConnectionStatus ir_tick()
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarClassEstLapTime:", carIdx );
             parseYamlFloat( sessionYaml, path, &car.carClassEstLapTime );
+
+            car.practicePosition = 0;
+            car.qualPosition = 0;
+            car.racePosition = 0;
         }
 
-        // Qualifying results
+        // Grab positions from as many sessions as we see / understand
         for( int pos=0; pos<IR_MAX_CARS; ++pos )
         {
             sprintf( path, "QualifyResultsInfo:Results:Position:{%d}CarIdx:", pos );
-
             int carIdx = -1;
-            parseYamlInt( sessionYaml, path, &carIdx );
+            if( parseYamlInt( sessionYaml, path, &carIdx ) ) {
+                ir_session.cars[carIdx].qualPosition = pos + 1;
+            }
+        }
 
-            if( carIdx >= 0 )
-                ir_session.cars[carIdx].qualifyingResultPosition = pos + 1;
+        for( int session=0; ; ++session )
+        {
+            std::string sessionNameStr;
+            sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionName:", session );
+            if( !parseYamlStr( sessionYaml, path, sessionNameStr ) )
+                break;
+
+            for( int pos=1; pos<IR_MAX_CARS+1; ++pos )
+            {
+                int carIdx = -1;
+                sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}ResultsPositions:Position:{%d}CarIdx:", session, pos );
+                if( parseYamlInt( sessionYaml, path, &carIdx ) )
+                {
+                    if( sessionNameStr == "PRACTICE" )
+                        ir_session.cars[carIdx].practicePosition = pos;
+                    else if( sessionNameStr == "QUALIFY" )
+                        ir_session.cars[carIdx].qualPosition = pos;
+                    else if( sessionNameStr == "RACE" )
+                        ir_session.cars[carIdx].racePosition = pos;
+                }
+            }
         }
     } // if session string updated
 
@@ -487,7 +526,7 @@ ConnectionStatus ir_tick()
     return ir_IsOnTrack.getBool() ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;
 }
 
-bool ir_isPacing()
+bool ir_isPreStart()
 {
     // To find out whether we're pacing, it isn't enough to check ir_PaceMode, because
     // iRacing doesn't set it to irsdk_PaceModeNotPacing as one would expect. So in addition we check
@@ -499,6 +538,28 @@ bool ir_isPacing()
 float ir_estimateLaptime()
 {
     return ir_session.cars[ir_session.driverCarIdx].carClassEstLapTime;  // TODO: not sure this is a good enough estimate?
+}
+
+int ir_getPosition( int carIdx )
+{
+    // Try the different sources we have for position data, in descending order of importance
+    int pos = ir_CarIdxPosition.getInt(carIdx);
+    if( pos > 0 )
+        return pos;
+
+    pos = ir_session.cars[carIdx].racePosition;
+    if( pos > 0 )
+        return pos;
+
+    pos = ir_session.cars[carIdx].qualPosition;
+    if( pos > 0 )
+        return pos;
+
+    pos = ir_session.cars[carIdx].practicePosition;
+    if( pos > 0 )
+        return pos;
+
+    return 0;
 }
 
 void ir_printVariables()

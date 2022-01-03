@@ -100,8 +100,8 @@ public:
 
             CarInfo ci;
             ci.carIdx = i;
-            ci.lapCount = ir_CarIdxLapCompleted.getInt(i);
-            ci.position = ir_CarIdxPosition.getInt(i) > 0 ? ir_CarIdxPosition.getInt(i) : car.qualifyingResultPosition;
+            ci.lapCount = std::max(0,ir_CarIdxLap.getInt(i));
+            ci.position = ir_getPosition(i);
             ci.pctAroundLap = ir_CarIdxLapDistPct.getFloat(i);
             ci.delta = -ir_CarIdxF2Time.getFloat(i);
             ci.best = ir_CarIdxBestLapTime.getFloat(i);
@@ -120,15 +120,22 @@ public:
 
         // Sort by position
         std::sort( carInfo.begin(), carInfo.end(),
-            []( const CarInfo& a, const CarInfo& b ) { 
-                return a.position < b.position;
+            []( const CarInfo& a, const CarInfo& b ) {
+                const int ap = a.position<=0 ? INT_MAX : a.position;
+                const int bp = b.position<=0 ? INT_MAX : b.position;
+                return ap < bp;
             } );
 
-        // Compute delta to leader
+        // Compute lap delta to leader
         for( int i=0; i<(int)carInfo.size(); ++i )
         {
             const CarInfo& ciLeader = carInfo[0];
             CarInfo&       ci       = carInfo[i];
+
+            if( ci.pctAroundLap < 0 || ciLeader.pctAroundLap < 0 )
+            {
+                continue;
+            }
 
             if( ci.pctAroundLap > ciLeader.pctAroundLap )
                 ci.lapDelta = ci.lapCount + 1 - ciLeader.lapCount;
@@ -141,6 +148,7 @@ public:
         const float  lineHeight         = fontSize + lineSpacing;
         const float4 selfCol            = g_cfg.getFloat4( m_name, "self_col" );
         const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
+        const float4 flaggedCol         = g_cfg.getFloat4( m_name, "flagged_col" );
         const float4 otherCarCol        = g_cfg.getFloat4( m_name, "other_car_col" );
         const float4 headerCol          = g_cfg.getFloat4( m_name, "header_col" );
         const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
@@ -223,7 +231,7 @@ public:
 
         clm = m_columns.get( (int)Columns::DELTA );
         r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-        swprintf( s, _countof(s), L"Delta" );
+        swprintf( s, _countof(s), L"To P1" );
         m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
         m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
 
@@ -241,15 +249,22 @@ public:
             }
 
             const CarInfo&  ci  = carInfo[i];
-            const Car&      car = ir_session.cars[ci.carIdx];            
+            const Car&      car = ir_session.cars[ci.carIdx];
+
+            float4 textCol = car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:carNumberBgCol));
+            if( ir_CarIdxOnPitRoad.getBool(ci.carIdx) && !car.isSelf )
+                textCol.a *= 0.5f;
 
             // Position
-            clm = m_columns.get( (int)Columns::POSITION );
-            m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy?buddyCol:otherCarCol) );
-            swprintf( s, _countof(s), L"P%d", ci.position );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            if( ci.position > 0 )
+            {
+                clm = m_columns.get( (int)Columns::POSITION );
+                m_brush->SetColor( textCol );
+                swprintf( s, _countof(s), L"P%d", ci.position );
+                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            }
 
             // Car number
             clm = m_columns.get( (int)Columns::CAR_NUMBER );
@@ -258,7 +273,7 @@ public:
             rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
             rr.radiusX = 3;
             rr.radiusY = 3;
-            m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : carNumberBgCol) );
+            m_brush->SetColor( textCol );
             m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
             m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
             m_brush->SetColor( carNumberTextCol );
@@ -269,14 +284,14 @@ public:
             swprintf( s, _countof(s), L"%S", car.userName.c_str() );
             r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
             m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
-            m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy?buddyCol:otherCarCol) );
+            m_brush->SetColor( textCol );
             m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
 
             // Pit age
-            clm = m_columns.get( (int)Columns::PIT );
-            m_brush->SetColor( pitCol );
-            if( ci.pitAge >= 1 )
+            if( ci.pitAge >= 1 && !ir_isPreStart() )
             {
+                clm = m_columns.get( (int)Columns::PIT );
+                m_brush->SetColor( pitCol );
                 swprintf( s, _countof(s), L"%d", ci.pitAge );
                 r = { xoff+clm->textL, y-lineHeight/2+2, xoff+clm->textR, y+lineHeight/2-2 };
                 m_renderTarget->DrawRectangle( &r, m_brush.Get() );
@@ -356,15 +371,18 @@ public:
             m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
 
             // Delta
-            clm = m_columns.get( (int)Columns::DELTA );
-            if( ci.position == 1 )
-                s[0] = L'\0';
-            else
-                swprintf( s, _countof(s), ci.lapDelta ? L"%.0f L" : L"%.03f", ci.lapDelta ? (float)ci.lapDelta : ci.delta );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-            m_brush->SetColor( otherCarCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            if( ci.position != 1 && (ci.lapDelta || ci.delta) && ir_session.sessionType==SessionType::RACE && !ir_isPreStart() )
+            {
+                clm = m_columns.get( (int)Columns::DELTA );
+                if( ci.lapDelta < 0 )
+                    swprintf( s, _countof(s), L"%d L", ci.lapDelta );
+                else
+                    swprintf( s, _countof(s), L"%.03f", ci.delta );
+                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
+                m_brush->SetColor( otherCarCol );
+                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            }
         }
         m_renderTarget->EndDraw();
     }
