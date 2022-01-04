@@ -58,7 +58,7 @@ static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus
 }
 
 int main()
-{
+{    
     // Bump priority up so we get time from the sim
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 
@@ -67,13 +67,27 @@ int main()
     g_cfg.watchForChanges();
 
     // Register hotkey to enable/disable position/size changes.
-    int hotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter", "j" )[0];
-    RegisterHotKey( NULL, 0, MOD_ALT, toupper(hotkey) );
+    const int uiEditHotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter", "j" )[0];
+    RegisterHotKey( NULL, 0, MOD_ALT, toupper(uiEditHotkey) );
     
     // Register hotkey to enable/disable standings overlay.
     // TODO: make this more flexible/configurable. Perhaps use DInput so we can map it to non-keyboard keys?
-    hotkey = g_cfg.getString( "General", "standings_hotkey_is_ctrl_and_this_letter", " " )[0];
-    RegisterHotKey( NULL, 1, MOD_CONTROL, toupper(hotkey) );
+    const int standingsHotkey = g_cfg.getString( "General", "standings_hotkey_is_ctrl_and_this_letter", " " )[0];
+    RegisterHotKey( NULL, 1, MOD_CONTROL, toupper(standingsHotkey) );
+
+    const std::string uiEditHotkeyStr    = uiEditHotkey==' '    ? "SPACE" : std::string(1,(char)uiEditHotkey);
+    const std::string standingsHotkeyStr = standingsHotkey==' ' ? "SPACE" : std::string(1,(char)standingsHotkey);
+    printf("====================================================================================\n");
+    printf("Welcome to iRon! This app provides a few lightweight overlays for iRacing.\n\n");
+    printf("NOTE: Most overlays are only active when iRacing is running and the car is on track.\n\n");
+    printf("At any time, press ALT-%s to move and resize overlays, and press CTRL-%s to toggle\n"\
+           "the standings overlay.\n\n", uiEditHotkeyStr.c_str(), standingsHotkeyStr.c_str());
+    printf("iRon will generate a file called \'config.json\' in its current directory. This file\n"\
+           "stores your settings. You can edit the file at any time, even while iRon is running,\n"\
+           "to customize your overlays.\n\n");
+    printf("For the latest version or to submit bug reports, visit https://github.com/lespalt/iRon.\n");
+    printf("\nHappy Racing!\n");
+    printf("====================================================================================\n\n");
 
     // Create overlays
     std::vector<Overlay*> overlays;
@@ -96,7 +110,7 @@ int main()
             if( status == ConnectionStatus::DISCONNECTED )
                 printf("Waiting for iRacing connection...\n");
             else
-                printf("Connection status: %d\n", (int)status);
+                printf("iRacing connected (%d)\n", (int)status);
 
             // Enable user-selected overlays, but only if we're driving
             handleConfigChange( overlays, status );
