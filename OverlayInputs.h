@@ -26,12 +26,11 @@ SOFTWARE.
 
 #include "Overlay.h"
 #include "Config.h"
+#include "OverlayDebug.h"
 
 class OverlayInputs : public Overlay
 {
     public:
-
-        static const int N = 250;
 
         OverlayInputs()
             : Overlay("OverlayInputs")
@@ -72,7 +71,7 @@ class OverlayInputs : public Overlay
             m_steerVtx[(int)m_steerVtx.size()-1].y = std::min( 1.0f, std::max( 0.0f, (ir_SteeringWheelAngle.getFloat() / ir_SteeringWheelAngleMax.getFloat()) * -0.5f + 0.5f) );
 
             // Render
-            const float thickness = g_cfg.getFloat( m_name, "line_thickness" );
+            const float thickness = g_cfg.getFloat( m_name, "line_thickness", 2.0f );
             auto vtx2coord = [&]( const float2& v )->float2 {
                 return float2( v.x+0.5f, h-0.5f*thickness - v.y*(h-thickness) );
             };
@@ -130,15 +129,15 @@ class OverlayInputs : public Overlay
             steeringLineSink->Close();
 
             m_renderTarget->BeginDraw();
-            m_brush->SetColor( g_cfg.getFloat4( m_name, "throttle_fill_col" ) );
+            m_brush->SetColor( g_cfg.getFloat4( m_name, "throttle_fill_col", float4(0.2f,0.45f,0.15f,0.6f) ) );
             m_renderTarget->FillGeometry( throttleFillPath.Get(), m_brush.Get() );
-            m_brush->SetColor( g_cfg.getFloat4( m_name, "brake_fill_col" ) );
+            m_brush->SetColor( g_cfg.getFloat4( m_name, "brake_fill_col", float4(0.46f,0.01f,0.06f,0.6f) ) );
             m_renderTarget->FillGeometry( brakeFillPath.Get(), m_brush.Get() );
-            m_brush->SetColor( g_cfg.getFloat4( m_name, "throttle_col" ) );
+            m_brush->SetColor( g_cfg.getFloat4( m_name, "throttle_col", float4(0.38f,0.91f,0.31f,0.8f) ) );
             m_renderTarget->DrawGeometry( throttleLinePath.Get(), m_brush.Get(), thickness );
-            m_brush->SetColor( g_cfg.getFloat4( m_name, "brake_col" ) );
+            m_brush->SetColor( g_cfg.getFloat4( m_name, "brake_col", float4(0.93f,0.03f,0.13f,0.8f) ) );
             m_renderTarget->DrawGeometry( brakeLinePath.Get(), m_brush.Get(), thickness );
-            m_brush->SetColor( g_cfg.getFloat4( m_name, "steering_col" ) );
+            m_brush->SetColor( g_cfg.getFloat4( m_name, "steering_col", float4(1,1,1,0.3f) ) );
             m_renderTarget->DrawGeometry( steeringLinePath.Get(), m_brush.Get(), thickness );
             m_renderTarget->EndDraw();
         }

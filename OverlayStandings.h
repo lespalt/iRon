@@ -46,9 +46,9 @@ public:
 
     virtual void onConfigChanged()
     {
-        const std::string font = g_cfg.getString( m_name, "font" );
-        const float fontSize = g_cfg.getFloat( m_name, "font_size" );
-        const int fontWeight = g_cfg.getInt( m_name, "font_weight" );
+        const std::string font = g_cfg.getString( m_name, "font", "Calibri Bold" );
+        const float fontSize = g_cfg.getFloat( m_name, "font_size", 15 );
+        const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
         HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, (DWRITE_FONT_WEIGHT)fontWeight, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
         m_textFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
         m_textFormat->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
@@ -143,23 +143,23 @@ public:
                 ci.lapDelta = ci.lapCount - ciLeader.lapCount;
         }
 
-        const float  fontSize           = g_cfg.getFloat( m_name, "font_size" );
-        const float  lineSpacing        = g_cfg.getFloat( m_name, "line_spacing" );
+        const float  fontSize           = g_cfg.getFloat( m_name, "font_size", 15 );
+        const float  lineSpacing        = g_cfg.getFloat( m_name, "line_spacing", 8 );
         const float  lineHeight         = fontSize + lineSpacing;
-        const float4 selfCol            = g_cfg.getFloat4( m_name, "self_col" );
-        const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col" );
-        const float4 flaggedCol         = g_cfg.getFloat4( m_name, "flagged_col" );
-        const float4 otherCarCol        = g_cfg.getFloat4( m_name, "other_car_col" );
-        const float4 headerCol          = g_cfg.getFloat4( m_name, "header_col" );
-        const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
-        const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col" );
-        const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col" );
-        const float4 iratingTextCol     = g_cfg.getFloat4( m_name, "irating_text_col" );
-        const float4 iratingBgCol       = g_cfg.getFloat4( m_name, "irating_background_col" );
-        const float4 licenseTextCol     = g_cfg.getFloat4( m_name, "license_text_col" );
-        const float4 fastestLapCol      = g_cfg.getFloat4( m_name, "fastest_lap_col" );
-        const float4 pitCol             = g_cfg.getFloat4( m_name, "pit_col" );
-        const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha" );
+        const float4 selfCol            = g_cfg.getFloat4( m_name, "self_col", float4(0.94f,0.67f,0.13f,1) );
+        const float4 buddyCol           = g_cfg.getFloat4( m_name, "buddy_col", float4(0.2f,0.75f,0,1) );
+        const float4 flaggedCol         = g_cfg.getFloat4( m_name, "flagged_col", float4(0.68f,0.42f,0.2f,1) );
+        const float4 otherCarCol        = g_cfg.getFloat4( m_name, "other_car_col", float4(1,1,1,0.9f) );
+        const float4 headerCol          = g_cfg.getFloat4( m_name, "header_col", float4(0.7f,0.7f,0.7f,0.9f) );
+        const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col", float4(1,1,1,0.9f) );
+        const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col", float4(0,0,0,0.9f) );
+        const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col", float4(0.5f,0.5f,0.5f,0.1f) );
+        const float4 iratingTextCol     = g_cfg.getFloat4( m_name, "irating_text_col", float4(0,0,0,0.9f) );
+        const float4 iratingBgCol       = g_cfg.getFloat4( m_name, "irating_background_col", float4(1,1,1,0.85f) );
+        const float4 licenseTextCol     = g_cfg.getFloat4( m_name, "license_text_col", float4(1,1,1,0.9f) );
+        const float4 fastestLapCol      = g_cfg.getFloat4( m_name, "fastest_lap_col", float4(1,0,1,1) );
+        const float4 pitCol             = g_cfg.getFloat4( m_name, "pit_col", float4(0.94f,0.8f,0.13f,1) );
+        const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha", 0.8f );
 
         const float xoff = 10.0f;
         const float yoff = 10;

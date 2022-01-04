@@ -52,7 +52,7 @@ class Overlay
 
         void            configChanged();
 
-        void            update( bool ignoreUpdateDelay=false );
+        void            update();
 
         void            setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindowPos=true );
         void            saveWindowPosAndSize();

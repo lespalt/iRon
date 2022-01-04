@@ -85,7 +85,7 @@ static LRESULT CALLBACK windowProc( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
                 const int h = r.bottom - r.top;
                 o->setWindowPosAndSize( x, y, w, h, false );
                 o->saveWindowPosAndSize();
-                o->update(true); // draw window content while moving/resizing
+                o->update(); // draw window content while moving/resizing
             }
             break;
         }
@@ -240,7 +240,7 @@ bool Overlay::isEnabled() const
 void Overlay::enableUiEdit( bool on )
 {
     m_uiEditEnabled = on;
-    update( true );
+    update();
 }
 
 bool Overlay::isUiEditEnabled() const
@@ -253,24 +253,29 @@ void Overlay::configChanged()
     if( !m_enabled )
         return;
 
+    static int cnt = 0;
+    const int defaultX = ((cnt%4)*500) + 100;
+    const int defaultY = (cnt/4)*400 + 100;
+    cnt++;
+
     // Position/dimensions might have changed
-    const int x = g_cfg.getInt(m_name,"window_pos_x");
-    const int y = g_cfg.getInt(m_name,"window_pos_y");
-    const int w = g_cfg.getInt(m_name,"window_size_x");
-    const int h = g_cfg.getInt(m_name,"window_size_y");
+    const int x = g_cfg.getInt(m_name,"window_pos_x", defaultX);
+    const int y = g_cfg.getInt(m_name,"window_pos_y", defaultY);
+    const int w = g_cfg.getInt(m_name,"window_size_x", 400);
+    const int h = g_cfg.getInt(m_name,"window_size_y", 300);
     setWindowPosAndSize( x, y, w, h );
 
     onConfigChanged();
 }
 
-void Overlay::update( bool ignoreUpdateDelay )
+void Overlay::update()
 {
     if( !m_enabled )
         return;
 
     const float w = (float)m_width;
     const float h = (float)m_height;
-    const float cornerRadius = g_cfg.getFloat( m_name, "corner_radius" );
+    const float cornerRadius = g_cfg.getFloat( m_name, "corner_radius", m_name=="OverlayInputs"?2.0f:6.0f );
 
     // Clear/draw background
     {
@@ -280,7 +285,7 @@ void Overlay::update( bool ignoreUpdateDelay )
         rr.rect = { 0.5f, 0.5f, w-0.5f, h-0.5f };
         rr.radiusX = cornerRadius;
         rr.radiusY = cornerRadius;
-        m_brush->SetColor( g_cfg.getFloat4( m_name, "background_col" ) );
+        m_brush->SetColor( g_cfg.getFloat4( m_name, "background_col", float4(0,0,0,0.7f) ) );
         m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
         m_renderTarget->EndDraw();
     }

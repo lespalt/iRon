@@ -515,8 +515,8 @@ ConnectionStatus ir_tick()
 
 void ir_handleConfigChange()
 {
-    std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
-    std::vector<std::string> flagged = g_cfg.getStringVec( "General", "flagged" );
+    std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies", {} );
+    std::vector<std::string> flagged = g_cfg.getStringVec( "General", "flagged", {} );
 
     for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
     {

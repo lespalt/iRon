@@ -55,7 +55,7 @@ bool Config::load()
     std::string json;
     if( !loadFile(m_filename, json) )
     {
-        printf("Could not load config file\n");
+        //printf("Could not load config file\n");
         return false;
     }
 
@@ -90,28 +90,55 @@ bool Config::hasChanged()
     return m_hasChanged;
 }
 
-bool Config::getBool( const std::string& component, const std::string& key )
+bool Config::getBool( const std::string& component, const std::string& key, bool defaultVal )
 {
-    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-    return pjcomp[key].get<bool>();
+    bool existed = false;
+    picojson::value& value = getOrInsertValue( component, key, &existed );
+
+    if( !existed )
+        value.set<bool>( defaultVal );
+
+    return value.get<bool>();
 }
 
-int Config::getInt( const std::string& component, const std::string& key )
+int Config::getInt( const std::string& component, const std::string& key, int defaultVal )
 {
-    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-    return (int)pjcomp[key].get<double>();
+    bool existed = false;
+    picojson::value& value = getOrInsertValue( component, key, &existed );
+
+    if( !existed )
+        value.set<double>( defaultVal );
+
+    return (int)value.get<double>();
 }
 
-float Config::getFloat( const std::string& component, const std::string& key )
+float Config::getFloat( const std::string& component, const std::string& key, float defaultVal )
 {
-    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-    return (float)pjcomp[key].get<double>();
+    bool existed = false;
+    picojson::value& value = getOrInsertValue( component, key, &existed );
+
+    if( !existed )
+        value.set<double>( defaultVal );
+
+    return (float)value.get<double>();
 }
 
-float4 Config::getFloat4( const std::string& component, const std::string& key )
+float4 Config::getFloat4( const std::string& component, const std::string& key, const float4& defaultVal )
 {
-    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-    picojson::array& arr = pjcomp[key].get<picojson::array>();
+    bool existed = false;
+    picojson::value& value = getOrInsertValue( component, key, &existed );
+
+    if( !existed )
+    {
+        picojson::array arr( 4 );
+        arr[0].set<double>( defaultVal.x );
+        arr[1].set<double>( defaultVal.y );
+        arr[2].set<double>( defaultVal.z );
+        arr[3].set<double>( defaultVal.w );
+        value.set<picojson::array>( arr );
+    }
+
+    picojson::array& arr = value.get<picojson::array>();
     float4 ret;
     ret.x = (float)arr[0].get<double>();
     ret.y = (float)arr[1].get<double>();
@@ -120,19 +147,34 @@ float4 Config::getFloat4( const std::string& component, const std::string& key )
     return ret;
 }
 
-std::string Config::getString( const std::string& component, const std::string& key )
+std::string Config::getString( const std::string& component, const std::string& key, const std::string& defaultVal )
 {
-    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-    return pjcomp[key].get<std::string>();
+    bool existed = false;
+    picojson::value& value = getOrInsertValue( component, key, &existed );
+
+    if( !existed )
+        value.set<std::string>( defaultVal );
+
+    return value.get<std::string>();
 }
 
-std::vector<std::string> Config::getStringVec( const std::string& component, const std::string& key )
+std::vector<std::string> Config::getStringVec( const std::string& component, const std::string& key, const std::vector<std::string>& defaultVal )
 {
-    picojson::object& pjcomp = m_pj[component].get<picojson::object>();
-    picojson::array& arr = pjcomp[key].get<picojson::array>();
-    std::vector<std::string> ret;
-    for( picojson::value& val : arr )
-        ret.push_back( val.get<std::string>() );
+    bool existed = false;
+    picojson::value& value = getOrInsertValue( component, key, &existed );
+
+    if( !existed )
+    {
+        picojson::array arr( defaultVal.size() );
+        for( int i=0; i<(int)defaultVal.size(); ++i )
+            arr[i].set<std::string>( defaultVal[i] );
+        value.set<picojson::array>( arr );
+    }
+
+    picojson::array& arr = value.get<picojson::array>();
+    std::vector<std::string> ret( arr.size() );
+    for( picojson::value& entry : arr )
+        ret.push_back( entry.get<std::string>() );
     return ret;
 }
 
@@ -147,4 +189,26 @@ void Config::setBool( const std::string& component, const std::string& key, bool
 {
     picojson::object& pjcomp = m_pj[component].get<picojson::object>();
     pjcomp[key].set<bool>( v );
+}
+
+picojson::object& Config::getOrInsertComponent( const std::string& component, bool* existed )
+{
+    auto it = m_pj.insert(std::make_pair(component,picojson::object()));
+    
+    if( existed )
+        *existed = !it.second;
+
+    return it.first->second.get<picojson::object>();
+}
+
+picojson::value& Config::getOrInsertValue( const std::string& component, const std::string& key, bool* existed )
+{
+    picojson::object& comp = getOrInsertComponent( component );
+
+    auto it = comp.insert(std::make_pair(key,picojson::value()));
+
+    if( existed )
+        *existed = !it.second;
+
+    return it.first->second;
 }

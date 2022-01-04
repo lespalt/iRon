@@ -48,7 +48,7 @@ static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus
 
     for( Overlay* o : overlays )
     {
-        o->enable( g_cfg.getBool(o->getName(),"enabled") && (
+        o->enable( g_cfg.getBool(o->getName(),"enabled",true) && (
             status == ConnectionStatus::DRIVING ||
             status == ConnectionStatus::CONNECTED && o->canEnableWhileNotDriving() ||
             status == ConnectionStatus::DISCONNECTED && o->canEnableWhileDisconnected()
@@ -67,12 +67,13 @@ int main()
     g_cfg.watchForChanges();
 
     // Register hotkey to enable/disable position/size changes.
-    const int hotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter" )[0];
+    int hotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter", "j" )[0];
     RegisterHotKey( NULL, 0, MOD_ALT, toupper(hotkey) );
     
     // Register hotkey to enable/disable standings overlay.
     // TODO: make this more flexible/configurable. Perhaps use DInput so we can map it to non-keyboard keys?
-    RegisterHotKey( NULL, 1, MOD_CONTROL, ' ' );
+    hotkey = g_cfg.getString( "General", "standings_hotkey_is_ctrl_and_this_letter", " " )[0];
+    RegisterHotKey( NULL, 1, MOD_CONTROL, toupper(hotkey) );
 
     // Create overlays
     std::vector<Overlay*> overlays;
@@ -128,7 +129,7 @@ int main()
                 }
                 else if( msg.wParam == 1 )
                 {
-                    g_cfg.setBool( "OverlayStandings", "enabled", !g_cfg.getBool("OverlayStandings","enabled") );
+                    g_cfg.setBool( "OverlayStandings", "enabled", !g_cfg.getBool("OverlayStandings","enabled",true) );
                     g_cfg.save();
                     handleConfigChange( overlays, status );
                 }
