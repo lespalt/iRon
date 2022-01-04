@@ -40,7 +40,7 @@ class OverlayRelative : public Overlay
 
     protected:
 
-        enum class Columns { POSITION, CAR_NUMBER, NAME, DELTA, LICENSE, IRATING };
+        enum class Columns { POSITION, CAR_NUMBER, NAME, DELTA, LICENSE, SAFETY_RATING, IRATING, PIT };
 
         virtual void onEnable()
         {
@@ -68,9 +68,16 @@ class OverlayRelative : public Overlay
             m_columns.add( (int)Columns::POSITION,   computeTextExtent( L"P99", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
             m_columns.add( (int)Columns::CAR_NUMBER, computeTextExtent( L"#999", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
             m_columns.add( (int)Columns::NAME,       0, fontSize/2 );
-            m_columns.add( (int)Columns::DELTA,      computeTextExtent( L"999.9 (+99)", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
-            m_columns.add( (int)Columns::LICENSE,    computeTextExtent( L"A 4.44", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/6 );
-            m_columns.add( (int)Columns::IRATING,    computeTextExtent( L"999.9k", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/6 );
+            m_columns.add( (int)Columns::DELTA,      computeTextExtent( L"-99.9  +99", m_dwriteFactory.Get(), m_textFormat.Get() ).x, 1, fontSize/2 );
+
+            if( g_cfg.getBool(m_name,"show_pit_age") )
+                m_columns.add( (int)Columns::PIT,           computeTextExtent( L"999", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/4 );
+            if( g_cfg.getBool(m_name,"show_license") && !g_cfg.getBool(m_name,"show_sr") )
+                m_columns.add( (int)Columns::LICENSE,       computeTextExtent( L" A ", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x*1.6f, fontSize/10 );
+            if( g_cfg.getBool(m_name,"show_sr") )
+                m_columns.add( (int)Columns::SAFETY_RATING, computeTextExtent( L"A 4.44", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/8 );
+            if( g_cfg.getBool(m_name,"show_irating") )
+                m_columns.add( (int)Columns::IRATING,       computeTextExtent( L"999.9k", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/8 );
         }
 
         virtual void onUpdate()
@@ -79,6 +86,7 @@ class OverlayRelative : public Overlay
                 int     carIdx = 0;
                 float   delta = 0;
                 int     lapDelta = 0;
+                int     pitAge = 0;
             };
             std::vector<CarInfo> relatives;
             relatives.reserve( IR_MAX_CARS );
@@ -127,6 +135,7 @@ class OverlayRelative : public Overlay
                     ci.carIdx = i;
                     ci.delta = delta;
                     ci.lapDelta = lapDelta;
+                    ci.pitAge = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
                     relatives.push_back( ci );
                 }
             }
@@ -167,6 +176,7 @@ class OverlayRelative : public Overlay
             const float4 flaggedCol         = g_cfg.getFloat4( m_name, "flagged_col" );
             const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col" );
             const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col" );
+            const float4 pitCol             = g_cfg.getFloat4( m_name, "pit_col" );
             const bool   minimapEnabled     = g_cfg.getBool( m_name, "minimap_enabled" );
             const bool   minimapIsRelative  = g_cfg.getBool( m_name, "minimap_is_relative" );
             const float4 minimapBgCol       = g_cfg.getFloat4( m_name, "minimap_background_col" );
@@ -250,7 +260,7 @@ class OverlayRelative : public Overlay
                 // Delta
                 clm = m_columns.get( (int)Columns::DELTA );
                 if( ci.lapDelta )
-                    swprintf( s, _countof(s), L"%.1f (%+d)", ci.delta, ci.lapDelta );
+                    swprintf( s, _countof(s), L"%.1f  %+d", ci.delta, ci.lapDelta );
                 else
                     swprintf( s, _countof(s), L"%.1f", ci.delta );
                 r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
@@ -258,33 +268,73 @@ class OverlayRelative : public Overlay
                 m_brush->SetColor( col );
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );         
 
-                // License/SR
-                clm = m_columns.get( (int)Columns::LICENSE );
-                swprintf( s, _countof(s), L"%C %.1f", car.licenseChar, car.licenseSR );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
-                rr.radiusX = 3;
-                rr.radiusY = 3;
-                float4 c = car.licenseCol;
-                c.a = licenseBgAlpha;
-                m_brush->SetColor( c );
-                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-                m_brush->SetColor( licenseTextCol );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                // Pit age
+                if( (clm = m_columns.get((int)Columns::PIT)) && !ir_isPreStart() && (ci.pitAge>=1||ir_CarIdxOnPitRoad.getBool(ci.carIdx)) )
+                {
+                    r = { xoff+clm->textL, y-lineHeight/2+2, xoff+clm->textR, y+lineHeight/2-2 };
+                    m_brush->SetColor( pitCol );
+                    m_renderTarget->DrawRectangle( &r, m_brush.Get() );
+                    if( ir_CarIdxOnPitRoad.getBool(ci.carIdx) ) {
+                        swprintf( s, _countof(s), L"PIT" );
+                        m_renderTarget->FillRectangle( &r, m_brush.Get() );
+                        m_brush->SetColor( float4(0,0,0,1) );
+                    }
+                    else {
+                        swprintf( s, _countof(s), L"%d", ci.pitAge );
+                        m_renderTarget->DrawRectangle( &r, m_brush.Get() );
+                    }
+                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                }
+
+                // License without SR
+                if( clm = m_columns.get( (int)Columns::LICENSE ) )
+                {
+                    swprintf( s, _countof(s), L"%C", car.licenseChar );
+                    r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                    rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                    rr.radiusX = 3;
+                    rr.radiusY = 3;
+                    float4 c = car.licenseCol;
+                    c.a = licenseBgAlpha;
+                    m_brush->SetColor( c );
+                    m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                    m_brush->SetColor( licenseTextCol );
+                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                }
+
+                // License with SR
+                if( clm = m_columns.get( (int)Columns::SAFETY_RATING ) )
+                {
+                    swprintf( s, _countof(s), L"%C %.1f", car.licenseChar, car.licenseSR );
+                    r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                    rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                    rr.radiusX = 3;
+                    rr.radiusY = 3;
+                    float4 c = car.licenseCol;
+                    c.a = licenseBgAlpha;
+                    m_brush->SetColor( c );
+                    m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                    m_brush->SetColor( licenseTextCol );
+                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                }
 
                 // Irating
-                clm = m_columns.get( (int)Columns::IRATING );
-                swprintf( s, _countof(s), L"%.1fk", (float)car.irating/1000.0f );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
-                rr.radiusX = 3;
-                rr.radiusY = 3;
-                m_brush->SetColor( iratingBgCol );
-                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-                m_brush->SetColor( iratingTextCol );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                if( clm = m_columns.get( (int)Columns::IRATING ) )
+                {
+                    swprintf( s, _countof(s), L"%.1fk", (float)car.irating/1000.0f );
+                    r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                    rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                    rr.radiusX = 3;
+                    rr.radiusY = 3;
+                    m_brush->SetColor( iratingBgCol );
+                    m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
+                    m_brush->SetColor( iratingTextCol );
+                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                }
             }
 
             if( minimapEnabled )

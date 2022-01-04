@@ -44,6 +44,8 @@ SOFTWARE.
 
 static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus status )
 {
+    ir_handleConfigChange();
+
     for( Overlay* o : overlays )
     {
         o->enable( g_cfg.getBool(o->getName(),"enabled") && (

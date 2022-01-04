@@ -391,11 +391,7 @@ ConnectionStatus ir_tick()
         fprintf(fp,"%s",sessionYaml);
         fclose(fp);
 #endif
-        char path[256];
-
-        // Lists
-        std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
-        std::vector<std::string> flagged = g_cfg.getStringVec( "General", "flagged" );
+        char path[256];        
 
         // Current session type
         std::string sessionNameStr;
@@ -423,18 +419,6 @@ ConnectionStatus ir_tick()
             {
                 car = Car();
                 continue;
-            }
-
-            car.isBuddy = 0;
-            for( const std::string& name : buddies ) {
-                if( name == car.userName )
-                    car.isBuddy = 1;
-            }
-
-            car.isFlagged = 0;
-            for( const std::string& name : flagged ) {
-                if( name == car.userName )
-                    car.isFlagged = 1;
             }
 
             sprintf( path, "DriverInfo:Drivers:CarIdx:{%d}CarNumber:", carIdx );
@@ -510,6 +494,9 @@ ConnectionStatus ir_tick()
                 }
             }
         }
+
+        ir_handleConfigChange();
+
     } // if session string updated
 
     // Track cars in pits. Reset every time we're in the 'warmup' phase (just before starting pace laps).
@@ -524,6 +511,29 @@ ConnectionStatus ir_tick()
     }
 
     return ir_IsOnTrack.getBool() ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;
+}
+
+void ir_handleConfigChange()
+{
+    std::vector<std::string> buddies = g_cfg.getStringVec( "General", "buddies" );
+    std::vector<std::string> flagged = g_cfg.getStringVec( "General", "flagged" );
+
+    for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
+    {
+        Car& car = ir_session.cars[carIdx];
+
+        car.isBuddy = 0;
+        for( const std::string& name : buddies ) {
+            if( name == car.userName )
+                car.isBuddy = 1;
+        }
+
+        car.isFlagged = 0;
+        for( const std::string& name : flagged ) {
+            if( name == car.userName )
+                car.isFlagged = 1;
+        }
+    }
 }
 
 bool ir_isPreStart()

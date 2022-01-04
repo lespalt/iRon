@@ -376,6 +376,9 @@ extern Session ir_session;
 // Will block for around 16 milliseconds.
 ConnectionStatus ir_tick();
 
+// Let the session data tracking know that the config has changed.
+void ir_handleConfigChange();
+
 // Return whether we're in the process of getting in the car, waiting for folks
 // to grid, or doing pace laps before the actual race start.
 bool ir_isPreStart();

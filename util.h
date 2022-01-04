@@ -124,7 +124,8 @@ class ColumnLayout
         {
             int             id = 0;
             float           textWidth = 0;
-            float           border = 0;
+            float           borderL = 0;
+            float           borderR = 0;
             float           textL = 0;
             float           textR = 0;
             bool            autoWidth = false;
@@ -136,14 +137,19 @@ class ColumnLayout
         }
 
         // Pass in zero width for auto-scale
-        void add( int id, float textWidth, float border )
+        void add( int id, float textWidth, float borderL, float borderR )
         {
             Column clm;
             clm.id = id;
             clm.textWidth = textWidth;
-            clm.border = border;
+            clm.borderL = borderL;
+            clm.borderR = borderR;
             clm.autoWidth = textWidth == 0;
             m_columns.emplace_back( clm );
+        }
+        void add( int id, float textWidth, float border )
+        {
+            add( id, textWidth, border, border );
         }
 
         void layout( float totalWidth )
@@ -155,11 +161,11 @@ class ColumnLayout
                 if( clm.autoWidth )
                 {
                     autoWidthCnt++;
-                    fixedWidth += clm.border * 2;
+                    fixedWidth += clm.borderL + clm.borderR;
                 }
                 else
                 {
-                    fixedWidth += clm.textWidth + clm.border * 2;
+                    fixedWidth += clm.textWidth + clm.borderL + clm.borderR;
                 }
             }
 
@@ -171,10 +177,10 @@ class ColumnLayout
                 if( clm.autoWidth )
                     clm.textWidth = autoTextWidth;
 
-                clm.textL = x + clm.border;
+                clm.textL = x + clm.borderL;
                 clm.textR = clm.textL + clm.textWidth;
 
-                x = clm.textR + clm.border;
+                x = clm.textR + clm.borderR;
             }
         }
 

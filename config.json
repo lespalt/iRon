@@ -1,15 +1,15 @@
 {
   "General": {
     "buddies": ["Dave Kaemmer","Ian Sudol"],
-    "flagged": ["John West","Doug Hunt"],
+    "flagged": ["John West","Doug Hunt", "Steve Myers"],
     "ui_edit_hotkey_is_alt_and_this_letter": "j"
   },
   "OverlayDebug": {
     "background_col": [0,0,0,0.8],
     "corner_radius": 6,
     "enabled": true,
-    "window_pos_x": 1420,
-    "window_pos_y": 733,
+    "window_pos_x": 880,
+    "window_pos_y": 764,
     "window_size_x": 659,
     "window_size_y": 646
   },
@@ -50,12 +50,17 @@
     "minimap_background_col": [1,1,1,0.13],
     "minimap_enabled": true,
     "minimap_is_relative": true,
+    "pit_col": [0.94,0.8,0.13,1],
     "same_lap_col": [1,1,1,1],
     "self_col": [0.94,0.67,0.13,1],
-    "window_pos_x": 4610,
-    "window_pos_y": 1081,
-    "window_size_x": 507,
-    "window_size_y": 349
+    "show_irating": true,
+    "show_license": true,
+    "show_pit_age": true,
+    "show_sr": true,
+    "window_pos_x": 4581,
+    "window_pos_y": 1105,
+    "window_size_x": 518,
+    "window_size_y": 323
   },
   "OverlayStandings": {
     "alternate_line_background_col": [0.5,0.5,0.5,0.1],
