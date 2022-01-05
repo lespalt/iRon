@@ -397,7 +397,7 @@ public:
         y = m_height - (m_height-ybottom)/2;
         r = { xoff, y-lineHeight/2, (float)m_width-xoff, y+lineHeight/2 };
         m_brush->SetColor( headerCol );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
+        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
         m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
 
         m_renderTarget->EndDraw();
