@@ -44,8 +44,15 @@ public:
         onConfigChanged();  // trigger font load
     }
 
+    virtual void onDisable()
+    {
+        m_text.reset();
+    }
+
     virtual void onConfigChanged()
     {
+        m_text.reset( m_dwriteFactory.Get() );
+
         const std::string font = g_cfg.getString( m_name, "font", "Calibri Bold" );
         const float fontSize = g_cfg.getFloat( m_name, "font_size", 15 );
         const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
@@ -177,64 +184,44 @@ public:
 
         // Headers
         clm = m_columns.get( (int)Columns::POSITION );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"Pos." );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
         clm = m_columns.get( (int)Columns::CAR_NUMBER );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"No." );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
         clm = m_columns.get( (int)Columns::NAME );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"Driver" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 
         clm = m_columns.get( (int)Columns::PIT );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"P.Age" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
         clm = m_columns.get( (int)Columns::LICENSE );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"SR" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
         clm = m_columns.get( (int)Columns::IRATING );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"IR" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
         clm = m_columns.get( (int)Columns::INCIDENTS );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"Inc." );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
         clm = m_columns.get( (int)Columns::BEST );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"Best" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
         clm = m_columns.get( (int)Columns::LAST );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"Last" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
         clm = m_columns.get( (int)Columns::DELTA );
-        r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
         swprintf( s, _countof(s), L"To P1" );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
         // Content
         for( int i=0; i<(int)carInfo.size(); ++i )
@@ -265,9 +252,7 @@ public:
                 clm = m_columns.get( (int)Columns::POSITION );
                 m_brush->SetColor( textCol );
                 swprintf( s, _countof(s), L"P%d", ci.position );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
             }
 
             // Car number
@@ -279,17 +264,14 @@ public:
             rr.radiusY = 3;
             m_brush->SetColor( textCol );
             m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
             m_brush->SetColor( carNumberTextCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
             // Name
             clm = m_columns.get( (int)Columns::NAME );
             swprintf( s, _countof(s), L"%S", car.userName.c_str() );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
             m_brush->SetColor( textCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 
             // Pit age
             if( ci.pitAge >= 1 && !ir_isPreStart() )
@@ -299,8 +281,7 @@ public:
                 swprintf( s, _countof(s), L"%d", ci.pitAge );
                 r = { xoff+clm->textL, y-lineHeight/2+2, xoff+clm->textR, y+lineHeight/2-2 };
                 m_renderTarget->DrawRectangle( &r, m_brush.Get() );
-                m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             }
 
             // License/SR
@@ -314,9 +295,8 @@ public:
             c.a = licenseBgAlpha;
             m_brush->SetColor( c );
             m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-            m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
             m_brush->SetColor( licenseTextCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
             // Irating
             clm = m_columns.get( (int)Columns::IRATING );
@@ -327,9 +307,8 @@ public:
             rr.radiusY = 3;
             m_brush->SetColor( iratingBgCol );
             m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-            m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
             m_brush->SetColor( iratingTextCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
             // Incidents
             if( car.incidentCount >= 0 )  // sadly we don't see incidents of others while racing
@@ -337,9 +316,7 @@ public:
                 clm = m_columns.get( (int)Columns::INCIDENTS );
                 m_brush->SetColor( car.incidentCount ? otherCarCol : float4(otherCarCol.r,otherCarCol.g,otherCarCol.b,otherCarCol.a*0.5f) );
                 swprintf( s, _countof(s), L"%dx", car.incidentCount );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
             }
 
             // Best
@@ -353,10 +330,8 @@ public:
                 else
                     swprintf( s, _countof(s), L"%.03f", ci.best );
             }
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
             m_brush->SetColor( ci.hasFastestLap ? fastestLapCol : otherCarCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
             // Last
             clm = m_columns.get( (int)Columns::LAST );
@@ -369,10 +344,8 @@ public:
                 else
                     swprintf( s, _countof(s), L"%.03f", ci.last );
             }
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
             m_brush->SetColor( otherCarCol );
-            m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
             // Delta
             if( ci.position != 1 && (ci.lapDelta || ci.delta) && ir_session.sessionType==SessionType::RACE && !ir_isPreStart() )
@@ -382,10 +355,8 @@ public:
                     swprintf( s, _countof(s), L"%d L", ci.lapDelta );
                 else
                     swprintf( s, _countof(s), L"%.03f", ci.delta );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
                 m_brush->SetColor( otherCarCol );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
             }
         }
         
@@ -395,10 +366,8 @@ public:
 
         swprintf( s, _countof(s), L"SoF: %d      Track Temp: %.1f°      Air Temp: %.1f°      Setup: %s      Subsession: %d", ir_session.sof, ir_TrackTempCrew.getFloat(), ir_AirTemp.getFloat(), ir_session.isFixedSetup?L"fixed":L"open", ir_session.subsessionId );
         y = m_height - (m_height-ybottom)/2;
-        r = { xoff, y-lineHeight/2, (float)m_width-xoff, y+lineHeight/2 };
         m_brush->SetColor( headerCol );
-        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff, (float)m_width-2*xoff, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
         m_renderTarget->EndDraw();
     }
@@ -414,4 +383,5 @@ protected:
     Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatSmall;
 
     ColumnLayout m_columns;
+    TextCache    m_text;
 };

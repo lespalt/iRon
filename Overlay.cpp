@@ -313,6 +313,9 @@ void Overlay::update()
 
 void Overlay::setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindowPos )
 {
+    w = std::max( w, 30 );
+    h = std::max( h, 30 );
+
     if( callSetWindowPos )
         SetWindowPos( m_hwnd, HWND_TOPMOST, x, y, w, h, SWP_NOACTIVATE|SWP_SHOWWINDOW );
     
@@ -333,7 +336,6 @@ void Overlay::setWindowPosAndSize( int x, int y, int w, int h, bool callSetWindo
     targetProperties.pixelFormat.format = DXGI_FORMAT_UNKNOWN;
     targetProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED;
     HRCHECK(m_d2dFactory->CreateDxgiSurfaceRenderTarget( dxgiSurface.Get(), &targetProperties, &m_renderTarget ));
-
 }
 
 void Overlay::saveWindowPosAndSize()

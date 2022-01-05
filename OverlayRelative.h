@@ -48,10 +48,14 @@ class OverlayRelative : public Overlay
         }
 
         virtual void onDisable()
-        {}
+        {
+            m_text.reset();
+        }
 
         virtual void onConfigChanged()
         {
+            m_text.reset( m_dwriteFactory.Get() );
+
             const std::string font = g_cfg.getString( m_name, "font", "Calibri Bold" );
             const float fontSize = g_cfg.getFloat( m_name, "font_size", 16 );
             const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
@@ -231,9 +235,8 @@ class OverlayRelative : public Overlay
                     clm = m_columns.get( (int)Columns::POSITION );
                     m_brush->SetColor( col );
                     swprintf( s, _countof(s), L"P%d", ir_getPosition(ci.carIdx) );
-                    r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
                     m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
-                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // Car number
@@ -245,17 +248,14 @@ class OverlayRelative : public Overlay
                 rr.radiusY = 3;
                 m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:carNumberBgCol)) );
                 m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                 m_brush->SetColor( carNumberTextCol );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
                 // Name
                 clm = m_columns.get( (int)Columns::NAME );
                 swprintf( s, _countof(s), L"%S", car.userName.c_str() );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
                 m_brush->SetColor( col );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 
                 // Delta
                 clm = m_columns.get( (int)Columns::DELTA );
@@ -263,10 +263,8 @@ class OverlayRelative : public Overlay
                     swprintf( s, _countof(s), L"%.1f  %+d", ci.delta, ci.lapDelta );
                 else
                     swprintf( s, _countof(s), L"%.1f", ci.delta );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_TRAILING );
                 m_brush->SetColor( col );
-                m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );         
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
                 // Pit age
                 if( (clm = m_columns.get((int)Columns::PIT)) && !ir_isPreStart() && (ci.pitAge>=1||ir_CarIdxOnPitRoad.getBool(ci.carIdx)) )
@@ -283,8 +281,7 @@ class OverlayRelative : public Overlay
                         swprintf( s, _countof(s), L"%d", ci.pitAge );
                         m_renderTarget->DrawRectangle( &r, m_brush.Get() );
                     }
-                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
-                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
 
                 // License without SR
@@ -299,9 +296,8 @@ class OverlayRelative : public Overlay
                     c.a = licenseBgAlpha;
                     m_brush->SetColor( c );
                     m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                     m_brush->SetColor( licenseTextCol );
-                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
 
                 // License with SR
@@ -316,9 +312,8 @@ class OverlayRelative : public Overlay
                     c.a = licenseBgAlpha;
                     m_brush->SetColor( c );
                     m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                     m_brush->SetColor( licenseTextCol );
-                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
 
                 // Irating
@@ -331,9 +326,8 @@ class OverlayRelative : public Overlay
                     rr.radiusY = 3;
                     m_brush->SetColor( iratingBgCol );
                     m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                    m_textFormatSmall->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_CENTER );
                     m_brush->SetColor( iratingTextCol );
-                    m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormatSmall.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
             }
 
@@ -412,4 +406,5 @@ class OverlayRelative : public Overlay
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatSmall;
 
         ColumnLayout m_columns;
+        TextCache    m_text;
 };
