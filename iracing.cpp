@@ -391,7 +391,14 @@ ConnectionStatus ir_tick()
         fprintf(fp,"%s",sessionYaml);
         fclose(fp);
 #endif
-        char path[256];        
+        char path[256];
+
+        // Weekend info
+        sprintf( path, "WeekendInfo:SubSessionID:" );
+        parseYamlInt( sessionYaml, path, &ir_session.subsessionId );
+
+        sprintf( path, "WeekendInfo:WeekendOptions:IsFixedSetup:" );
+        parseYamlInt( sessionYaml, path, &ir_session.isFixedSetup );
 
         // Current session type
         std::string sessionNameStr;
@@ -494,6 +501,21 @@ ConnectionStatus ir_tick()
                 }
             }
         }
+
+        // SoF
+        double sof = 0;
+        int cnt = 0;
+        for( int i=0; i<IR_MAX_CARS; ++i )
+        {
+            const Car& car = ir_session.cars[i];
+
+            if( car.isPaceCar || car.isSpectator || car.userName.empty() )
+                continue;
+
+            sof += car.irating;
+            cnt++;
+        }
+        ir_session.sof = sof / cnt;
 
         ir_handleConfigChange();
 

@@ -165,6 +165,7 @@ public:
         const float yoff = 10;
         m_columns.layout( (float)m_width - 2*xoff );
         float y = yoff + lineHeight/2;
+        const float ybottom = m_height - lineHeight * 1.5f;
 
         const ColumnLayout::Column* clm = nullptr;
         wchar_t s[512];
@@ -239,6 +240,9 @@ public:
         for( int i=0; i<(int)carInfo.size(); ++i )
         {
             y = 2*yoff + lineHeight/2 + (i+1)*lineHeight;
+
+            if( y+lineHeight/2 > ybottom )
+                break;
 
             // Alternating line backgrounds
             if( i & 1 && alternateLineBgCol.a > 0 )
@@ -384,6 +388,18 @@ public:
                 m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
             }
         }
+        
+        // Footer
+        m_brush->SetColor(float4(1,1,1,0.4f));
+        m_renderTarget->DrawLine( float2(0,ybottom),float2((float)m_width,ybottom),m_brush.Get() );
+
+        swprintf( s, _countof(s), L"SoF: %d      Track Temp: %.1f°      Air Temp: %.1f°      Setup: %s      Subsession: %d", ir_session.sof, ir_TrackTempCrew.getFloat(), ir_AirTemp.getFloat(), ir_session.isFixedSetup?L"fixed":L"open", ir_session.subsessionId );
+        y = m_height - (m_height-ybottom)/2;
+        r = { xoff, y-lineHeight/2, (float)m_width-xoff, y+lineHeight/2 };
+        m_brush->SetColor( headerCol );
+        m_textFormat->SetTextAlignment( DWRITE_TEXT_ALIGNMENT_LEADING );
+        m_renderTarget->DrawTextA( s, (int)wcslen(s), m_textFormat.Get(), &r, m_brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP );
+
         m_renderTarget->EndDraw();
     }
 

@@ -78,7 +78,7 @@ int main()
     const std::string uiEditHotkeyStr    = uiEditHotkey==' '    ? "SPACE" : std::string(1,(char)uiEditHotkey);
     const std::string standingsHotkeyStr = standingsHotkey==' ' ? "SPACE" : std::string(1,(char)standingsHotkey);
     printf("====================================================================================\n");
-    printf("Welcome to iRon! This app provides a few lightweight overlays for iRacing.\n\n");
+    printf("Welcome to iRon! This app provides a few simple overlays for iRacing.\n\n");
     printf("NOTE: Most overlays are only active when iRacing is running and the car is on track.\n\n");
     printf("At any time, press ALT-%s to move and resize overlays, and press CTRL-%s to toggle\n"\
            "the standings overlay.\n\n", uiEditHotkeyStr.c_str(), standingsHotkeyStr.c_str());

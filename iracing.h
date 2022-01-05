@@ -69,7 +69,7 @@ struct Car
     int             practicePosition = 0;
     int             qualPosition = 0;
     int             racePosition = 0;
-    int             lastLapInPits = 0;
+    int             lastLapInPits = 0;    
 };
 
 struct Session
@@ -77,6 +77,9 @@ struct Session
     SessionType     sessionType = SessionType::UNKNOWN;
     Car             cars[IR_MAX_CARS];
     int             driverCarIdx = -1;
+    int             sof = 0;
+    int             subsessionId = 0;
+    int             isFixedSetup = 0;
 };
 
 extern irsdkCVar ir_SessionTime;    // double[1] Seconds since session start (s)
