@@ -40,6 +40,7 @@
     <ClInclude Include="util.h" />
     <ClInclude Include="OverlayStandings.h" />
     <ClInclude Include="OverlayDebug.h" />
+    <ClInclude Include="OverlayDDU.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE" />

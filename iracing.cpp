@@ -469,13 +469,16 @@ ConnectionStatus ir_tick()
             car.racePosition = 0;
         }
 
-        // Grab positions from as many sessions as we see / understand
+        // Grab position info from as many sessions as we see / understand
         for( int pos=0; pos<IR_MAX_CARS; ++pos )
         {
             sprintf( path, "QualifyResultsInfo:Results:Position:{%d}CarIdx:", pos );
             int carIdx = -1;
             if( parseYamlInt( sessionYaml, path, &carIdx ) ) {
                 ir_session.cars[carIdx].qualPosition = pos + 1;
+
+                sprintf( path, "QualifyResultsInfo:Results:Position:{%d}FastestTime:", pos );
+                parseYamlFloat( sessionYaml, path, &ir_session.cars[carIdx].qualTime );
             }
         }
 

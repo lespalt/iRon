@@ -40,6 +40,7 @@ SOFTWARE.
 #include "OverlayInputs.h"
 #include "OverlayStandings.h"
 #include "OverlayDebug.h"
+#include "OverlayDDU.h"
 
 
 static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus status )
@@ -94,6 +95,7 @@ int main()
     overlays.push_back( new OverlayRelative() );
     overlays.push_back( new OverlayInputs() );
     overlays.push_back( new OverlayStandings() );
+    overlays.push_back( new OverlayDDU() );
 #ifdef _DEBUG
     overlays.push_back( new OverlayDebug() );
 #endif

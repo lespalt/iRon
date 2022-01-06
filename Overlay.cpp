@@ -253,10 +253,10 @@ void Overlay::configChanged()
     if( !m_enabled )
         return;
 
-    static int cnt = 0;
-    const int defaultX = ((cnt%4)*500) + 100;
-    const int defaultY = (cnt/4)*400 + 100;
-    cnt++;
+    // Somewhat silly way to ensure the default positions of the overlays aren't all on top of each other.
+    const unsigned hash = MurmurHash2(m_name.c_str(),(int)m_name.length(),0x1234);
+    const int defaultX = (hash % 100) * 15;
+    const int defaultY = (hash % 80) * 10;
 
     // Position/dimensions might have changed
     const int x = g_cfg.getInt(m_name,"window_pos_x", defaultX);

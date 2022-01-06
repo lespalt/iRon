@@ -68,8 +68,9 @@ struct Car
     float           carClassEstLapTime = 0;
     int             practicePosition = 0;
     int             qualPosition = 0;
+    float           qualTime = 0;
     int             racePosition = 0;
-    int             lastLapInPits = 0;    
+    int             lastLapInPits = 0;
 };
 
 struct Session

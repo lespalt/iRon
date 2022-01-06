@@ -34,6 +34,8 @@ class OverlayRelative : public Overlay
 {
     public:
 
+        const float DefaultFontSize = 16;
+
         OverlayRelative()
             : Overlay("OverlayRelative")
         {}
@@ -57,7 +59,7 @@ class OverlayRelative : public Overlay
             m_text.reset( m_dwriteFactory.Get() );
 
             const std::string font = g_cfg.getString( m_name, "font", "Calibri Bold" );
-            const float fontSize = g_cfg.getFloat( m_name, "font_size", 16 );
+            const float fontSize = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
             const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
             HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, (DWRITE_FONT_WEIGHT)fontWeight, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
             m_textFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
@@ -164,7 +166,7 @@ class OverlayRelative : public Overlay
 
             // Display such that our driver is in the vertical center of the area where we're listing cars
 
-            const float  fontSize           = g_cfg.getFloat( m_name, "font_size", 16 );
+            const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
             const float  lineSpacing        = g_cfg.getFloat( m_name, "line_spacing", 6 );
             const float  lineHeight         = fontSize + lineSpacing;
             const float4 selfCol            = g_cfg.getFloat4( m_name, "self_col", float4(0.94f,0.67f,0.13f,1) );
@@ -267,7 +269,7 @@ class OverlayRelative : public Overlay
                 m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
                 // Pit age
-                if( (clm = m_columns.get((int)Columns::PIT)) && !ir_isPreStart() && (ci.pitAge>=1||ir_CarIdxOnPitRoad.getBool(ci.carIdx)) )
+                if( (clm = m_columns.get((int)Columns::PIT)) && !ir_isPreStart() && (ci.pitAge>=0||ir_CarIdxOnPitRoad.getBool(ci.carIdx)) )
                 {
                     r = { xoff+clm->textL, y-lineHeight/2+2, xoff+clm->textR, y+lineHeight/2-2 };
                     m_brush->SetColor( pitCol );
