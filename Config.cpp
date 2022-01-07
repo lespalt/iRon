@@ -76,7 +76,13 @@ bool Config::save()
 {
     const picojson::value value = picojson::value( m_pj );
     const std::string json = value.serialize(true);
-    return saveFile( m_filename, json );
+    const bool ok = saveFile( m_filename, json );
+    if( !ok ) {
+        char s[1024];
+        GetCurrentDirectory( sizeof(s), s );
+        printf("Could not save config file! Please make sure iRon is started from a directory for which it has write permissions. The current directory is: %s.\n", s);
+    }
+    return ok;
 }
 
 void Config::watchForChanges()

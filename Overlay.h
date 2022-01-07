@@ -32,6 +32,7 @@ SOFTWARE.
 #include <dcomp.h>
 #include <dwrite.h>
 #include <wrl.h>
+#include "util.h"
 
 class Overlay
 {
@@ -63,6 +64,7 @@ class Overlay
         virtual void    onDisable();
         virtual void    onUpdate();
         virtual void    onConfigChanged();
+        virtual float2  getDefaultSize();
 
         std::string     m_name;
         HWND            m_hwnd = 0;

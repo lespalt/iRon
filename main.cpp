@@ -78,15 +78,16 @@ int main()
 
     const std::string uiEditHotkeyStr    = uiEditHotkey==' '    ? "SPACE" : std::string(1,(char)uiEditHotkey);
     const std::string standingsHotkeyStr = standingsHotkey==' ' ? "SPACE" : std::string(1,(char)standingsHotkey);
-    printf("====================================================================================\n");
+    printf("\n====================================================================================\n");
     printf("Welcome to iRon! This app provides a few simple overlays for iRacing.\n\n");
     printf("NOTE: Most overlays are only active when iRacing is running and the car is on track.\n\n");
-    printf("At any time, press ALT-%s to move and resize overlays, and press CTRL-%s to toggle\n"\
-           "the standings overlay.\n\n", uiEditHotkeyStr.c_str(), standingsHotkeyStr.c_str());
+    printf("At any time, press:\n\n        ALT-%s to move and resize overlays\n        CTRL-%s to toggle the standings overlay\n\n",
+           uiEditHotkeyStr.c_str(), standingsHotkeyStr.c_str());
     printf("iRon will generate a file called \'config.json\' in its current directory. This file\n"\
            "stores your settings. You can edit the file at any time, even while iRon is running,\n"\
            "to customize your overlays.\n\n");
-    printf("For the latest version or to submit bug reports, visit https://github.com/lespalt/iRon.\n");
+    printf("To exit iRon, simply close this console window.\n\n");
+    printf("For the latest version or to submit bug reports, go to:\n\n        https://github.com/lespalt/iRon\n\n");
     printf("\nHappy Racing!\n");
     printf("====================================================================================\n\n");
 

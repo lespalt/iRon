@@ -286,8 +286,37 @@ class TextCache
         //
         void render( ID2D1RenderTarget* renderTarget, const wchar_t* str, IDWriteTextFormat* textFormat, float xmin, float xmax, float ycenter, ID2D1SolidColorBrush* brush, DWRITE_TEXT_ALIGNMENT align )
         {
-            if( xmax < xmin )
+            IDWriteTextLayout* textLayout = getOrCreateTextLayout( str, textFormat, xmin, xmax, align );
+            if( !textLayout )
                 return;
+
+            const float fontSize = textFormat->GetFontSize();
+
+            const D2D1_RECT_F r = { xmin, ycenter-fontSize, xmax, ycenter+fontSize };
+            renderTarget->DrawTextLayout( float2(xmin,ycenter-fontSize), textLayout, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP );
+        }
+
+        //
+        // Same assumptions as render().
+        //
+        float2 getExtent( const wchar_t* str, IDWriteTextFormat* textFormat, float xmin, float xmax, DWRITE_TEXT_ALIGNMENT align )
+        {
+            IDWriteTextLayout* textLayout = getOrCreateTextLayout( str, textFormat, xmin, xmax, align );
+            if( !textLayout )
+                return float2(0,0);
+
+            DWRITE_TEXT_METRICS m = {};
+            textLayout->GetMetrics( &m );
+
+            return float2( m.width, m.height );
+        }
+
+    private:
+
+        IDWriteTextLayout* getOrCreateTextLayout( const wchar_t* str, IDWriteTextFormat* textFormat, float xmin, float xmax, DWRITE_TEXT_ALIGNMENT align )
+        {
+            if( xmax < xmin )
+                return nullptr;
 
             const float fontSize = textFormat->GetFontSize();
             const float width = xmax - xmin;
@@ -315,11 +344,8 @@ class TextCache
                 textLayout = it->second;
             }
 
-            const D2D1_RECT_F r = { xmin, ycenter-fontSize, xmax, ycenter+fontSize };
-            renderTarget->DrawTextLayout( float2(xmin,ycenter-fontSize), textLayout, brush, D2D1_DRAW_TEXT_OPTIONS_CLIP );
+            return textLayout;
         }
-
-    private:
 
         std::unordered_map<unsigned int,IDWriteTextLayout*>  m_cache;
         IDWriteFactory*                                      m_factory = nullptr;

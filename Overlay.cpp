@@ -258,11 +258,13 @@ void Overlay::configChanged()
     const int defaultX = (hash % 100) * 15;
     const int defaultY = (hash % 80) * 10;
 
+    const float2 defaultSize = getDefaultSize();
+
     // Position/dimensions might have changed
     const int x = g_cfg.getInt(m_name,"window_pos_x", defaultX);
     const int y = g_cfg.getInt(m_name,"window_pos_y", defaultY);
-    const int w = g_cfg.getInt(m_name,"window_size_x", 400);
-    const int h = g_cfg.getInt(m_name,"window_size_y", 300);
+    const int w = g_cfg.getInt(m_name,"window_size_x", (int)defaultSize.x);
+    const int h = g_cfg.getInt(m_name,"window_size_y", (int)defaultSize.y);
     setWindowPosAndSize( x, y, w, h );
 
     onConfigChanged();
@@ -362,3 +364,4 @@ void Overlay::onEnable() {}
 void Overlay::onDisable() {}
 void Overlay::onUpdate() {}
 void Overlay::onConfigChanged() {}
+float2 Overlay::getDefaultSize() { return float2(400,300); }

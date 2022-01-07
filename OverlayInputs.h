@@ -38,6 +38,11 @@ class OverlayInputs : public Overlay
 
     protected:
 
+        virtual float2 getDefaultSize()
+        {
+            return float2(400,100);
+        }
+
         virtual void onConfigChanged()
         {
             // Width might have changed, reset tracker values

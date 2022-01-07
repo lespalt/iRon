@@ -469,7 +469,7 @@ ConnectionStatus ir_tick()
             car.racePosition = 0;
         }
 
-        // Grab position info from as many sessions as we see / understand
+        // Qualifying results info
         for( int pos=0; pos<IR_MAX_CARS; ++pos )
         {
             sprintf( path, "QualifyResultsInfo:Results:Position:{%d}CarIdx:", pos );
@@ -482,12 +482,22 @@ ConnectionStatus ir_tick()
             }
         }
 
+        // Session info (may override qual results from above, but that's ok since hopefully they're the same!)
         for( int session=0; ; ++session )
         {
             std::string sessionNameStr;
             sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionName:", session );
             if( !parseYamlStr( sessionYaml, path, sessionNameStr ) )
                 break;
+
+            std::string str;
+            sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionTime:", session );
+            parseYamlStr( sessionYaml, path, str );
+            ir_session.isUnlimitedTime = int( str=="unlimited" );
+
+            sprintf( path, "SessionInfo:Sessions:SessionNum:{%d}SessionLaps:", session );
+            parseYamlStr( sessionYaml, path, str );
+            ir_session.isUnlimitedLaps = int( str=="unlimited" );
 
             for( int pos=1; pos<IR_MAX_CARS+1; ++pos )
             {
