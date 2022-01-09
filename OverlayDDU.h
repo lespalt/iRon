@@ -109,14 +109,15 @@ class OverlayDDU : public Overlay
             m_d2dFactory->CreatePathGeometry( &m_pathGeometry );
             m_pathGeometry->Open( &geometrySink );
 
+            const float vtop = 0.13f;
             const float hgap = 0.005f;
             const float vgap = 0.05f;
-            const float vtop = 0.11f;
             const float gearw = 0.09f;
             const float w1 = 0.06f;
             const float w2 = 0.12f;
             const float h1 = 0.24f;
             const float h2 = 2*h1+vgap;
+            const float h3 = 3*h1+2*vgap;
             
             m_boxGear = makeBox( 0.5f-gearw/2, gearw, vtop, 0.53f, "" );
             addBoxFigure( geometrySink.Get(), m_boxGear );
@@ -145,13 +146,13 @@ class OverlayDDU : public Overlay
             m_boxInc = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+2*vgap+2*h1, h1, "Inc" );
             addBoxFigure( geometrySink.Get(), m_boxInc );
 
-            m_boxFuel = makeBox( 0.5f+gearw/2+hgap, w2*1.5f, vtop+h1/3, 2*vgap+h1*8.0f/3.0f, "Fuel" );
+            m_boxFuel = makeBox( 0.5f+gearw/2+hgap, w2, vtop, h3, "Fuel" );
             addBoxFigure( geometrySink.Get(), m_boxFuel );
 
-            m_boxBias = makeBox( 0.5f+gearw/2+2*hgap+w2*1.5f, w1, vtop+vgap+h1, h1, "Bias" );
+            m_boxBias = makeBox( 0.5f+gearw/2+2*hgap+w2, w1, vtop+vgap+h1, h1, "Bias" );
             addBoxFigure( geometrySink.Get(), m_boxBias );
             
-            m_boxTires = makeBox( 0.5f+gearw/2+2*hgap+w2*1.5f, w2, vtop+2*vgap+2*h1, h1, "Tires" );
+            m_boxTires = makeBox( 0.5f+gearw/2+2*hgap+w2, w2, vtop+2*vgap+2*h1, h1, "Tires" );
             addBoxFigure( geometrySink.Get(), m_boxTires );
 
             geometrySink->Close();
@@ -234,7 +235,7 @@ class OverlayDDU : public Overlay
                 swprintf( s, _countof(s), L"%S", lapsStr );
                 m_text.render( m_renderTarget.Get(), s, m_textFormatLarge.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0+m_boxLaps.h*0.55f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
-                m_text.render( m_renderTarget.Get(), L"REMAIN", m_textFormatVerySmall.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0+m_boxLaps.h*0.75f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_text.render( m_renderTarget.Get(), L"TO GO", m_textFormatVerySmall.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0+m_boxLaps.h*0.75f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             }
 
             // Position
@@ -317,11 +318,13 @@ class OverlayDDU : public Overlay
 
             // Fuel
             {
-                m_text.render( m_renderTarget.Get(), L"Est Laps",   m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"Remaining",  m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*4.2f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"Per Lap",    m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*6.2f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"+To Finish", m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*8.4f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"+Add",       m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                const float xoff = 7;
+
+                m_text.render( m_renderTarget.Get(), L"Est", m_textFormat.Get(),      m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Rem", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*4.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Per", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*6.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Fin", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*8.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Add", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 
                 const float safetyFact = g_cfg.getFloat( m_name, "fuel_estimate_safety_factor", 1.05f );
                 const bool  useGallons = ir_DisplayUnits.getInt() == 0;
@@ -339,15 +342,15 @@ class OverlayDDU : public Overlay
                 if( perLapConsEst > 0 )
                 {
                     const float estLaps = remainingFuel / perLapConsEst;
-                    swprintf( s, _countof(s), L"%.1f", estLaps );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormatBold.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    swprintf( s, _countof(s), L"%.*f", estLaps<10?1:0, estLaps );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatBold.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // Remaining
                 if( remainingFuel >= 0 )
                 {
                     swprintf( s, _countof(s), useGallons ? L"%.1f gl" : L"%.1f lt", remainingFuel );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*4.2f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*4.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // Per Lap
@@ -357,16 +360,16 @@ class OverlayDDU : public Overlay
                     if( useGallons )
                         val *= 0.264172f;
                     swprintf( s, _countof(s), useGallons ? L"%.1f gl" : L"%.1f lt", val );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*6.3f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*6.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // To Finish
                 const int remainingLaps = ir_SessionLapsRemainEx.getInt();  // TODO: replace with estimate when session is time-limited
                 if( remainingLaps != SHRT_MAX && perLapConsEst > 0 )
                 {
-                    float toFinish = remainingLaps * perLapConsEst - remainingFuel;
+                    float toFinish = std::max( 0.0f, remainingLaps * perLapConsEst - remainingFuel );
 
-                    if( toFinish > ir_session.fuelMaxLtr )
+                    if( toFinish > ir_PitSvFuel.getFloat() )
                         m_brush->SetColor( warnCol );
                     else 
                         m_brush->SetColor( goodCol );
@@ -374,7 +377,7 @@ class OverlayDDU : public Overlay
                     if( useGallons )
                         toFinish *= 0.264172f;
                     swprintf( s, _countof(s), useGallons ? L"%3.1f gl" : L"%3.1f lt", toFinish );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*8.4f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*8.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                     m_brush->SetColor( textCol );
                 }
 
@@ -388,7 +391,7 @@ class OverlayDDU : public Overlay
                     if( useGallons )
                         add *= 0.264172f;
                     swprintf( s, _countof(s), useGallons ? L"%3.1f gl" : L"%3.1f lt", add );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                     m_brush->SetColor( textCol );
                 }
             }
