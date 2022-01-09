@@ -119,7 +119,7 @@ protected:
             ci.pitAge = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
             carInfo.push_back( ci );
 
-            if( ci.best >= 0 && ci.best < fastestLapTime ) {
+            if( ci.best > 0 && ci.best < fastestLapTime ) {
                 fastestLapTime = ci.best;
                 fastestLapIdx = (int)carInfo.size()-1;
             }
@@ -180,6 +180,7 @@ protected:
 
         const ColumnLayout::Column* clm = nullptr;
         wchar_t s[512];
+        std::string str;
         D2D1_RECT_F r = {};
         D2D1_ROUNDED_RECT rr = {};
 
@@ -321,31 +322,19 @@ protected:
 
             // Best
             clm = m_columns.get( (int)Columns::BEST );
-            if( ci.best <= 0 )
-                s[0] = L'\0';
-            else {
-                const int mins = int(ci.best/60.0f);
-                if( mins )
-                    swprintf( s, _countof(s), L"%d:%05.3f", mins, fmodf(ci.best,60.0f) );
-                else
-                    swprintf( s, _countof(s), L"%.03f", ci.best );
-            }
+            str.clear();
+            if( ci.best > 0 )
+                str = formatLaptime( ci.best );
             m_brush->SetColor( ci.hasFastestLap ? fastestLapCol : otherCarCol );
-            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+            m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
             // Last
             clm = m_columns.get( (int)Columns::LAST );
-            if( ci.last <= 0 )
-                s[0] = L'\0';
-            else {
-                const int mins = int(ci.last/60.0f);
-                if( mins )
-                    swprintf( s, _countof(s), L"%d:%05.3f", mins, fmodf(ci.last,60.0f) );
-                else
-                    swprintf( s, _countof(s), L"%.03f", ci.last );
-            }
+            str.clear();
+            if( ci.last > 0 )
+                str = formatLaptime( ci.last );
             m_brush->SetColor( otherCarCol );
-            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+            m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
 
             // Delta
             if( ci.lapDelta || ci.delta )

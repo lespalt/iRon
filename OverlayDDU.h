@@ -40,8 +40,9 @@ class OverlayDDU : public Overlay
             : Overlay("OverlayDDU")
         {}
 
-        bool canEnableWhileDisconnected() const { return true; }
-        bool canEnableWhileNotDriving() const { return true; }
+        virtual bool    canEnableWhileNotDriving() const { return true; }
+        virtual bool    canEnableWhileDisconnected() const { return true; }
+
 
     protected:
 
@@ -99,46 +100,59 @@ class OverlayDDU : public Overlay
             m_textFormatVerySmall->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
             m_textFormatVerySmall->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
 
+            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*3.0f, L"en-us", &m_textFormatGear ));
+            m_textFormatGear->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+            m_textFormatGear->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+
             // Box geometries
             Microsoft::WRL::ComPtr<ID2D1GeometrySink>  geometrySink;
             m_d2dFactory->CreatePathGeometry( &m_pathGeometry );
             m_pathGeometry->Open( &geometrySink );
 
-            m_boxGear = makeBox( 0.5f-0.045f, 0.5f+0.045f, 0.11f, 0.64f, "" );
+            const float hgap = 0.005f;
+            const float vgap = 0.05f;
+            const float vtop = 0.11f;
+            const float gearw = 0.09f;
+            const float w1 = 0.06f;
+            const float w2 = 0.12f;
+            const float h1 = 0.24f;
+            const float h2 = 2*h1+vgap;
+            
+            m_boxGear = makeBox( 0.5f-gearw/2, gearw, vtop, 0.53f, "" );
             addBoxFigure( geometrySink.Get(), m_boxGear );
 
-            m_boxLaps = makeBox( 0.5f-0.165f, 0.5f-0.05f, 0.11f, 0.64f, "Lap" );
-            addBoxFigure( geometrySink.Get(), m_boxLaps );
-
-            m_boxPos = makeBox( 0.5f-0.23f, 0.5f-0.17f, 0.4f, 0.64f, "Pos" );
-            addBoxFigure( geometrySink.Get(), m_boxPos );
-
-            m_boxBest = makeBox( 0.5f+0.05f, 0.5f+0.16f, 0.11f, 0.35f, "Best" );
+            m_boxDelta = makeBox( 0.5f-gearw/2, gearw, vtop+2*vgap+2*h1, h1, "vs Best" );
+            addBoxFigure( geometrySink.Get(), m_boxDelta );
+            
+            m_boxBest = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop, h1, "Best" );
             addBoxFigure( geometrySink.Get(), m_boxBest );
-
-            m_boxLast = makeBox( 0.5f+0.05f, 0.5f+0.16f, 0.4f, 0.64f, "Last" );
+            
+            m_boxLast = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop+vgap+h1, h1, "Last" );
             addBoxFigure( geometrySink.Get(), m_boxLast );
 
-            m_boxP1Last = makeBox( 0.5f+0.05f, 0.5f+0.16f, 0.69f, 0.93f, "P1 Last" );
+            m_boxP1Last = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop+2*vgap+2*h1, h1, "P1 Last" );
             addBoxFigure( geometrySink.Get(), m_boxP1Last );
 
-            m_boxFuel = makeBox( 0.5f+0.165f, 0.5f+0.33f, 0.4f, 0.93f, "Fuel" );
-            addBoxFigure( geometrySink.Get(), m_boxFuel );
+            m_boxLaps = makeBox( 0.5f-gearw/2-2*hgap-2*w2, w2, vtop+vgap+h1, h2, "Lap" );
+            addBoxFigure( geometrySink.Get(), m_boxLaps );
 
-            m_boxTires = makeBox( 0.5f+0.335f, 0.5f+0.425f, 0.69f, 0.93f, "Tires" );
-            addBoxFigure( geometrySink.Get(), m_boxTires );
-
-            m_boxDelta = makeBox( 0.5f-0.045f, 0.5f+0.045f, 0.69f, 0.93f, "vs Best" );
-            addBoxFigure( geometrySink.Get(), m_boxDelta );
-
-            m_boxSession = makeBox( 0.5f-0.165f, 0.5f-0.05f, 0.69f, 0.93f, "Session" );
+            m_boxSession = makeBox( 0.5f-gearw/2-2*hgap-2*w2, w2, vtop+h1/3, h1*2.f/3.f, "Session" );
             addBoxFigure( geometrySink.Get(), m_boxSession );
 
-            m_boxInc = makeBox( 0.5f-0.23f, 0.5f-0.17f, 0.69f, 0.93f, "Inc" );
+            m_boxPos = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+vgap+h1, h1, "Pos" );
+            addBoxFigure( geometrySink.Get(), m_boxPos );
+
+            m_boxInc = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+2*vgap+2*h1, h1, "Inc" );
             addBoxFigure( geometrySink.Get(), m_boxInc );
 
-            m_boxBias = makeBox( 0.5f-0.295f, 0.5f-0.235f, 0.69f, 0.93f, "Bias" );
+            m_boxFuel = makeBox( 0.5f+gearw/2+hgap, w2*1.5f, vtop+h1/3, 2*vgap+h1*8.0f/3.0f, "Fuel" );
+            addBoxFigure( geometrySink.Get(), m_boxFuel );
+
+            m_boxBias = makeBox( 0.5f+gearw/2+2*hgap+w2*1.5f, w1, vtop+vgap+h1, h1, "Bias" );
             addBoxFigure( geometrySink.Get(), m_boxBias );
+            
+            m_boxTires = makeBox( 0.5f+gearw/2+2*hgap+w2*1.5f, w2, vtop+2*vgap+2*h1, h1, "Tires" );
+            addBoxFigure( geometrySink.Get(), m_boxTires );
 
             geometrySink->Close();
         }
@@ -150,20 +164,52 @@ class OverlayDDU : public Overlay
             const DWORD tickCount = GetTickCount();
 
             const int currentLap = ir_isPreStart() ? 0 : std::max(0,ir_CarIdxLap.getInt(carIdx));
-            const bool lapChanged = currentLap != m_prevCurrentLap;
+            const bool newLapCount = currentLap != m_prevCurrentLap;
             m_prevCurrentLap = currentLap;
-            if( lapChanged )
+            if( newLapCount )
                 m_lastLapChangeTickCount = tickCount;
 
             const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
+            const float4 outlineCol         = g_cfg.getFloat4( m_name, "outline_col", float4(0.7f,0.7f,0.7f,0.9f) );
             const float4 textCol            = g_cfg.getFloat4( m_name, "text_col", float4(1,1,1,0.9f) );
             const int    deltaHoldMsec      = g_cfg.getInt( m_name, "delta_hold_msec", 3000 );
+            const float4 goodCol            = float4(0,0.8f,0,0.5f);
+            const float4 badCol             = float4(0.8f,0,0,0.5f);
+            const float4 fastestCol         = float4(0.8f,0,0.8f,0.5f);
+            const float4 serviceCol         = float4(0.36f,0.61f,0.84f,1);
+            const float4 warnCol            = float4(1,0.6f,0,1);
 
             wchar_t s[512];
             float y = 0;
 
             m_renderTarget->BeginDraw();
-            m_brush->SetColor( textCol );            
+            m_brush->SetColor( textCol );      
+            
+            // Gear & Speed
+            {
+                const int gear = ir_Gear.getInt();
+                char gearC = ' ';
+                if( gear == -1 )
+                    gearC = 'R';
+                else if( gear == 0 )
+                    gearC = 'N';
+                else
+                    gearC = char(gear + 48);
+                swprintf( s, _countof(s), L"%C", gearC );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatGear.Get(), m_boxGear.x0, m_boxGear.x1, m_boxGear.y0+m_boxGear.h*0.41f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+
+                const float speedMps = ir_Speed.getFloat();
+                if( speedMps >= 0 )
+                {
+                    float speed = 0;
+                    if( ir_DisplayUnits.getInt() == 1 )
+                        speed = speedMps * 3.6f;
+                    else
+                        speed = speedMps * 2.23694f;
+                    swprintf( s, _countof(s), L"%d", (int)(speed+0.5f) );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatBold.Get(), m_boxGear.x0, m_boxGear.x1, m_boxGear.y0+m_boxGear.h*0.8f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
+            }
             
             // Laps
             {
@@ -203,27 +249,178 @@ class OverlayDDU : public Overlay
 
             // Best time
             {
-                
+                // Figure out if we have the fastest lap across all cars
+                bool haveFastestLap = false;
+                {
+                    int fastestLapCarIdx = -1;
+                    float fastest = FLT_MAX;
+                    for( int i=0; i<IR_MAX_CARS; ++i )
+                    {
+                        const Car& car = ir_session.cars[i];
+                        if( car.isPaceCar || car.isSpectator || car.userName.empty() )
+                            continue;
+
+                        const float best = ir_CarIdxBestLapTime.getFloat(i);
+                        if( best > 0 && best < fastest ) {
+                            fastest = best;
+                            fastestLapCarIdx = i;
+                        }
+                    }
+                    haveFastestLap = fastestLapCarIdx == ir_session.driverCarIdx;
+                }
+
+                const float t = ir_LapBestLapTime.getFloat();
+                if( t > 0 )
+                {
+                    D2D1_RECT_F r = { m_boxBest.x0, m_boxBest.y0, m_boxBest.x1, m_boxBest.y1 };
+                    m_brush->SetColor( haveFastestLap ? fastestCol : goodCol );
+                    m_renderTarget->FillRectangle( &r, m_brush.Get() );
+                    m_brush->SetColor( textCol );
+
+                    std::string str = formatLaptime( t );
+                    m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), m_boxBest.x0, m_boxBest.x1, m_boxBest.y0+m_boxBest.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
             }
 
             // Last time
             {
-                
+                const float t = ir_LapLastLapTime.getFloat();
+                if( t > 0 )
+                {
+                    std::string str = formatLaptime( t );
+                    m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), m_boxLast.x0, m_boxLast.x1, m_boxLast.y0+m_boxLast.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
             }
 
             // P1's Last time
             {
-                
+                // Figure out who's P1
+                int p1carIdx = -1;
+                for( int i=0; i<IR_MAX_CARS; ++i )
+                {
+                    if( ir_getPosition(i) == 1 ) {
+                        p1carIdx = i;
+                        break;
+                    }
+                }
+
+                if( p1carIdx >= 0 )
+                {
+                    const float t = ir_CarIdxLastLapTime.getFloat( p1carIdx );
+                    if( t > 0 )
+                    {
+                        std::string str = formatLaptime( t );
+                        m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), m_boxP1Last.x0, m_boxP1Last.x1, m_boxP1Last.y0+m_boxP1Last.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                    }
+                }
             }
 
             // Fuel
             {
-                
+                m_text.render( m_renderTarget.Get(), L"Est Laps",   m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Remaining",  m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*4.2f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Per Lap",    m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*6.2f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"+To Finish", m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*8.4f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"+Add",       m_textFormatSmall.Get(), m_boxFuel.x0+7, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+
+                const float safetyFact = g_cfg.getFloat( m_name, "fuel_estimate_safety_factor", 1.05f );
+                const bool  useGallons = ir_DisplayUnits.getInt() == 0;
+                const float remainingFuel = ir_FuelLevel.getFloat();
+
+                if( newLapCount )
+                {
+                    const float usedLastLap = std::max( 0.0f, m_lapStartRemainingFuel - remainingFuel );
+                    m_lapStartRemainingFuel = remainingFuel;
+                    m_maxPerLapFuelUsed = std::max( m_maxPerLapFuelUsed, usedLastLap );
+                }
+
+                // Est Laps
+                const float perLapConsEst = m_maxPerLapFuelUsed * safetyFact;  // conservative estimate of per-lap use for further calculations
+                if( perLapConsEst > 0 )
+                {
+                    const float estLaps = remainingFuel / perLapConsEst;
+                    swprintf( s, _countof(s), L"%.1f", estLaps );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatBold.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                }
+
+                // Remaining
+                if( remainingFuel >= 0 )
+                {
+                    swprintf( s, _countof(s), useGallons ? L"%.1f gl" : L"%.1f lt", remainingFuel );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*4.2f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                }
+
+                // Per Lap
+                if( m_maxPerLapFuelUsed > 0 )
+                {
+                    float val = m_maxPerLapFuelUsed;
+                    if( useGallons )
+                        val *= 0.264172f;
+                    swprintf( s, _countof(s), useGallons ? L"%.1f gl" : L"%.1f lt", val );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*6.3f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                }
+
+                // To Finish
+                const int remainingLaps = ir_SessionLapsRemainEx.getInt();  // TODO: replace with estimate when session is time-limited
+                if( remainingLaps != SHRT_MAX && perLapConsEst > 0 )
+                {
+                    float toFinish = remainingLaps * perLapConsEst - remainingFuel;
+
+                    if( toFinish > ir_session.fuelMaxLtr )
+                        m_brush->SetColor( warnCol );
+                    else 
+                        m_brush->SetColor( goodCol );
+
+                    if( useGallons )
+                        toFinish *= 0.264172f;
+                    swprintf( s, _countof(s), useGallons ? L"%3.1f gl" : L"%3.1f lt", toFinish );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*8.4f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_brush->SetColor( textCol );
+                }
+
+                // Add
+                float add = ir_PitSvFuel.getFloat();
+                if( add >= 0 )
+                {
+                    if( ir_dpFuelFill.getFloat() )
+                        m_brush->SetColor( serviceCol );
+
+                    if( useGallons )
+                        add *= 0.264172f;
+                    swprintf( s, _countof(s), useGallons ? L"%3.1f gl" : L"%3.1f lt", add );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-5, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_brush->SetColor( textCol );
+                }
             }
 
             // Tires
             {
-                
+                const float lf = 100.0f * std::min(std::min( ir_LFwearL.getFloat(), ir_LFwearM.getFloat() ), ir_LFwearR.getFloat() );
+                const float rf = 100.0f * std::min(std::min( ir_RFwearL.getFloat(), ir_RFwearM.getFloat() ), ir_RFwearR.getFloat() );
+                const float lr = 100.0f * std::min(std::min( ir_LRwearL.getFloat(), ir_LRwearM.getFloat() ), ir_LRwearR.getFloat() );
+                const float rr = 100.0f * std::min(std::min( ir_RRwearL.getFloat(), ir_RRwearM.getFloat() ), ir_RRwearR.getFloat() );
+
+                // Left
+                if( ir_dpLTireChange.getFloat() )
+                    m_brush->SetColor( serviceCol );
+                else
+                    m_brush->SetColor( textCol );
+                swprintf( s, _countof(s), L"%d", (int)(lf+0.5f) );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+20, m_boxTires.x0+m_boxTires.w/2, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                swprintf( s, _countof(s), L"%d", (int)(lr+0.5f) );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+20, m_boxTires.x0+m_boxTires.w/2, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+
+                // Right
+                if( ir_dpRTireChange.getFloat() )
+                    m_brush->SetColor( serviceCol );
+                else
+                    m_brush->SetColor( textCol );
+                swprintf( s, _countof(s), L"%d", (int)(rf+0.5f) );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                swprintf( s, _countof(s), L"%d", (int)(rr+0.5f) );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+
+                m_brush->SetColor( textCol );
             }
 
             // Delta
@@ -236,9 +433,9 @@ class OverlayDDU : public Overlay
                     t = m_prevDelta;
                     swprintf( s, _countof(s), L"%+5.3f", t );
                 }
-                else if( ir_LapDeltaToBestLap_OK.getBool() )
+                else if( ir_LapDeltaToSessionBestLap_OK.getBool() )
                 {
-                    t = ir_LapDeltaToBestLap.getFloat();
+                    t = ir_LapDeltaToSessionBestLap.getFloat();
                     swprintf( s, _countof(s), L"%+4.2f", t );
                     m_prevDelta = t;
                     m_prevDeltaOk = true;
@@ -251,7 +448,7 @@ class OverlayDDU : public Overlay
                 if( m_prevDeltaOk )
                 {
                     D2D1_RECT_F r = { m_boxDelta.x0, m_boxDelta.y0, m_boxDelta.x1, m_boxDelta.y1 };
-                    m_brush->SetColor( t <= 0 ? float4(0,0.8f,0,0.8f) : float4(0.8f,0,0,0.8f) );
+                    m_brush->SetColor( t <= 0 ? goodCol : badCol );
                     m_renderTarget->FillRectangle( &r, m_brush.Get() );
                     m_brush->SetColor( textCol );
                 }
@@ -277,10 +474,10 @@ class OverlayDDU : public Overlay
                 const int    mins  = int( sessionTime / 60.0 ) % 60;
                 const int    secs  = (int)fmod( sessionTime, 60.0 );
                 if( hours )
-                    swprintf( s, _countof(s), L"%d:%02d:%d", hours, mins, secs );
+                    swprintf( s, _countof(s), L"%d:%02d:%02d", hours, mins, secs );
                 else
                     swprintf( s, _countof(s), L"%02d:%02d", mins, secs );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxSession.x0, m_boxSession.x1, m_boxSession.y0+m_boxSession.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxSession.x0, m_boxSession.x1, m_boxSession.y0+m_boxSession.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             }
 
             // Incidents
@@ -293,11 +490,12 @@ class OverlayDDU : public Overlay
             // Brake bias
             {
                 const float bias = ir_dcBrakeBias.getFloat();
-                swprintf( s, _countof(s), L"%+2.1f", bias );
+                swprintf( s, _countof(s), L"%+3.1f", bias );
                 m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxBias.x0, m_boxBias.x1, m_boxBias.y0+m_boxBias.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             }
 
             // Draw all the box outlines and titles
+            m_brush->SetColor( outlineCol );
             m_renderTarget->DrawGeometry( m_pathGeometry.Get(), m_brush.Get() );
             m_text.render( m_renderTarget.Get(), L"Lap",     m_textFormatSmall.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Pos",     m_textFormatSmall.Get(), m_boxPos.x0, m_boxPos.x1, m_boxPos.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
@@ -348,17 +546,17 @@ class OverlayDDU : public Overlay
             return ry * (float)m_height;
         }
 
-        Box makeBox( float x0, float x1, float y0, float y1, const std::string& title )
+        Box makeBox( float x0, float w, float y0, float h, const std::string& title )
         {
             Box r;
 
-            if( x0 > x1 || y0 > y1 )
+            if( w <= 0 || h <= 0 )
                 return r;
 
             r.x0 = r2ax( x0 );
-            r.x1 = r2ax( x1 );
+            r.x1 = r2ax( x0+w );
             r.y0 = r2ay( y0 );
-            r.y1 = r2ay( y1 );
+            r.y1 = r2ay( y0+h );
             r.w = r.x1 - r.x0;
             r.h = r.y1 - r.y0;
             r.title = title;
@@ -385,6 +583,7 @@ class OverlayDDU : public Overlay
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatLarge;
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatSmall;
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatVerySmall;
+        Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatGear;
         Microsoft::WRL::ComPtr<ID2D1PathGeometry1> m_pathGeometry;
 
         TextCache    m_text;
@@ -394,5 +593,8 @@ class OverlayDDU : public Overlay
 
         float   m_prevDelta = 0;
         bool    m_prevDeltaOk = false;
+
+        float   m_lapStartRemainingFuel = 0;
+        float   m_maxPerLapFuelUsed = 0;
 };
 

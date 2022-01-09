@@ -411,10 +411,11 @@ ConnectionStatus ir_tick()
         else if( sessionNameStr == "RACE" )
             ir_session.sessionType = SessionType::RACE;
 
-        // Driver car index
+        // Driver/car info
         parseYamlInt( sessionYaml, "DriverInfo:DriverCarIdx:", &ir_session.driverCarIdx );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarFuelMaxLtr:", &ir_session.fuelMaxLtr );
 
-        // Driver info
+        // Per-Driver info
         for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
         {
             Car& car = ir_session.cars[carIdx];
