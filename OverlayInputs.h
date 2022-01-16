@@ -62,6 +62,14 @@ class OverlayInputs : public Overlay
             const float w = (float)m_width;
             const float h = (float)m_height;
 
+            // Make code below safe against indexing into size-1 when sizes are zero
+            if( m_throttleVtx.empty() )
+                m_throttleVtx.resize( 1 );
+            if( m_brakeVtx.empty() )
+                m_brakeVtx.resize( 1 );
+            if( m_steerVtx.empty() )
+                m_steerVtx.resize( 1 );
+
             // Advance input vertices
             for( int i=0; i<(int)m_throttleVtx.size()-1; ++i )
                 m_throttleVtx[i].y = m_throttleVtx[i+1].y;

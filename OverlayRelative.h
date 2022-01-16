@@ -129,10 +129,10 @@ class OverlayRelative : public Overlay
                         delta = C - S;
                     }
 
-                    // Assume no lap delta in practice, because we don't want to show drivers as lapped/lapping there.
+                    // Assume no lap delta when not in a race, because we don't want to show drivers as lapped/lapping there.
                     // Also reset it during initial pacing, since iRacing for some reason starts counting
                     // during the pace lap but then resets the counter a couple seconds in, confusing the logic.
-                    if( ir_session.sessionType==SessionType::PRACTICE || ir_isPreStart() )
+                    if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() )
                     {
                         lapDelta = 0;
                     }

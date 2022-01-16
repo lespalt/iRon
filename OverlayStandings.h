@@ -113,7 +113,7 @@ protected:
             ci.lapCount = std::max( ir_CarIdxLap.getInt(i), ir_CarIdxLapCompleted.getInt(i) );
             ci.position = ir_getPosition(i);
             ci.pctAroundLap = ir_CarIdxLapDistPct.getFloat(i);
-            ci.delta = -ir_CarIdxF2Time.getFloat(i);
+            ci.delta = ir_session.sessionType!=SessionType::RACE ? 0 : -ir_CarIdxF2Time.getFloat(i);
             ci.best = ir_CarIdxBestLapTime.getFloat(i) ? ir_CarIdxBestLapTime.getFloat(i) : car.qualTime;
             ci.last = ir_CarIdxLastLapTime.getFloat(i);
             ci.pitAge = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
@@ -136,22 +136,12 @@ protected:
                 return ap < bp;
             } );
 
-        // Compute lap delta to leader if it looks like it makes sense to do so
+        // Compute lap deltas to leader
         for( int i=0; i<(int)carInfo.size(); ++i )
         {
             const CarInfo& ciLeader = carInfo[0];
             CarInfo&       ci       = carInfo[i];
-
-            if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() ||
-                ci.pctAroundLap < 0 || ciLeader.pctAroundLap < 0 )
-            {
-                continue;
-            }
-
-            if( ci.pctAroundLap > ciLeader.pctAroundLap )
-                ci.lapDelta = ci.lapCount + 1 - ciLeader.lapCount;
-            else
-                ci.lapDelta = ci.lapCount - ciLeader.lapCount;
+            ci.lapDelta = ir_getLapDeltaToLeader( ci.carIdx, ciLeader.carIdx );
         }
 
         const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
@@ -271,7 +261,7 @@ protected:
 
             // Name
             clm = m_columns.get( (int)Columns::NAME );
-            swprintf( s, _countof(s), L"%S", car.userName.c_str() );
+            swprintf( s, _countof(s), L"%d %d %S", ir_CarIdxLap.getInt(), ir_CarIdxLapCompleted.getInt(),  car.userName.c_str() );
             m_brush->SetColor( textCol );
             m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 

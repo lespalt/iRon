@@ -396,5 +396,8 @@ float ir_estimateLaptime();
 // Get the best known position, from the latest session we can find.
 int ir_getPosition( int carIdx );
 
+// Get lap delta to P0 car if available.
+int ir_getLapDeltaToLeader( int carIdx, int ldrIdx );
+
 // Print all the variables the sim supports.
 void ir_printVariables();

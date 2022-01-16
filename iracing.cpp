@@ -583,7 +583,10 @@ bool ir_isPreStart()
 
 float ir_estimateLaptime()
 {
-    return ir_session.cars[ir_session.driverCarIdx].carClassEstLapTime;  // TODO: not sure this is a good enough estimate?
+    float best = ir_LapBestLapTime.getFloat();
+    if( best > 0 )
+        return best;
+    return ir_session.cars[ir_session.driverCarIdx].carClassEstLapTime;
 }
 
 int ir_getPosition( int carIdx )
@@ -606,6 +609,28 @@ int ir_getPosition( int carIdx )
         return pos;
 
     return 0;
+}
+
+int ir_getLapDeltaToLeader( int carIdx, int ldrIdx )
+{
+    if( carIdx < 0 || ldrIdx < 0 )
+        return 0;
+
+    const int carLapCount = std::max( ir_CarIdxLap.getInt(carIdx), ir_CarIdxLapCompleted.getInt(carIdx) );
+    const int ldrLapCount = std::max( ir_CarIdxLap.getInt(ldrIdx), ir_CarIdxLapCompleted.getInt(ldrIdx) );
+
+    const float carPctAroundLap = ir_CarIdxLapDistPct.getFloat( carIdx );
+    const float ldrPctAroundLap = ir_CarIdxLapDistPct.getFloat( ldrIdx );
+
+    if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() || carPctAroundLap < 0 || ldrPctAroundLap < 0 )
+        return 0;
+
+    int lapDelta = carLapCount - ldrLapCount;
+
+    if( carPctAroundLap > ldrPctAroundLap )
+        return lapDelta += 1;
+
+    return lapDelta;
 }
 
 void ir_printVariables()

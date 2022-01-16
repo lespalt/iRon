@@ -26,9 +26,11 @@ SOFTWARE.
 
 #include <vector>
 #include <algorithm>
+#include <deque>
 #include "Overlay.h"
 #include "iracing.h"
 #include "Config.h"
+#include "OverlayDebug.h"
 
 class OverlayDDU : public Overlay
 {
@@ -143,7 +145,10 @@ class OverlayDDU : public Overlay
             m_boxPos = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+vgap+h1, h1, "Pos" );
             addBoxFigure( geometrySink.Get(), m_boxPos );
 
-            m_boxInc = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+2*vgap+2*h1, h1, "Inc" );
+            m_boxLapDelta = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+2*vgap+2*h1, h1, "Lap " );
+            addBoxFigure( geometrySink.Get(), m_boxLapDelta );
+
+            m_boxInc = makeBox( 0.5f-gearw/2-4*hgap-2*w2-2*w1, w1, vtop+2*vgap+2*h1, h1, "Inc" );
             addBoxFigure( geometrySink.Get(), m_boxInc );
 
             m_boxFuel = makeBox( 0.5f+gearw/2+hgap, w2, vtop, h3, "Fuel" );
@@ -160,32 +165,44 @@ class OverlayDDU : public Overlay
 
         virtual void onUpdate()
         {
+            const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
+            const float4 outlineCol         = g_cfg.getFloat4( m_name, "outline_col", float4(0.7f,0.7f,0.7f,0.9f) );
+            const float4 textCol            = g_cfg.getFloat4( m_name, "text_col", float4(1,1,1,0.9f) );
+            const float4 goodCol            = float4(0,0.8f,0,0.6f);
+            const float4 badCol             = float4(0.8f,0.1f,0.1f,0.6f);
+            const float4 fastestCol         = float4(0.8f,0,0.8f,0.6f);
+            const float4 serviceCol         = float4(0.36f,0.61f,0.84f,1);
+            const float4 warnCol            = float4(1,0.6f,0,1);
+
             const int carIdx = ir_session.driverCarIdx;
 
             const DWORD tickCount = GetTickCount();
 
-            const int currentLap = ir_isPreStart() ? 0 : std::max(0,ir_CarIdxLap.getInt(carIdx));
-            const bool newLapCount = currentLap != m_prevCurrentLap;
+            // Figure out who's P1
+            int p1carIdx = -1;
+            for( int i=0; i<IR_MAX_CARS; ++i )
+            {
+                if( ir_getPosition(i) == 1 ) {
+                    p1carIdx = i;
+                    break;
+                }
+            }
+
+            // General lap info
+            const bool sessionIsTimeLimited = ir_SessionLapsTotal.getInt() == SHRT_MAX;
+            const int  remainingLaps = sessionIsTimeLimited ? int(0.5f+ir_SessionTimeRemain.getFloat()/ir_estimateLaptime()) : ir_SessionLapsRemainEx.getInt();
+            const int  currentLap = ir_isPreStart() ? 0 : std::max(0,ir_CarIdxLap.getInt(carIdx));
+            const bool lapCountUpdated = currentLap != m_prevCurrentLap;
             m_prevCurrentLap = currentLap;
-            if( newLapCount )
+            if( lapCountUpdated )
                 m_lastLapChangeTickCount = tickCount;
 
-            const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
-            const float4 outlineCol         = g_cfg.getFloat4( m_name, "outline_col", float4(0.7f,0.7f,0.7f,0.9f) );
-            const float4 textCol            = g_cfg.getFloat4( m_name, "text_col", float4(1,1,1,0.9f) );
-            const int    deltaHoldMsec      = g_cfg.getInt( m_name, "delta_hold_msec", 3000 );
-            const float4 goodCol            = float4(0,0.8f,0,0.5f);
-            const float4 badCol             = float4(0.8f,0,0,0.5f);
-            const float4 fastestCol         = float4(0.8f,0,0.8f,0.5f);
-            const float4 serviceCol         = float4(0.36f,0.61f,0.84f,1);
-            const float4 warnCol            = float4(1,0.6f,0,1);
+            dbg( "isUnlimitedTime: %d, isUnlimitedLaps: %d, rem laps: %d, total laps: %d, rem time: %f", (int)ir_session.isUnlimitedTime, (int)ir_session.isUnlimitedLaps, ir_SessionLapsRemainEx.getInt(), ir_SessionLapsTotal.getInt(), ir_SessionTimeRemain.getFloat() );
 
             wchar_t s[512];
-            float y = 0;
-
             m_renderTarget->BeginDraw();
-            m_brush->SetColor( textCol );      
-            
+            m_brush->SetColor( textCol );
+
             // Gear & Speed
             {
                 const int gear = ir_Gear.getInt();
@@ -217,21 +234,20 @@ class OverlayDDU : public Overlay
                 char lapsStr[32];
                 
                 const int totalLaps = ir_SessionLapsTotal.getInt();
-                const int remainingLaps = ir_SessionLapsRemainEx.getInt();
             
                 if( totalLaps == SHRT_MAX )
                     sprintf( lapsStr, "--" );
                 else
                     sprintf( lapsStr, "%d", totalLaps );
-                y = fontSize * 1.5f;
                 swprintf( s, _countof(s), L"%d / %S", currentLap, lapsStr );
                 m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0+m_boxLaps.h*0.25f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
                 if( remainingLaps == SHRT_MAX )
                     sprintf( lapsStr, "--" );
+                else if( sessionIsTimeLimited )
+                    sprintf( lapsStr, "~%d", remainingLaps );
                 else
                     sprintf( lapsStr, "%d", remainingLaps );
-                y += fontSize * 1.5f;
                 swprintf( s, _countof(s), L"%S", lapsStr );
                 m_text.render( m_renderTarget.Get(), s, m_textFormatLarge.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0+m_boxLaps.h*0.55f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
@@ -245,6 +261,16 @@ class OverlayDDU : public Overlay
                 {
                     swprintf( s, _countof(s), L"%d", pos );
                     m_text.render( m_renderTarget.Get(), s, m_textFormatLarge.Get(), m_boxPos.x0, m_boxPos.x1, m_boxPos.y0+m_boxPos.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
+            }
+
+            // Lap Delta
+            {
+                const int lapDelta = ir_getLapDeltaToLeader( ir_session.driverCarIdx, p1carIdx );
+                if( lapDelta )
+                {
+                    swprintf( s, _countof(s), L"%d", lapDelta );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatLarge.Get(), m_boxLapDelta.x0, m_boxLapDelta.x1, m_boxLapDelta.y0+m_boxLapDelta.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
             }
 
@@ -273,11 +299,20 @@ class OverlayDDU : public Overlay
                 const float t = ir_LapBestLapTime.getFloat();
                 if( t > 0 )
                 {
-                    D2D1_RECT_F r = { m_boxBest.x0, m_boxBest.y0, m_boxBest.x1, m_boxBest.y1 };
-                    m_brush->SetColor( haveFastestLap ? fastestCol : goodCol );
-                    m_renderTarget->FillRectangle( &r, m_brush.Get() );
-                    m_brush->SetColor( textCol );
+                    bool vsb = true;
+                    if( t < m_prevBestLapTime && tickCount-m_lastLapChangeTickCount < 5000 )  // blink
+                        vsb = (tickCount % 800) < 500;
+                    else
+                        m_prevBestLapTime = t;
 
+                    if( vsb )
+                    {
+                        D2D1_RECT_F r = { m_boxBest.x0, m_boxBest.y0, m_boxBest.x1, m_boxBest.y1 };
+                        m_brush->SetColor( haveFastestLap ? fastestCol : goodCol );
+                        m_renderTarget->FillRectangle( &r, m_brush.Get() );
+                    }
+
+                    m_brush->SetColor( textCol );
                     std::string str = formatLaptime( t );
                     m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), m_boxBest.x0, m_boxBest.x1, m_boxBest.y0+m_boxBest.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
@@ -294,17 +329,7 @@ class OverlayDDU : public Overlay
             }
 
             // P1's Last time
-            {
-                // Figure out who's P1
-                int p1carIdx = -1;
-                for( int i=0; i<IR_MAX_CARS; ++i )
-                {
-                    if( ir_getPosition(i) == 1 ) {
-                        p1carIdx = i;
-                        break;
-                    }
-                }
-
+            {                
                 if( p1carIdx >= 0 )
                 {
                     const float t = ir_CarIdxLastLapTime.getFloat( p1carIdx );
@@ -320,51 +345,88 @@ class OverlayDDU : public Overlay
             {
                 const float xoff = 7;
 
-                m_text.render( m_renderTarget.Get(), L"Est", m_textFormat.Get(),      m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"Rem", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*4.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"Per", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*6.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
-                m_text.render( m_renderTarget.Get(), L"Fin", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*8.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                // Progress bar
+                {
+                    const float x0 = m_boxFuel.x0+xoff;
+                    const float x1 = m_boxFuel.x1-xoff;
+                    D2D1_RECT_F r = { x0, m_boxFuel.y0+12, x1, m_boxFuel.y0+m_boxFuel.h*0.11f };
+                    m_brush->SetColor( float4( 0.5f, 0.5f, 0.5f, 0.5f ) );
+                    m_renderTarget->FillRectangle( &r, m_brush.Get() );
+
+                    const float fuelPct = ir_FuelLevelPct.getFloat();
+                    r = { x0, m_boxFuel.y0+12, x0+fuelPct*(x1-x0), m_boxFuel.y0+m_boxFuel.h*0.11f };
+                    m_brush->SetColor( fuelPct < 0.1f ? warnCol : goodCol );
+                    m_renderTarget->FillRectangle( &r, m_brush.Get() );
+                }
+                
+                m_brush->SetColor( textCol );
+                m_text.render( m_renderTarget.Get(), L"Laps", m_textFormat.Get(),      m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*2.8f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Rem", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*5.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Per", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*6.9f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_text.render( m_renderTarget.Get(), L"Fin", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*8.7f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
                 m_text.render( m_renderTarget.Get(), L"Add", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 
-                const float safetyFact = g_cfg.getFloat( m_name, "fuel_estimate_safety_factor", 1.05f );
-                const bool  useGallons = ir_DisplayUnits.getInt() == 0;
-                const float remainingFuel = ir_FuelLevel.getFloat();
+                const float estimateFactor = g_cfg.getFloat( m_name, "fuel_estimate_factor", 1.05f );
+                const bool  useGallons     = ir_DisplayUnits.getInt() == 0;
+                const float remainingFuel  = ir_FuelLevel.getFloat();
 
-                if( newLapCount )
+                // Update average fuel consumption tracking. Ignore laps that weren't entirely under green or where we pitted.
+                float avgPerLap = 0;
                 {
-                    const float usedLastLap = std::max( 0.0f, m_lapStartRemainingFuel - remainingFuel );
-                    m_lapStartRemainingFuel = remainingFuel;
-                    m_maxPerLapFuelUsed = std::max( m_maxPerLapFuelUsed, usedLastLap );
+                    if( lapCountUpdated )
+                    {
+                        const float usedLastLap = std::max( 0.0f, m_lapStartRemainingFuel - remainingFuel );
+                        m_lapStartRemainingFuel = remainingFuel;
+
+                        if( m_isValidFuelLap )
+                            m_fuelUsedLastLaps.push_back( usedLastLap );
+
+                        const int numLapsToAvg = g_cfg.getInt( m_name, "fuel_estimate_avg_green_laps", 4 );
+                        while( m_fuelUsedLastLaps.size() > numLapsToAvg )
+                            m_fuelUsedLastLaps.pop_front();
+
+                        m_isValidFuelLap = true;
+                    }
+                    if( (ir_SessionFlags.getInt() & (irsdk_yellow|irsdk_yellowWaving|irsdk_red|irsdk_checkered|irsdk_crossed|irsdk_oneLapToGreen|irsdk_caution|irsdk_cautionWaving|irsdk_disqualify|irsdk_repair)) || ir_CarIdxOnPitRoad.getBool(carIdx) )
+                        m_isValidFuelLap = false;
+                    
+                    for( float v : m_fuelUsedLastLaps ) {
+                        avgPerLap += v;
+                        dbg("%f",v);
+                    }
+                    if( !m_fuelUsedLastLaps.empty() )
+                        avgPerLap /= (float)m_fuelUsedLastLaps.size();
+
+                    dbg( "valid fuel lap: %d", (int)m_isValidFuelLap );
                 }
 
                 // Est Laps
-                const float perLapConsEst = m_maxPerLapFuelUsed * safetyFact;  // conservative estimate of per-lap use for further calculations
+                const float perLapConsEst = avgPerLap * estimateFactor;  // conservative estimate of per-lap use for further calculations
                 if( perLapConsEst > 0 )
                 {
                     const float estLaps = remainingFuel / perLapConsEst;
                     swprintf( s, _countof(s), L"%.*f", estLaps<10?1:0, estLaps );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormatBold.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*2.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatBold.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*2.8f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // Remaining
                 if( remainingFuel >= 0 )
                 {
                     swprintf( s, _countof(s), useGallons ? L"%.1f gl" : L"%.1f lt", remainingFuel );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*4.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*5.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // Per Lap
-                if( m_maxPerLapFuelUsed > 0 )
+                if( avgPerLap > 0 )
                 {
-                    float val = m_maxPerLapFuelUsed;
+                    float val = avgPerLap;
                     if( useGallons )
                         val *= 0.264172f;
                     swprintf( s, _countof(s), useGallons ? L"%.1f gl" : L"%.1f lt", val );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*6.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*6.9f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
                 // To Finish
-                const int remainingLaps = ir_SessionLapsRemainEx.getInt();  // TODO: replace with estimate when session is time-limited
                 if( remainingLaps != SHRT_MAX && perLapConsEst > 0 )
                 {
                     float toFinish = std::max( 0.0f, remainingLaps * perLapConsEst - remainingFuel );
@@ -377,7 +439,7 @@ class OverlayDDU : public Overlay
                     if( useGallons )
                         toFinish *= 0.264172f;
                     swprintf( s, _countof(s), useGallons ? L"%3.1f gl" : L"%3.1f lt", toFinish );
-                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*8.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*8.7f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                     m_brush->SetColor( textCol );
                 }
 
@@ -422,56 +484,48 @@ class OverlayDDU : public Overlay
                 m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 swprintf( s, _countof(s), L"%d", (int)(rr+0.5f) );
                 m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                m_brush->SetColor( textCol );
+                
+                /* TODO: why doesn't iracing report 255 here in an AI session where we DO have unlimited tire sets??
+
+                // Left available
+                int avail = ir_LeftTireSetsAvailable.getInt();
+                if( avail < 255 )
+                {
+                    swprintf( s, _countof(s), L"%d", avail );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0, m_boxTires.x0+m_boxTires.w/4, m_boxTires.y0+m_boxTires.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
+
+                // Right available
+                avail = ir_RightTireSetsAvailable.getInt();
+                if( avail < 255 )
+                {
+                    swprintf( s, _countof(s), L"%d", avail );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w*3.0f/4.0f, m_boxTires.x1, m_boxTires.y0+m_boxTires.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
+                */
 
                 m_brush->SetColor( textCol );
             }
 
             // Delta
             {
-                s[0] = L'\0';
-                float t = 0;
-
-                if( m_prevDeltaOk && int(tickCount-m_lastLapChangeTickCount) <= deltaHoldMsec )
+                if( ir_LapDeltaToSessionBestLap_OK.getBool() )
                 {
-                    t = m_prevDelta;
-                    swprintf( s, _countof(s), L"%+5.3f", t );
-                }
-                else if( ir_LapDeltaToSessionBestLap_OK.getBool() )
-                {
-                    t = ir_LapDeltaToSessionBestLap.getFloat();
+                    const float t = ir_LapDeltaToSessionBestLap.getFloat();
                     swprintf( s, _countof(s), L"%+4.2f", t );
-                    m_prevDelta = t;
-                    m_prevDeltaOk = true;
-                }
-                else
-                {
-                    m_prevDeltaOk = false;
-                }
 
-                if( m_prevDeltaOk )
-                {
                     D2D1_RECT_F r = { m_boxDelta.x0, m_boxDelta.y0, m_boxDelta.x1, m_boxDelta.y1 };
                     m_brush->SetColor( t <= 0 ? goodCol : badCol );
                     m_renderTarget->FillRectangle( &r, m_brush.Get() );
                     m_brush->SetColor( textCol );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxDelta.x0, m_boxDelta.x1, m_boxDelta.y0+m_boxDelta.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
                 }
-
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxDelta.x0, m_boxDelta.x1, m_boxDelta.y0+m_boxDelta.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             }
 
             // Session
             {                   
-                // iRacing will sometimes set a really high time limit in addition to a lap limit,
-                // forcing us to choose whether we assume a session is naturally time-limited or lap-limited.
-                // So once again use a heuristic to guess what makes the most sense to display.
-
-                bool countdown = false;
-                if( ir_session.isUnlimitedLaps && !ir_session.isUnlimitedTime )
-                    countdown = true;
-                if( !ir_session.isUnlimitedLaps && !ir_session.isUnlimitedTime && ir_session.sessionType!=SessionType::RACE )
-                    countdown = true;
-
-                const double sessionTime = countdown ? ir_SessionTimeRemain.getDouble() : ir_SessionTime.getDouble();
+                const double sessionTime = sessionIsTimeLimited ? ir_SessionTimeRemain.getDouble() : ir_SessionTime.getDouble();
 
                 const int    hours = int( sessionTime / 3600.0 );
                 const int    mins  = int( sessionTime / 60.0 ) % 60;
@@ -479,8 +533,8 @@ class OverlayDDU : public Overlay
                 if( hours )
                     swprintf( s, _countof(s), L"%d:%02d:%02d", hours, mins, secs );
                 else
-                    swprintf( s, _countof(s), L"%02d:%02d", mins, secs );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxSession.x0, m_boxSession.x1, m_boxSession.y0+m_boxSession.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                    swprintf( s, _countof(s), L"%02d:%02d", mins, secs ); 
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxSession.x0, m_boxSession.x1, m_boxSession.y0+m_boxSession.h*0.55f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             }
 
             // Incidents
@@ -502,6 +556,7 @@ class OverlayDDU : public Overlay
             m_renderTarget->DrawGeometry( m_pathGeometry.Get(), m_brush.Get() );
             m_text.render( m_renderTarget.Get(), L"Lap",     m_textFormatSmall.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Pos",     m_textFormatSmall.Get(), m_boxPos.x0, m_boxPos.x1, m_boxPos.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            m_text.render( m_renderTarget.Get(), L"Lap \u0394",m_textFormatSmall.Get(), m_boxLapDelta.x0, m_boxLapDelta.x1, m_boxLapDelta.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Best",    m_textFormatSmall.Get(), m_boxBest.x0, m_boxBest.x1, m_boxBest.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Last",    m_textFormatSmall.Get(), m_boxLast.x0, m_boxLast.x1, m_boxLast.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"P1 Last", m_textFormatSmall.Get(), m_boxP1Last.x0, m_boxP1Last.x1, m_boxP1Last.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
@@ -520,7 +575,7 @@ class OverlayDDU : public Overlay
             if( !box.title.empty() )
             {
                 const float hctr = (box.x0 + box.x1) * 0.5f;
-                const float titleWidth = 6 + m_text.getExtent( toWide(box.title).c_str(), m_textFormat.Get(), box.x0, box.x1, DWRITE_TEXT_ALIGNMENT_CENTER ).x;
+                const float titleWidth = std::min( box.w, 6 + m_text.getExtent( toWide(box.title).c_str(), m_textFormat.Get(), box.x0, box.x1, DWRITE_TEXT_ALIGNMENT_CENTER ).x );
                 geometrySink->BeginFigure( float2(hctr-titleWidth/2,box.y0), D2D1_FIGURE_BEGIN_HOLLOW );
                 geometrySink->AddLine( float2(box.x0,box.y0) );
                 geometrySink->AddLine( float2(box.x0,box.y1) );
@@ -571,6 +626,7 @@ class OverlayDDU : public Overlay
         Box m_boxGear;
         Box m_boxLaps;
         Box m_boxPos;
+        Box m_boxLapDelta;
         Box m_boxBest;
         Box m_boxLast;
         Box m_boxP1Last;
@@ -589,15 +645,15 @@ class OverlayDDU : public Overlay
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatGear;
         Microsoft::WRL::ComPtr<ID2D1PathGeometry1> m_pathGeometry;
 
-        TextCache    m_text;
+        TextCache           m_text;
 
-        int     m_prevCurrentLap = 0;
-        DWORD   m_lastLapChangeTickCount = 0;
+        int                 m_prevCurrentLap = 0;
+        DWORD               m_lastLapChangeTickCount = 0;
 
-        float   m_prevDelta = 0;
-        bool    m_prevDeltaOk = false;
+        float               m_prevBestLapTime = 0;
 
-        float   m_lapStartRemainingFuel = 0;
-        float   m_maxPerLapFuelUsed = 0;
+        float               m_lapStartRemainingFuel = 0;
+        std::deque<float>   m_fuelUsedLastLaps;
+        bool                m_isValidFuelLap = false;
 };
 
