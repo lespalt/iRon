@@ -374,3 +374,8 @@ inline float2 computeTextExtent( const wchar_t* str, IDWriteFactory* factory, ID
 
     return float2( m.width, m.height );
 }
+
+inline float celsiusToFahrenheit( float c )
+{
+    return c * (9.0f / 5.0f) + 32.0f;
+}

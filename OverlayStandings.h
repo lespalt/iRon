@@ -251,7 +251,6 @@ protected:
             clm = m_columns.get( (int)Columns::CAR_NUMBER );
             swprintf( s, _countof(s), L"#%S", car.carNumberStr.c_str() );
             r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
             rr.radiusX = 3;
             rr.radiusY = 3;
             m_brush->SetColor( textCol );
@@ -260,10 +259,17 @@ protected:
             m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
             // Name
-            clm = m_columns.get( (int)Columns::NAME );
-            swprintf( s, _countof(s), L"%d %d %S", ir_CarIdxLap.getInt(), ir_CarIdxLapCompleted.getInt(),  car.userName.c_str() );
-            m_brush->SetColor( textCol );
-            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+            {
+                const bool active = ir_CarIdxLap.getInt(ci.carIdx) >= 0 || ir_CarIdxLapCompleted.getInt(ci.carIdx) >= 0;
+                clm = m_columns.get( (int)Columns::NAME );
+                swprintf( s, _countof(s), L"%S", car.userName.c_str() );
+                float4 col = textCol;
+                if( !active )
+                    textCol.a *= 0.5f;
+                m_brush->SetColor( col );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                m_brush->SetColor( textCol );
+            }
 
             // Pit age
             if( !ir_isPreStart() && (ci.pitAge>=0||ir_CarIdxOnPitRoad.getBool(ci.carIdx)) )
