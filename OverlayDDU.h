@@ -76,91 +76,111 @@ class OverlayDDU : public Overlay
 
         virtual void onConfigChanged()
         {
-            m_text.reset( m_dwriteFactory.Get() );
-
             // Font stuff
-            const std::string font = g_cfg.getString( m_name, "font", "Arial" );
-            const float fontSize = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
-            const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
-            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
-            m_textFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
-            m_textFormat->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+            {
+                m_text.reset( m_dwriteFactory.Get() );
 
-            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormatBold ));
-            m_textFormatBold->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
-            m_textFormatBold->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+                const std::string font = g_cfg.getString( m_name, "font", "Arial" );
+                const float fontSize = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
+                const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
+                HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
+                m_textFormat->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+                m_textFormat->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
 
-            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*1.2f, L"en-us", &m_textFormatLarge ));
-            m_textFormatLarge->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
-            m_textFormatLarge->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+                HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormatBold ));
+                m_textFormatBold->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+                m_textFormatBold->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
 
-            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*0.7f, L"en-us", &m_textFormatSmall ));
-            m_textFormatSmall->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
-            m_textFormatSmall->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+                HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*1.2f, L"en-us", &m_textFormatLarge ));
+                m_textFormatLarge->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+                m_textFormatLarge->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
 
-            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*0.6f, L"en-us", &m_textFormatVerySmall ));
-            m_textFormatVerySmall->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
-            m_textFormatVerySmall->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+                HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*0.7f, L"en-us", &m_textFormatSmall ));
+                m_textFormatSmall->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+                m_textFormatSmall->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
 
-            HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*3.0f, L"en-us", &m_textFormatGear ));
-            m_textFormatGear->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
-            m_textFormatGear->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+                HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_LIGHT, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*0.6f, L"en-us", &m_textFormatVerySmall ));
+                m_textFormatVerySmall->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+                m_textFormatVerySmall->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+
+                HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, DWRITE_FONT_WEIGHT_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize*3.0f, L"en-us", &m_textFormatGear ));
+                m_textFormatGear->SetParagraphAlignment( DWRITE_PARAGRAPH_ALIGNMENT_CENTER );
+                m_textFormatGear->SetWordWrapping( DWRITE_WORD_WRAPPING_NO_WRAP );
+            }
+
+            // Background geometry
+            {
+                Microsoft::WRL::ComPtr<ID2D1GeometrySink>  geometrySink;
+                m_d2dFactory->CreatePathGeometry( &m_backgroundPathGeometry );
+                m_backgroundPathGeometry->Open( &geometrySink );
+
+                const float w = (float)m_width;
+                const float h = (float)m_height;
+
+                geometrySink->BeginFigure( float2(0,h), D2D1_FIGURE_BEGIN_FILLED );
+                geometrySink->AddBezier( D2D1::BezierSegment(float2(0,-h/3),float2(w,-h/3),float2(w,h)) );
+                geometrySink->EndFigure( D2D1_FIGURE_END_CLOSED );
+
+                geometrySink->Close();
+            }
 
             // Box geometries
-            Microsoft::WRL::ComPtr<ID2D1GeometrySink>  geometrySink;
-            m_d2dFactory->CreatePathGeometry( &m_pathGeometry );
-            m_pathGeometry->Open( &geometrySink );
+            {
+                Microsoft::WRL::ComPtr<ID2D1GeometrySink>  geometrySink;
+                m_d2dFactory->CreatePathGeometry( &m_boxPathGeometry );
+                m_boxPathGeometry->Open( &geometrySink );
 
-            const float vtop = 0.13f;
-            const float hgap = 0.005f;
-            const float vgap = 0.05f;
-            const float gearw = 0.09f;
-            const float w1 = 0.06f;
-            const float w2 = 0.12f;
-            const float h1 = 0.24f;
-            const float h2 = 2*h1+vgap;
-            const float h3 = 3*h1+2*vgap;
+                const float vtop = 0.13f;
+                const float hgap = 0.005f;
+                const float vgap = 0.05f;
+                const float gearw = 0.09f;
+                const float w1 = 0.06f;
+                const float w2 = 0.12f;
+                const float h1 = 0.24f;
+                const float h2 = 2*h1+vgap;
+                const float h3 = 3*h1+2*vgap;
             
-            m_boxGear = makeBox( 0.5f-gearw/2, gearw, vtop, 0.53f, "" );
-            addBoxFigure( geometrySink.Get(), m_boxGear );
+                m_boxGear = makeBox( 0.5f-gearw/2, gearw, vtop, 0.53f, "" );
+                addBoxFigure( geometrySink.Get(), m_boxGear );
 
-            m_boxDelta = makeBox( 0.5f-gearw/2, gearw, vtop+2*vgap+2*h1, h1, "vs Best" );
-            addBoxFigure( geometrySink.Get(), m_boxDelta );
+                m_boxDelta = makeBox( 0.5f-gearw/2, gearw, vtop+2*vgap+2*h1, h1, "vs Best" );
+                addBoxFigure( geometrySink.Get(), m_boxDelta );
             
-            m_boxBest = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop, h1, "Best" );
-            addBoxFigure( geometrySink.Get(), m_boxBest );
+                m_boxBest = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop, h1, "Best" );
+                addBoxFigure( geometrySink.Get(), m_boxBest );
             
-            m_boxLast = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop+vgap+h1, h1, "Last" );
-            addBoxFigure( geometrySink.Get(), m_boxLast );
+                m_boxLast = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop+vgap+h1, h1, "Last" );
+                addBoxFigure( geometrySink.Get(), m_boxLast );
 
-            m_boxP1Last = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop+2*vgap+2*h1, h1, "P1 Last" );
-            addBoxFigure( geometrySink.Get(), m_boxP1Last );
+                m_boxP1Last = makeBox( 0.5f-gearw/2-hgap-w2, w2, vtop+2*vgap+2*h1, h1, "P1 Last" );
+                addBoxFigure( geometrySink.Get(), m_boxP1Last );
 
-            m_boxLaps = makeBox( 0.5f-gearw/2-2*hgap-2*w2, w2, vtop+vgap+h1, h2, "Lap" );
-            addBoxFigure( geometrySink.Get(), m_boxLaps );
+                m_boxLaps = makeBox( 0.5f-gearw/2-2*hgap-2*w2, w2, vtop+vgap+h1, h2, "Lap" );
+                addBoxFigure( geometrySink.Get(), m_boxLaps );
 
-            m_boxSession = makeBox( 0.5f-gearw/2-2*hgap-2*w2, w2, vtop+h1/3, h1*2.f/3.f, "Session" );
-            addBoxFigure( geometrySink.Get(), m_boxSession );
+                m_boxSession = makeBox( 0.5f-gearw/2-2*hgap-2*w2, w2, vtop+h1/3, h1*2.f/3.f, "Session" );
+                addBoxFigure( geometrySink.Get(), m_boxSession );
 
-            m_boxPos = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+vgap+h1, h1, "Pos" );
-            addBoxFigure( geometrySink.Get(), m_boxPos );
+                m_boxPos = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+vgap+h1, h1, "Pos" );
+                addBoxFigure( geometrySink.Get(), m_boxPos );
 
-            m_boxLapDelta = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+2*vgap+2*h1, h1, "Lap " );
-            addBoxFigure( geometrySink.Get(), m_boxLapDelta );
+                m_boxLapDelta = makeBox( 0.5f-gearw/2-3*hgap-2*w2-w1, w1, vtop+2*vgap+2*h1, h1, "Lap " );
+                addBoxFigure( geometrySink.Get(), m_boxLapDelta );
 
-            m_boxInc = makeBox( 0.5f-gearw/2-4*hgap-2*w2-2*w1, w1, vtop+2*vgap+2*h1, h1, "Inc" );
-            addBoxFigure( geometrySink.Get(), m_boxInc );
+                m_boxInc = makeBox( 0.5f-gearw/2-4*hgap-2*w2-2*w1, w1, vtop+2*vgap+2*h1, h1, "Inc" );
+                addBoxFigure( geometrySink.Get(), m_boxInc );
 
-            m_boxFuel = makeBox( 0.5f+gearw/2+hgap, w2, vtop, h3, "Fuel" );
-            addBoxFigure( geometrySink.Get(), m_boxFuel );
+                m_boxFuel = makeBox( 0.5f+gearw/2+hgap, w2, vtop, h3, "Fuel" );
+                addBoxFigure( geometrySink.Get(), m_boxFuel );
 
-            m_boxBias = makeBox( 0.5f+gearw/2+2*hgap+w2, w1, vtop+vgap+h1, h1, "Bias" );
-            addBoxFigure( geometrySink.Get(), m_boxBias );
+                m_boxBias = makeBox( 0.5f+gearw/2+2*hgap+w2, w1, vtop+vgap+h1, h1, "Bias" );
+                addBoxFigure( geometrySink.Get(), m_boxBias );
             
-            m_boxTires = makeBox( 0.5f+gearw/2+2*hgap+w2, w2, vtop+2*vgap+2*h1, h1, "Tires" );
-            addBoxFigure( geometrySink.Get(), m_boxTires );
+                m_boxTires = makeBox( 0.5f+gearw/2+2*hgap+w2, w2, vtop+2*vgap+2*h1, h1, "Tires" );
+                addBoxFigure( geometrySink.Get(), m_boxTires );
 
-            geometrySink->Close();
+                geometrySink->Close();
+            }
         }
 
         virtual void onUpdate()
@@ -202,6 +222,13 @@ class OverlayDDU : public Overlay
             wchar_t s[512];
             m_renderTarget->BeginDraw();
             m_brush->SetColor( textCol );
+
+            // Background
+            {
+                m_renderTarget->Clear( float4(0,0,0,0) );
+                m_brush->SetColor( g_cfg.getFloat4( m_name, "background_col", float4(0,0,0,0.9f) ) );
+                m_renderTarget->FillGeometry( m_backgroundPathGeometry.Get(), m_brush.Get() );
+            }
 
             // Gear & Speed
             {
@@ -553,7 +580,7 @@ class OverlayDDU : public Overlay
 
             // Draw all the box outlines and titles
             m_brush->SetColor( outlineCol );
-            m_renderTarget->DrawGeometry( m_pathGeometry.Get(), m_brush.Get() );
+            m_renderTarget->DrawGeometry( m_boxPathGeometry.Get(), m_brush.Get() );
             m_text.render( m_renderTarget.Get(), L"Lap",     m_textFormatSmall.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Pos",     m_textFormatSmall.Get(), m_boxPos.x0, m_boxPos.x1, m_boxPos.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Lap \u0394",m_textFormatSmall.Get(), m_boxLapDelta.x0, m_boxLapDelta.x1, m_boxLapDelta.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
@@ -566,7 +593,7 @@ class OverlayDDU : public Overlay
             m_text.render( m_renderTarget.Get(), L"Session", m_textFormatSmall.Get(), m_boxSession.x0, m_boxSession.x1, m_boxSession.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Bias",    m_textFormatSmall.Get(), m_boxBias.x0, m_boxBias.x1, m_boxBias.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
             m_text.render( m_renderTarget.Get(), L"Inc",     m_textFormatSmall.Get(), m_boxInc.x0, m_boxInc.x1, m_boxInc.y0, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-
+            
             m_renderTarget->EndDraw();
         }
 
@@ -623,6 +650,11 @@ class OverlayDDU : public Overlay
 
     protected:
 
+        virtual bool hasCustomBackground()
+        {
+            return true;
+        }
+
         Box m_boxGear;
         Box m_boxLaps;
         Box m_boxPos;
@@ -643,7 +675,9 @@ class OverlayDDU : public Overlay
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatSmall;
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatVerySmall;
         Microsoft::WRL::ComPtr<IDWriteTextFormat>  m_textFormatGear;
-        Microsoft::WRL::ComPtr<ID2D1PathGeometry1> m_pathGeometry;
+
+        Microsoft::WRL::ComPtr<ID2D1PathGeometry1> m_boxPathGeometry;
+        Microsoft::WRL::ComPtr<ID2D1PathGeometry1> m_backgroundPathGeometry;
 
         TextCache           m_text;
 

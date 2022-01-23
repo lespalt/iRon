@@ -280,6 +280,7 @@ void Overlay::update()
     const float cornerRadius = g_cfg.getFloat( m_name, "corner_radius", m_name=="OverlayInputs"?2.0f:6.0f );
 
     // Clear/draw background
+    if( !hasCustomBackground() )
     {
         m_renderTarget->BeginDraw();
         m_renderTarget->Clear( float4(0,0,0,0) );
@@ -365,3 +366,5 @@ void Overlay::onDisable() {}
 void Overlay::onUpdate() {}
 void Overlay::onConfigChanged() {}
 float2 Overlay::getDefaultSize() { return float2(400,300); }
+bool Overlay::hasCustomBackground() { return false; }
+

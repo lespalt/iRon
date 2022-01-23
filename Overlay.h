@@ -65,6 +65,7 @@ class Overlay
         virtual void    onUpdate();
         virtual void    onConfigChanged();
         virtual float2  getDefaultSize();
+        virtual bool    hasCustomBackground();
 
         std::string     m_name;
         HWND            m_hwnd = 0;
