@@ -619,6 +619,9 @@ int ir_getLapDeltaToLeader( int carIdx, int ldrIdx )
     const int carLapCount = std::max( ir_CarIdxLap.getInt(carIdx), ir_CarIdxLapCompleted.getInt(carIdx) );
     const int ldrLapCount = std::max( ir_CarIdxLap.getInt(ldrIdx), ir_CarIdxLapCompleted.getInt(ldrIdx) );
 
+    if( carLapCount < 0 )
+        return ir_CarIdxLapCompleted.getInt(carIdx) - ir_CarIdxLapCompleted.getInt(ldrIdx);
+
     const float carPctAroundLap = ir_CarIdxLapDistPct.getFloat( carIdx );
     const float ldrPctAroundLap = ir_CarIdxLapDistPct.getFloat( ldrIdx );
 

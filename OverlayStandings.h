@@ -152,7 +152,6 @@ protected:
         const float4 flaggedCol         = g_cfg.getFloat4( m_name, "flagged_col", float4(0.68f,0.42f,0.2f,1) );
         const float4 otherCarCol        = g_cfg.getFloat4( m_name, "other_car_col", float4(1,1,1,0.9f) );
         const float4 headerCol          = g_cfg.getFloat4( m_name, "header_col", float4(0.7f,0.7f,0.7f,0.9f) );
-        const float4 carNumberBgCol     = g_cfg.getFloat4( m_name, "car_number_background_col", float4(1,1,1,0.9f) );
         const float4 carNumberTextCol   = g_cfg.getFloat4( m_name, "car_number_text_col", float4(0,0,0,0.9f) );
         const float4 alternateLineBgCol = g_cfg.getFloat4( m_name, "alternate_line_background_col", float4(0.5f,0.5f,0.5f,0.1f) );
         const float4 iratingTextCol     = g_cfg.getFloat4( m_name, "irating_text_col", float4(0,0,0,0.9f) );
@@ -233,8 +232,8 @@ protected:
             const CarInfo&  ci  = carInfo[i];
             const Car&      car = ir_session.cars[ci.carIdx];
 
-            const bool isGone = ir_CarIdxLapCompleted.getInt(ci.carIdx) > ir_CarIdxLap.getInt(ci.carIdx);
-            float4 textCol = car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:carNumberBgCol));
+            const bool isGone = ir_CarIdxTrackSurface.getInt(ci.carIdx) == irsdk_NotInWorld;
+            float4 textCol = car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:otherCarCol));
             if( isGone && !car.isSelf )
                 textCol.a *= 0.5f;
 
@@ -248,27 +247,25 @@ protected:
             }
 
             // Car number
-            clm = m_columns.get( (int)Columns::CAR_NUMBER );
-            swprintf( s, _countof(s), L"#%S", car.carNumberStr.c_str() );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            rr.radiusX = 3;
-            rr.radiusY = 3;
-            m_brush->SetColor( textCol );
-            m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-            m_brush->SetColor( carNumberTextCol );
-            m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            {
+                clm = m_columns.get( (int)Columns::CAR_NUMBER );
+                swprintf( s, _countof(s), L"#%S", car.carNumberStr.c_str() );
+                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
+                rr.radiusX = 3;
+                rr.radiusY = 3;
+                m_brush->SetColor( textCol );
+                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                m_brush->SetColor( carNumberTextCol );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            }
 
             // Name
             {
-                const bool active = ir_CarIdxLap.getInt(ci.carIdx) >= 0 || ir_CarIdxLapCompleted.getInt(ci.carIdx) >= 0;
                 clm = m_columns.get( (int)Columns::NAME );
-                swprintf( s, _countof(s), L"%S", car.userName.c_str() );
-                float4 col = textCol;
-                if( !active )
-                    textCol.a *= 0.5f;
-                m_brush->SetColor( col );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
                 m_brush->SetColor( textCol );
+                swprintf( s, _countof(s), L"%S", car.userName.c_str() );
+                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
             }
 
             // Pit age
@@ -291,46 +288,54 @@ protected:
             }
 
             // License/SR
-            clm = m_columns.get( (int)Columns::LICENSE );
-            swprintf( s, _countof(s), L"%C %.1f", car.licenseChar, car.licenseSR );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
-            rr.radiusX = 3;
-            rr.radiusY = 3;
-            float4 c = car.licenseCol;
-            c.a = licenseBgAlpha;
-            m_brush->SetColor( c );
-            m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-            m_brush->SetColor( licenseTextCol );
-            m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            {
+                clm = m_columns.get( (int)Columns::LICENSE );
+                swprintf( s, _countof(s), L"%C %.1f", car.licenseChar, car.licenseSR );
+                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                rr.radiusX = 3;
+                rr.radiusY = 3;
+                float4 c = car.licenseCol;
+                c.a = licenseBgAlpha;
+                m_brush->SetColor( c );
+                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                m_brush->SetColor( licenseTextCol );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            }
 
             // Irating
-            clm = m_columns.get( (int)Columns::IRATING );
-            swprintf( s, _countof(s), L"%.1fk", (float)car.irating/1000.0f );
-            r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-            rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
-            rr.radiusX = 3;
-            rr.radiusY = 3;
-            m_brush->SetColor( iratingBgCol );
-            m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-            m_brush->SetColor( iratingTextCol );
-            m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            {
+                clm = m_columns.get( (int)Columns::IRATING );
+                swprintf( s, _countof(s), L"%.1fk", (float)car.irating/1000.0f );
+                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                rr.rect = { r.left+1, r.top+1, r.right-1, r.bottom-1 };
+                rr.radiusX = 3;
+                rr.radiusY = 3;
+                m_brush->SetColor( iratingBgCol );
+                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                m_brush->SetColor( iratingTextCol );
+                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+            }
 
             // Best
-            clm = m_columns.get( (int)Columns::BEST );
-            str.clear();
-            if( ci.best > 0 )
-                str = formatLaptime( ci.best );
-            m_brush->SetColor( ci.hasFastestLap ? fastestLapCol : otherCarCol );
-            m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+            {
+                clm = m_columns.get( (int)Columns::BEST );
+                str.clear();
+                if( ci.best > 0 )
+                    str = formatLaptime( ci.best );
+                m_brush->SetColor( ci.hasFastestLap ? fastestLapCol : otherCarCol );
+                m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+            }
 
             // Last
-            clm = m_columns.get( (int)Columns::LAST );
-            str.clear();
-            if( ci.last > 0 )
-                str = formatLaptime( ci.last );
-            m_brush->SetColor( otherCarCol );
-            m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+            {
+                clm = m_columns.get( (int)Columns::LAST );
+                str.clear();
+                if( ci.last > 0 )
+                    str = formatLaptime( ci.last );
+                m_brush->SetColor( otherCarCol );
+                m_text.render( m_renderTarget.Get(), toWide(str).c_str(), m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+            }
 
             // Delta
             if( ci.lapDelta || ci.delta )
