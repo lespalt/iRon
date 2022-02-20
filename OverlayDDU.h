@@ -42,8 +42,10 @@ class OverlayDDU : public Overlay
             : Overlay("OverlayDDU")
         {}
 
-       // virtual bool    canEnableWhileNotDriving() const { return true; }
-       // virtual bool    canEnableWhileDisconnected() const { return true; }
+       #ifdef _DEBUG
+       virtual bool    canEnableWhileNotDriving() const { return true; }
+       virtual bool    canEnableWhileDisconnected() const { return true; }
+       #endif
 
 
     protected:
@@ -236,6 +238,25 @@ class OverlayDDU : public Overlay
                 m_brush->SetColor( g_cfg.getFloat4( m_name, "background_col", float4(0,0,0,0.9f) ) );
                 m_renderTarget->FillGeometry( m_backgroundPathGeometry.Get(), m_brush.Get() );
                 m_brush->SetColor( textCol );
+            }
+
+            // RPM lights
+            {
+                m_brush->SetColor( outlineCol );
+
+                const float lo  = ir_session.rpmIdle;
+                const float hi  = ir_session.rpmSLLast;
+                const float rpm = ir_RPM.getFloat();
+                const float rpmPct = (rpm-lo) / (hi-lo);
+
+                const float ww = 0.16f;
+                for( int i=0; i<8; ++i )
+                {
+                    D2D1_ELLIPSE e = { float2(r2ax(0.5f-ww/2+(i+0.5f)*ww/8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+
+
+                    m_renderTarget->DrawEllipse( &e, m_brush.Get() );
+                }
             }
 
             // Gear & Speed
