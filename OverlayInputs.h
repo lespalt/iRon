@@ -71,24 +71,26 @@ class OverlayInputs : public Overlay
                 m_steerVtx.resize( 1 );
 
             // Advance input vertices
-            for( int i=0; i<(int)m_throttleVtx.size()-1; ++i )
-                m_throttleVtx[i].y = m_throttleVtx[i+1].y;
-            m_throttleVtx[(int)m_throttleVtx.size()-1].y = ir_Throttle.getFloat();
+            {
+                for( int i=0; i<(int)m_throttleVtx.size()-1; ++i )
+                    m_throttleVtx[i].y = m_throttleVtx[i+1].y;
+                m_throttleVtx[(int)m_throttleVtx.size()-1].y = ir_Throttle.getFloat();
 
-            for( int i=0; i<(int)m_brakeVtx.size()-1; ++i )
-                m_brakeVtx[i].y = m_brakeVtx[i+1].y;
-            m_brakeVtx[(int)m_brakeVtx.size()-1].y = ir_Brake.getFloat();
+                for( int i=0; i<(int)m_brakeVtx.size()-1; ++i )
+                    m_brakeVtx[i].y = m_brakeVtx[i+1].y;
+                m_brakeVtx[(int)m_brakeVtx.size()-1].y = ir_Brake.getFloat();
 
-            for( int i=0; i<(int)m_steerVtx.size()-1; ++i )
-                m_steerVtx[i].y = m_steerVtx[i+1].y;
-            m_steerVtx[(int)m_steerVtx.size()-1].y = std::min( 1.0f, std::max( 0.0f, (ir_SteeringWheelAngle.getFloat() / ir_SteeringWheelAngleMax.getFloat()) * -0.5f + 0.5f) );
+                for( int i=0; i<(int)m_steerVtx.size()-1; ++i )
+                    m_steerVtx[i].y = m_steerVtx[i+1].y;
+                m_steerVtx[(int)m_steerVtx.size()-1].y = std::min( 1.0f, std::max( 0.0f, (ir_SteeringWheelAngle.getFloat() / ir_SteeringWheelAngleMax.getFloat()) * -0.5f + 0.5f) );
+            }
 
-            // Render
             const float thickness = g_cfg.getFloat( m_name, "line_thickness", 2.0f );
             auto vtx2coord = [&]( const float2& v )->float2 {
                 return float2( v.x+0.5f, h-0.5f*thickness - v.y*(h-thickness) );
             };
 
+            // Throttle (fill)
             Microsoft::WRL::ComPtr<ID2D1PathGeometry1> throttleFillPath;
             Microsoft::WRL::ComPtr<ID2D1GeometrySink>  throttleFillSink;
             m_d2dFactory->CreatePathGeometry( &throttleFillPath );
@@ -100,6 +102,7 @@ class OverlayInputs : public Overlay
             throttleFillSink->EndFigure( D2D1_FIGURE_END_OPEN );
             throttleFillSink->Close();
 
+            // Brake (fill)
             Microsoft::WRL::ComPtr<ID2D1PathGeometry1> brakeFillPath;
             Microsoft::WRL::ComPtr<ID2D1GeometrySink>  brakeFillSink;
             m_d2dFactory->CreatePathGeometry( &brakeFillPath );
@@ -111,6 +114,7 @@ class OverlayInputs : public Overlay
             brakeFillSink->EndFigure( D2D1_FIGURE_END_OPEN );
             brakeFillSink->Close();
 
+            // Throttle (line)
             Microsoft::WRL::ComPtr<ID2D1PathGeometry1> throttleLinePath;
             Microsoft::WRL::ComPtr<ID2D1GeometrySink>  throttleLineSink;
             m_d2dFactory->CreatePathGeometry( &throttleLinePath );
@@ -121,6 +125,7 @@ class OverlayInputs : public Overlay
             throttleLineSink->EndFigure( D2D1_FIGURE_END_OPEN );
             throttleLineSink->Close();
 
+            // Brake (line)
             Microsoft::WRL::ComPtr<ID2D1PathGeometry1> brakeLinePath;
             Microsoft::WRL::ComPtr<ID2D1GeometrySink>  brakeLineSink;
             m_d2dFactory->CreatePathGeometry( &brakeLinePath );
@@ -131,6 +136,7 @@ class OverlayInputs : public Overlay
             brakeLineSink->EndFigure( D2D1_FIGURE_END_OPEN );
             brakeLineSink->Close();
 
+            // Steering
             Microsoft::WRL::ComPtr<ID2D1PathGeometry1> steeringLinePath;
             Microsoft::WRL::ComPtr<ID2D1GeometrySink>  steeringLineSink;
             m_d2dFactory->CreatePathGeometry( &steeringLinePath );

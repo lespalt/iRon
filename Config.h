@@ -35,26 +35,26 @@ class Config
 {
     public:
 
-        bool    load();
-        bool    save();
+        bool                        load();
+        bool                        save();
 
-        void    watchForChanges();
-        bool    hasChanged();
+        void                        watchForChanges();
+        bool                        hasChanged();
 
-        bool                     getBool( const std::string& component, const std::string& key, bool defaultVal );
-        int                      getInt( const std::string& component, const std::string& key, int defaultVal );
-        float                    getFloat( const std::string& component, const std::string& key, float defaultVal );
-        float4                   getFloat4( const std::string& component, const std::string& key, const float4& defaultVal );
-        std::string              getString( const std::string& component, const std::string& key, const std::string& defaultVal );
-        std::vector<std::string> getStringVec( const std::string& component, const std::string& key, const std::vector<std::string>& defaultVal );
+        bool                        getBool( const std::string& component, const std::string& key, bool defaultVal );
+        int                         getInt( const std::string& component, const std::string& key, int defaultVal );
+        float                       getFloat( const std::string& component, const std::string& key, float defaultVal );
+        float4                      getFloat4( const std::string& component, const std::string& key, const float4& defaultVal );
+        std::string                 getString( const std::string& component, const std::string& key, const std::string& defaultVal );
+        std::vector<std::string>    getStringVec( const std::string& component, const std::string& key, const std::vector<std::string>& defaultVal );
 
-        void                     setInt( const std::string& component, const std::string& key, int v );
-        void                     setBool( const std::string& component, const std::string& key, bool v );
+        void                        setInt( const std::string& component, const std::string& key, int v );
+        void                        setBool( const std::string& component, const std::string& key, bool v );
 
     private:
 
-        picojson::object&       getOrInsertComponent( const std::string& component, bool* existed=nullptr );
-        picojson::value&        getOrInsertValue( const std::string& component, const std::string& key, bool* existed=nullptr );
+        picojson::object&           getOrInsertComponent( const std::string& component, bool* existed=nullptr );
+        picojson::value&            getOrInsertValue( const std::string& component, const std::string& key, bool* existed=nullptr );
 
         picojson::object    m_pj;
         std::atomic<bool>   m_hasChanged = false;

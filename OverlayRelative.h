@@ -242,31 +242,37 @@ class OverlayRelative : public Overlay
                 }
 
                 // Car number
-                clm = m_columns.get( (int)Columns::CAR_NUMBER );
-                swprintf( s, _countof(s), L"#%S", car.carNumberStr.c_str() );
-                r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
-                rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
-                rr.radiusX = 3;
-                rr.radiusY = 3;
-                m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:carNumberBgCol)) );
-                m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
-                m_brush->SetColor( carNumberTextCol );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                {
+                    clm = m_columns.get( (int)Columns::CAR_NUMBER );
+                    swprintf( s, _countof(s), L"#%S", car.carNumberStr.c_str() );
+                    r = { xoff+clm->textL, y-lineHeight/2, xoff+clm->textR, y+lineHeight/2 };
+                    rr.rect = { r.left-2, r.top+1, r.right+2, r.bottom-1 };
+                    rr.radiusX = 3;
+                    rr.radiusY = 3;
+                    m_brush->SetColor( car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:carNumberBgCol)) );
+                    m_renderTarget->FillRoundedRectangle( &rr, m_brush.Get() );
+                    m_brush->SetColor( carNumberTextCol );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                }
 
                 // Name
-                clm = m_columns.get( (int)Columns::NAME );
-                swprintf( s, _countof(s), L"%S", car.userName.c_str() );
-                m_brush->SetColor( col );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                {
+                    clm = m_columns.get( (int)Columns::NAME );
+                    swprintf( s, _countof(s), L"%S", car.userName.c_str() );
+                    m_brush->SetColor( col );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
+                }
 
                 // Delta
-                clm = m_columns.get( (int)Columns::DELTA );
-                if( ci.lapDelta )
-                    swprintf( s, _countof(s), L"%.1f  %+d", ci.delta, ci.lapDelta );
-                else
-                    swprintf( s, _countof(s), L"%.1f", ci.delta );
-                m_brush->SetColor( col );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                {
+                    clm = m_columns.get( (int)Columns::DELTA );
+                    if( ci.lapDelta )
+                        swprintf( s, _countof(s), L"%.1f  %+d", ci.delta, ci.lapDelta );
+                    else
+                        swprintf( s, _countof(s), L"%.1f", ci.delta );
+                    m_brush->SetColor( col );
+                    m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff+clm->textL, xoff+clm->textR, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
+                }
 
                 // Pit age
                 if( (clm = m_columns.get((int)Columns::PIT)) && !ir_isPreStart() && (ci.pitAge>=0||ir_CarIdxOnPitRoad.getBool(ci.carIdx)) )
@@ -333,6 +339,7 @@ class OverlayRelative : public Overlay
                 }
             }
 
+            // Minimap
             if( minimapEnabled )
             {
                 const float y = 10;
