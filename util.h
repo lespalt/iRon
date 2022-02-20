@@ -33,6 +33,7 @@ SOFTWARE.
 #include <d2d1_3.h>
 #include <dwrite.h>
 #include <unordered_map>
+#include <ctype.h>
 
 #define HRCHECK( x_ ) do{ \
     HRESULT hr_ = x_; \
@@ -378,4 +379,59 @@ inline float2 computeTextExtent( const wchar_t* str, IDWriteFactory* factory, ID
 inline float celsiusToFahrenheit( float c )
 {
     return c * (9.0f / 5.0f) + 32.0f;
+}
+
+inline bool parseHotkey( const std::string& desc, UINT* mod, UINT* vk )
+{
+    // Dumb but good-enough way to turn strings like "Ctrl-Shift-F1" into values understood by RegisterHotkey.
+
+    std::string s = desc;
+    for( char& c : s )
+        c = (char)toupper( (unsigned char)c );
+
+    // Need at least one modifier
+    size_t pos = s.find_last_of("+- ");
+    if( pos == std::string::npos )
+        return false;
+
+    // "Parse" modifier
+    *mod = 0;
+    if( strstr(s.c_str(),"CTRL") || strstr(s.c_str(),"CONTROL"))
+        *mod |= MOD_CONTROL;
+    if( strstr(s.c_str(),"ALT") )
+        *mod |= MOD_ALT;
+    if( strstr(s.c_str(),"SHIFT") )
+        *mod |= MOD_SHIFT;
+
+    // Parse key
+    const std::string key = s.substr( pos+1 );
+
+    for( int i=1; i<=24; ++i )
+    {
+        const std::string fkey = "F" + std::to_string(i);
+        if( key == fkey ) {
+            *vk = VK_F1 + (i-1);
+            return true;
+        }
+    }
+
+    if( key == "ENTER" || key == "RETURN" )
+    {
+        *vk = VK_RETURN;
+        return true;
+    }
+
+    if( key == "SPACE" )
+    {
+        *vk = VK_SPACE;
+        return true;
+    }
+
+    if( key.length() == 1 )
+    {
+        *vk = key[0];
+        return true;
+    }
+
+    return false;
 }

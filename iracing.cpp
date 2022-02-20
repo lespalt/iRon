@@ -414,6 +414,12 @@ ConnectionStatus ir_tick()
         // Driver/car info
         parseYamlInt( sessionYaml, "DriverInfo:DriverCarIdx:", &ir_session.driverCarIdx );
         parseYamlFloat( sessionYaml, "DriverInfo:DriverCarFuelMaxLtr:", &ir_session.fuelMaxLtr );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarIdleRPM:", &ir_session.rpmIdle );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarRedLine:", &ir_session.rpmRedline );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarSLFirstRPM:", &ir_session.rpmSLFirst );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarSLShiftRPM:", &ir_session.rpmSLShift );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarSLLastRPM:", &ir_session.rpmSLLast );
+        parseYamlFloat( sessionYaml, "DriverInfo:DriverCarSLBlinkRPM:", &ir_session.rpmSLBlink );
 
         // Per-Driver info
         for( int carIdx=0; carIdx<IR_MAX_CARS; ++carIdx )
@@ -631,7 +637,7 @@ int ir_getLapDeltaToLeader( int carIdx, int ldrIdx )
     int lapDelta = carLapCount - ldrLapCount;
 
     if( carPctAroundLap > ldrPctAroundLap )
-        return lapDelta += 1;
+        lapDelta += 1;
 
     return lapDelta;
 }

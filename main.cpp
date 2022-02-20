@@ -42,9 +42,45 @@ SOFTWARE.
 #include "OverlayDebug.h"
 #include "OverlayDDU.h"
 
+enum class Hotkey
+{
+    UiEdit,
+    Standings,
+    DDU,
+    Inputs,
+    Relative
+};
+
+static void registerHotkeys()
+{
+    UnregisterHotKey( NULL, (int)Hotkey::UiEdit );
+    UnregisterHotKey( NULL, (int)Hotkey::Standings );
+    UnregisterHotKey( NULL, (int)Hotkey::DDU );
+    UnregisterHotKey( NULL, (int)Hotkey::Inputs );
+    UnregisterHotKey( NULL, (int)Hotkey::Relative );
+
+    UINT vk, mod;
+
+    if( parseHotkey( g_cfg.getString("General","ui_edit_hotkey","alt-j"),&mod,&vk) )
+        RegisterHotKey( NULL, (int)Hotkey::UiEdit, mod, vk );
+
+    if( parseHotkey( g_cfg.getString("OverlayStandings","toggle_hotkey","ctrl-space"),&mod,&vk) )
+        RegisterHotKey( NULL, (int)Hotkey::Standings, mod, vk );
+
+    if( parseHotkey( g_cfg.getString("OverlayDDU","toggle_hotkey","ctrl-1"),&mod,&vk) )
+        RegisterHotKey( NULL, (int)Hotkey::DDU, mod, vk );
+
+    if( parseHotkey( g_cfg.getString("OverlayInputs","toggle_hotkey","ctrl-2"),&mod,&vk) )
+        RegisterHotKey( NULL, (int)Hotkey::Inputs, mod, vk );
+
+    if( parseHotkey( g_cfg.getString("OverlayRelative","toggle_hotkey","ctrl-3"),&mod,&vk) )
+        RegisterHotKey( NULL, (int)Hotkey::Relative, mod, vk );
+}
 
 static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus status )
 {
+    registerHotkeys();
+
     ir_handleConfigChange();
 
     for( Overlay* o : overlays )
@@ -67,25 +103,21 @@ int main()
     g_cfg.load();
     g_cfg.watchForChanges();
 
-    // Register hotkey to enable/disable position/size changes.
-    const int uiEditHotkey = g_cfg.getString( "General", "ui_edit_hotkey_is_alt_and_this_letter", "j" )[0];
-    RegisterHotKey( NULL, 0, MOD_ALT, toupper(uiEditHotkey) );
-    
-    // Register hotkey to enable/disable standings overlay.
-    // TODO: make this more flexible/configurable. Perhaps use DInput so we can map it to non-keyboard keys?
-    const int standingsHotkey = g_cfg.getString( "General", "standings_hotkey_is_ctrl_and_this_letter", " " )[0];
-    RegisterHotKey( NULL, 1, MOD_CONTROL, toupper(standingsHotkey) );
+    // Register global hotkeys
+    registerHotkeys();
 
-    const std::string uiEditHotkeyStr    = uiEditHotkey==' '    ? "SPACE" : std::string(1,(char)uiEditHotkey);
-    const std::string standingsHotkeyStr = standingsHotkey==' ' ? "SPACE" : std::string(1,(char)standingsHotkey);
     printf("\n====================================================================================\n");
     printf("Welcome to iRon! This app provides a few simple overlays for iRacing.\n\n");
     printf("NOTE: Most overlays are only active when iRacing is running and the car is on track.\n\n");
-    printf("At any time, press:\n\n        ALT-%s to move and resize overlays\n        CTRL-%s to toggle the standings overlay\n\n",
-           uiEditHotkeyStr.c_str(), standingsHotkeyStr.c_str());
-    printf("iRon will generate a file called \'config.json\' in its current directory. This file\n"\
+    printf("Current hotkeys:\n");
+    printf("    Move and resize overlays:     %s\n", g_cfg.getString("General","ui_edit_hotkey","").c_str() );
+    printf("    Toggle standings overlay:     %s\n", g_cfg.getString("OverlayStandings","toggle_hotkey","").c_str() );
+    printf("    Toggle DDU overlay:           %s\n", g_cfg.getString("OverlayDDU","toggle_hotkey","").c_str() );
+    printf("    Toggle inputs overlay:        %s\n", g_cfg.getString("OverlayInputs","toggle_hotkey","").c_str() );
+    printf("    Toggle relative overlay:      %s\n", g_cfg.getString("OverlayRelative","toggle_hotkey","").c_str() );
+    printf("\niRon will generate a file called \'config.json\' in its current directory. This file\n"\
            "stores your settings. You can edit the file at any time, even while iRon is running,\n"\
-           "to customize your overlays.\n\n");
+           "to customize your overlays and hotkeys.\n\n");
     printf("To exit iRon, simply close this console window.\n\n");
     printf("For the latest version or to submit bug reports, go to:\n\n        https://github.com/lespalt/iRon\n\n");
     printf("\nHappy Racing!\n");
@@ -138,15 +170,30 @@ int main()
         {
             if( msg.message == WM_HOTKEY )
             {
-                if( msg.wParam == 0 )
+                if( msg.wParam == (int)Hotkey::UiEdit )
                 {
                     uiEdit = !uiEdit;
                     for( Overlay* o : overlays )
                         o->enableUiEdit( uiEdit );
                 }
-                else if( msg.wParam == 1 )
+                else
                 {
-                    g_cfg.setBool( "OverlayStandings", "enabled", !g_cfg.getBool("OverlayStandings","enabled",true) );
+                    switch( msg.wParam )
+                    {
+                    case (int)Hotkey::Standings:
+                        g_cfg.setBool( "OverlayStandings", "enabled", !g_cfg.getBool("OverlayStandings","enabled",true) );
+                        break;
+                    case (int)Hotkey::DDU:
+                        g_cfg.setBool( "OverlayDDU", "enabled", !g_cfg.getBool("OverlayDDU","enabled",true) );
+                        break;
+                    case (int)Hotkey::Inputs:
+                        g_cfg.setBool( "OverlayInputs", "enabled", !g_cfg.getBool("OverlayInputs","enabled",true) );
+                        break;
+                    case (int)Hotkey::Relative:
+                        g_cfg.setBool( "OverlayRelative", "enabled", !g_cfg.getBool("OverlayRelative","enabled",true) );
+                        break;
+                    }
+                    
                     g_cfg.save();
                     handleConfigChange( overlays, status );
                 }
