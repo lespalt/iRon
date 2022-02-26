@@ -218,10 +218,11 @@ class OverlayDDU : public Overlay
             }
 
             // General lap info
-            const bool sessionIsTimeLimited = ir_SessionLapsTotal.getInt() == SHRT_MAX;
-            const int  remainingLaps = sessionIsTimeLimited ? int(0.5f+ir_SessionTimeRemain.getFloat()/ir_estimateLaptime()) : ir_SessionLapsRemainEx.getInt();
-            const int  currentLap = ir_isPreStart() ? 0 : std::max(0,ir_CarIdxLap.getInt(carIdx));
-            const bool lapCountUpdated = currentLap != m_prevCurrentLap;
+            const bool   sessionIsTimeLimited  = ir_SessionLapsTotal.getInt() == 32767 && ir_SessionTimeRemain.getDouble()<48.0*3600.0;
+            const double remainingSessionTime  = sessionIsTimeLimited ? ir_SessionTimeRemain.getDouble() : -1;
+            const int    remainingLaps         = sessionIsTimeLimited ? int(0.5+remainingSessionTime/ir_estimateLaptime()) : (ir_SessionLapsRemainEx.getInt() != 32767 ? ir_SessionLapsRemainEx.getInt() : -1);
+            const int    currentLap            = ir_isPreStart() ? 0 : std::max(0,ir_CarIdxLap.getInt(carIdx));
+            const bool   lapCountUpdated       = currentLap != m_prevCurrentLap;
             m_prevCurrentLap = currentLap;
             if( lapCountUpdated )
                 m_lastLapChangeTickCount = tickCount;
@@ -307,7 +308,7 @@ class OverlayDDU : public Overlay
                 swprintf( s, _countof(s), L"%d / %S", currentLap, lapsStr );
                 m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxLaps.x0, m_boxLaps.x1, m_boxLaps.y0+m_boxLaps.h*0.25f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
 
-                if( remainingLaps == SHRT_MAX )
+                if( remainingLaps < 0 )
                     sprintf( lapsStr, "--" );
                 else if( sessionIsTimeLimited )
                     sprintf( lapsStr, "~%d", remainingLaps );
@@ -491,7 +492,7 @@ class OverlayDDU : public Overlay
                 }
 
                 // To Finish
-                if( remainingLaps != SHRT_MAX && perLapConsEst > 0 )
+                if( remainingLaps >= 0 && perLapConsEst > 0 )
                 {
                     float toFinish = std::max( 0.0f, remainingLaps * perLapConsEst - remainingFuel );
 
@@ -589,7 +590,7 @@ class OverlayDDU : public Overlay
 
             // Session
             {                   
-                const double sessionTime = sessionIsTimeLimited ? ir_SessionTimeRemain.getDouble() : ir_SessionTime.getDouble();
+                const double sessionTime = remainingSessionTime>=0 ? remainingSessionTime : ir_SessionTime.getDouble();
 
                 const int    hours = int( sessionTime / 3600.0 );
                 const int    mins  = int( sessionTime / 60.0 ) % 60;
