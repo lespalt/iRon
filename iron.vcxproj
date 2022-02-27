@@ -158,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h" />
+    <ClInclude Include="OverlayCover.h" />
     <ClInclude Include="OverlayDDU.h" />
     <ClInclude Include="OverlayDebug.h" />
     <ClInclude Include="OverlayInputs.h" />
