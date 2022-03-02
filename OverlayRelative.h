@@ -105,8 +105,12 @@ class OverlayRelative : public Overlay
                 const int lapcountS = ir_CarIdxLap.getInt(ir_session.driverCarIdx);
                 const int lapcountC = ir_CarIdxLap.getInt(i);
 
-                if( lapcountC >= 0 && !car.isPaceCar && !car.isSpectator && car.carNumber>=0 )
+                if( lapcountC >= 0 && !car.isSpectator && car.carNumber>=0 )
                 {
+                    // Add the pace car only under yellow or initial pace lap
+                    if( car.isPaceCar && !(ir_SessionFlags.getInt() & (irsdk_caution|irsdk_cautionWaving)) && !ir_isPreStart() )
+                        continue;
+
                     // If the other car is up to half a lap in front, we consider the delta 'ahead', otherwise 'behind'.
 
                     float delta = 0;
@@ -132,7 +136,8 @@ class OverlayRelative : public Overlay
                     // Assume no lap delta when not in a race, because we don't want to show drivers as lapped/lapping there.
                     // Also reset it during initial pacing, since iRacing for some reason starts counting
                     // during the pace lap but then resets the counter a couple seconds in, confusing the logic.
-                    if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() )
+                    // And consider the pace car in the same lap as us, too.
+                    if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() || car.isPaceCar )
                     {
                         lapDelta = 0;
                     }
@@ -350,8 +355,8 @@ class OverlayRelative : public Overlay
                 m_brush->SetColor( minimapBgCol );
                 m_renderTarget->FillRectangle( &r, m_brush.Get() );                
 
-                // phases: lap down, same lap, lap ahead, buddies, self
-                for( int phase=0; phase<5; ++phase )
+                // phases: lap down, same lap, lap ahead, buddies, pacecar, self
+                for( int phase=0; phase<6; ++phase )
                 {
                     float4 baseCol = float4(0,0,0,0);
                     switch(phase)
@@ -360,7 +365,8 @@ class OverlayRelative : public Overlay
                         case 1: baseCol = sameLapCol; break;
                         case 2: baseCol = lapAheadCol; break;
                         case 3: baseCol = buddyCol; break;
-                        case 4: baseCol = selfCol; break;
+                        case 4: baseCol = float4(1,1,1,1); break;
+                        case 5: baseCol = selfCol; break;
                         default: break;
                     }
 
@@ -377,7 +383,9 @@ class OverlayRelative : public Overlay
                             continue;
                         if( phase == 3 && !car.isBuddy )
                             continue;
-                        if( phase == 4 && !car.isSelf )
+                        if( phase == 4 && !car.isPaceCar )
+                            continue;
+                        if( phase == 5 && !car.isSelf )
                             continue;
                         
                         float e = ir_CarIdxLapDistPct.getFloat(ci.carIdx);
@@ -399,7 +407,7 @@ class OverlayRelative : public Overlay
                             col.a *= 0.5f;
 
                         const float dx = 2;
-                        const float dy = car.isSelf ? 4.0f : 0.0f;
+                        const float dy = car.isSelf || car.isPaceCar ? 4.0f : 0.0f;
                         r = {e-dx, y+2-dy, e+dx, y+h-2+dy};
                         m_brush->SetColor( col );
                         m_renderTarget->FillRectangle( &r, m_brush.Get() );
