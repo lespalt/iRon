@@ -114,7 +114,7 @@ protected:
             ci.position     = ir_getPosition(i);
             ci.pctAroundLap = ir_CarIdxLapDistPct.getFloat(i);
             ci.delta        = ir_session.sessionType!=SessionType::RACE ? 0 : -ir_CarIdxF2Time.getFloat(i);
-            ci.best         = ir_session.sessionType==SessionType::QUALIFY || (ir_session.sessionType==SessionType::RACE && ir_SessionState.getInt()<=irsdk_StateWarmup) ? car.qualTime : ir_CarIdxBestLapTime.getFloat(i);
+            ci.best         = (ir_session.sessionType==SessionType::RACE && ir_SessionState.getInt()<=irsdk_StateWarmup) ? car.qualTime : ir_CarIdxBestLapTime.getFloat(i);
             ci.last         = ir_CarIdxLastLapTime.getFloat(i);
             ci.pitAge       = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
             carInfo.push_back( ci );
