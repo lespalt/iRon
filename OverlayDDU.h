@@ -298,7 +298,7 @@ class OverlayDDU : public Overlay
                 if( speedMps >= 0 )
                 {
                     float speed = 0;
-                    if( ir_DisplayUnits.getInt() == 1 )
+                    if( !imperial )
                         speed = speedMps * 3.6f;
                     else
                         speed = speedMps * 2.23694f;
