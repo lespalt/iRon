@@ -244,26 +244,38 @@ class OverlayDDU : public Overlay
 
             // RPM lights
             {
-                m_brush->SetColor( outlineCol );
-
-                const float lo  = ir_session.rpmIdle;
-                const float hi  = ir_session.rpmSLLast;
+                const float lo  = (ir_session.rpmIdle + ir_session.rpmSLFirst) / 2;
+                const float hi  = ir_session.rpmRedline;
                 const float rpm = ir_RPM.getFloat();
                 const float rpmPct = (rpm-lo) / (hi-lo);
 
                 const float ww = 0.16f;
                 for( int i=0; i<8; ++i )
                 {
+                    const float lightPct = i/8.0f;
+                    const float lightRpm = lo + (hi-lo) * lightPct;
+
                     D2D1_ELLIPSE e = { float2(r2ax(0.5f-ww/2+(i+0.5f)*ww/8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
 
-
-                    m_renderTarget->DrawEllipse( &e, m_brush.Get() );
+                    if( rpmPct < lightPct ) {
+                        m_brush->SetColor( outlineCol );
+                        m_renderTarget->DrawEllipse( &e, m_brush.Get() );
+                    }
+                    else {
+                        if( lightRpm < ir_session.rpmSLFirst )
+                            m_brush->SetColor( float4(1,1,1,1) );
+                        else if( lightRpm < ir_session.rpmSLLast )
+                            m_brush->SetColor( warnCol );
+                        else
+                            m_brush->SetColor( float4(1,0,0,1) );
+                        m_renderTarget->FillEllipse( &e, m_brush.Get() );
+                    }
                 }
             }
 
             // Gear & Speed
             {
-                if( ir_EngineWarnings.getInt() & irsdk_revLimiterActive )
+                if( ir_RPM.getFloat() >= ir_session.rpmSLShift || ir_EngineWarnings.getInt() & irsdk_revLimiterActive )
                 {
                     m_brush->SetColor( warnCol );
                     D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
@@ -496,7 +508,7 @@ class OverlayDDU : public Overlay
                 {
                     float toFinish = std::max( 0.0f, remainingLaps * perLapConsEst - remainingFuel );
 
-                    if( toFinish > ir_PitSvFuel.getFloat() )
+                    if( toFinish > ir_PitSvFuel.getFloat() || (toFinish>0 && !ir_dpFuelFill.getFloat()) )
                         m_brush->SetColor( warnCol );
                     else 
                         m_brush->SetColor( goodCol );
