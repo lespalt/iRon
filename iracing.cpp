@@ -623,19 +623,19 @@ int ir_getPosition( int carIdx )
 
 int ir_getLapDeltaToLeader( int carIdx, int ldrIdx )
 {
-    if( carIdx < 0 || ldrIdx < 0 )
+    if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() || carIdx < 0 || ldrIdx < 0 )
         return 0;
 
     const int carLapCount = std::max( ir_CarIdxLap.getInt(carIdx), ir_CarIdxLapCompleted.getInt(carIdx) );
     const int ldrLapCount = std::max( ir_CarIdxLap.getInt(ldrIdx), ir_CarIdxLapCompleted.getInt(ldrIdx) );
 
-    if( carLapCount < 0 )
-        return ir_CarIdxLapCompleted.getInt(carIdx) - ir_CarIdxLapCompleted.getInt(ldrIdx);
+   // if( carLapCount < 0 )
+     //   return ir_CarIdxLapCompleted.getInt(carIdx) - ir_CarIdxLapCompleted.getInt(ldrIdx);
 
     const float carPctAroundLap = ir_CarIdxLapDistPct.getFloat( carIdx );
     const float ldrPctAroundLap = ir_CarIdxLapDistPct.getFloat( ldrIdx );
 
-    if( ir_session.sessionType!=SessionType::RACE || ir_isPreStart() || carPctAroundLap < 0 || ldrPctAroundLap < 0 )
+    if( carPctAroundLap < 0 || ldrPctAroundLap < 0 )
         return 0;
 
     int lapDelta = carLapCount - ldrLapCount;

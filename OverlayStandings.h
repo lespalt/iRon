@@ -109,14 +109,14 @@ protected:
                 continue;
 
             CarInfo ci;
-            ci.carIdx = i;
-            ci.lapCount = std::max( ir_CarIdxLap.getInt(i), ir_CarIdxLapCompleted.getInt(i) );
-            ci.position = ir_getPosition(i);
+            ci.carIdx       = i;
+            ci.lapCount     = std::max( ir_CarIdxLap.getInt(i), ir_CarIdxLapCompleted.getInt(i) );
+            ci.position     = ir_getPosition(i);
             ci.pctAroundLap = ir_CarIdxLapDistPct.getFloat(i);
-            ci.delta = ir_session.sessionType!=SessionType::RACE ? 0 : -ir_CarIdxF2Time.getFloat(i);
-            ci.best = ir_CarIdxBestLapTime.getFloat(i) ? ir_CarIdxBestLapTime.getFloat(i) : car.qualTime;
-            ci.last = ir_CarIdxLastLapTime.getFloat(i);
-            ci.pitAge = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
+            ci.delta        = ir_session.sessionType!=SessionType::RACE ? 0 : -ir_CarIdxF2Time.getFloat(i);
+            ci.best         = ir_session.sessionType==SessionType::QUALIFY || (ir_session.sessionType==SessionType::RACE && ir_SessionState.getInt()<=irsdk_StateWarmup) ? car.qualTime : ir_CarIdxBestLapTime.getFloat(i);
+            ci.last         = ir_CarIdxLastLapTime.getFloat(i);
+            ci.pitAge       = ir_CarIdxLap.getInt(i) - car.lastLapInPits;
             carInfo.push_back( ci );
 
             if( ci.best > 0 && ci.best < fastestLapTime ) {
@@ -235,9 +235,9 @@ protected:
             // Dim color if player is disconnected.
             // TODO: this isn't 100% accurate, I think, because a car might be "not in world" while the player
             // is still connected? I haven't been able to find a better way to do this, though.
-            const bool isGone = ir_CarIdxTrackSurface.getInt(ci.carIdx) == irsdk_NotInWorld;
+            const bool isGone = !car.isSelf && ir_CarIdxTrackSurface.getInt(ci.carIdx) == irsdk_NotInWorld;
             float4 textCol = car.isSelf ? selfCol : (car.isBuddy ? buddyCol : (car.isFlagged?flaggedCol:otherCarCol));
-            if( isGone && !car.isSelf )
+            if( isGone )
                 textCol.a *= 0.5f;
 
             // Position

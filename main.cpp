@@ -159,7 +159,7 @@ int main()
             handleConfigChange( overlays, status );
         }
 
-        dbg( "connection status: %d, session type: %d, session state: %d, pace mode: %d, on track: %d, flags: 0x%X", (int)ir_session.sessionType, (int)status, ir_SessionState.getInt(), ir_PaceMode.getInt(), (int)ir_IsOnTrackCar.getBool(), ir_SessionFlags.getInt() );
+        dbg( "connection status: %s, session type: %s, session state: %d, pace mode: %d, on track: %d, flags: 0x%X", ConnectionStatusStr[(int)status], SessionTypeStr[(int)ir_session.sessionType], ir_SessionState.getInt(), ir_PaceMode.getInt(), (int)ir_IsOnTrackCar.getBool(), ir_SessionFlags.getInt() );
 
         // Update roughly every 16ms
         for( Overlay* o : overlays )

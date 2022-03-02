@@ -34,19 +34,21 @@ SOFTWARE.
 
 enum class ConnectionStatus
 {
-    UNKNOWN,
+    UNKNOWN = 0,
     DISCONNECTED,
     CONNECTED,
     DRIVING
 };
+static const char* const ConnectionStatusStr[] = {"UNKNOWN","DISCONNECTED","CONNECTED","DRIVING"};
 
 enum class SessionType
 {
-    UNKNOWN,
+    UNKNOWN = 0,
     PRACTICE,
     QUALIFY,
     RACE
 };
+static const char* const SessionTypeStr[] = {"UNKNOWN","PRACTICE","QUALIFY","RACE"};
 
 struct Car
 {    
