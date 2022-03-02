@@ -74,7 +74,7 @@ class OverlayRelative : public Overlay
             m_columns.add( (int)Columns::POSITION,   computeTextExtent( L"P99", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
             m_columns.add( (int)Columns::CAR_NUMBER, computeTextExtent( L"#999", m_dwriteFactory.Get(), m_textFormat.Get() ).x, fontSize/2 );
             m_columns.add( (int)Columns::NAME,       0, fontSize/2 );
-            m_columns.add( (int)Columns::DELTA,      computeTextExtent( L"-99.9  +99", m_dwriteFactory.Get(), m_textFormat.Get() ).x, 1, fontSize/2 );
+            m_columns.add( (int)Columns::DELTA,      computeTextExtent( L"+99L  -99.9", m_dwriteFactory.Get(), m_textFormat.Get() ).x, 1, fontSize/2 );
 
             if( g_cfg.getBool(m_name,"show_pit_age",true) )
                 m_columns.add( (int)Columns::PIT,           computeTextExtent( L"999", m_dwriteFactory.Get(), m_textFormatSmall.Get() ).x, fontSize/4 );
@@ -272,7 +272,7 @@ class OverlayRelative : public Overlay
                 {
                     clm = m_columns.get( (int)Columns::DELTA );
                     if( ci.lapDelta )
-                        swprintf( s, _countof(s), L"%.1f  %+d", ci.delta, ci.lapDelta );
+                        swprintf( s, _countof(s), L"%+dL  %.1f", ci.lapDelta, ci.delta );
                     else
                         swprintf( s, _countof(s), L"%.1f", ci.delta );
                     m_brush->SetColor( col );
