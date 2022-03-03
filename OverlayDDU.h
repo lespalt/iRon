@@ -191,6 +191,11 @@ class OverlayDDU : public Overlay
             }
         }
 
+        virtual void onSessionChanged()
+        {
+            m_isValidFuelLap = false;  // avoid confusing the fuel calculator logic with session changes
+        }
+
         virtual void onUpdate()
         {
             const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
@@ -244,6 +249,8 @@ class OverlayDDU : public Overlay
 
             // RPM lights
             {
+                // which of the rpm numbers to use for high/low and colored light indicators was a bit of
+                // trial and error, since I'm not really sure what they're supposed to mean exactly
                 const float lo  = (ir_session.rpmIdle + ir_session.rpmSLFirst) / 2;
                 const float hi  = ir_session.rpmRedline;
                 const float rpm = ir_RPM.getFloat();

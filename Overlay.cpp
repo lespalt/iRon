@@ -270,6 +270,11 @@ void Overlay::configChanged()
     onConfigChanged();
 }
 
+void Overlay::sessionChanged()
+{
+    onSessionChanged();
+}
+
 void Overlay::update()
 {
     if( !m_enabled )
@@ -365,6 +370,7 @@ void Overlay::onEnable() {}
 void Overlay::onDisable() {}
 void Overlay::onUpdate() {}
 void Overlay::onConfigChanged() {}
+void Overlay::onSessionChanged() {}
 float2 Overlay::getDefaultSize() { return float2(400,300); }
 bool Overlay::hasCustomBackground() { return false; }
 

@@ -147,16 +147,24 @@ int main()
     while( true )
     {
         ConnectionStatus prevStatus = status;
+        SessionType      prevSessionType = ir_session.sessionType;
+
         status = ir_tick();
         if( status != prevStatus )
         {
             if( status == ConnectionStatus::DISCONNECTED )
                 printf("Waiting for iRacing connection...\n");
             else
-                printf("iRacing connected (%d)\n", (int)status);
+                printf("iRacing connected (%s)\n", ConnectionStatusStr[(int)status]);
 
             // Enable user-selected overlays, but only if we're driving
             handleConfigChange( overlays, status );
+        }
+
+        if( ir_session.sessionType != prevSessionType )
+        {
+            for( Overlay* o : overlays )
+                o->sessionChanged();
         }
 
         dbg( "connection status: %s, session type: %s, session state: %d, pace mode: %d, on track: %d, flags: 0x%X", ConnectionStatusStr[(int)status], SessionTypeStr[(int)ir_session.sessionType], ir_SessionState.getInt(), ir_PaceMode.getInt(), (int)ir_IsOnTrackCar.getBool(), ir_SessionFlags.getInt() );

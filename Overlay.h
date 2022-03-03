@@ -52,6 +52,7 @@ class Overlay
         bool            isUiEditEnabled() const;
 
         void            configChanged();
+        void            sessionChanged();
 
         void            update();
 
@@ -64,6 +65,7 @@ class Overlay
         virtual void    onDisable();
         virtual void    onUpdate();
         virtual void    onConfigChanged();
+        virtual void    onSessionChanged();
         virtual float2  getDefaultSize();
         virtual bool    hasCustomBackground();
 
