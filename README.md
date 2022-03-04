@@ -60,25 +60,25 @@ The fuel calculator shows the estimated remaining laps, remaining amount of fuel
 
 ### "Inputs"
 
-Shows throttle/brake/steering in a moving graph. I find it useful mainly to practice braking accuracy.
+Shows throttle/brake/steering in a moving graph. I find it useful mainly to practice consistent braking.
 
 ![inputs](https://github.com/lespalt/iRon/blob/main/inputs.png?raw=true)
 
 ### "Standings"
 
-Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default, but switch it on during cautions.
+Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions.
 
 ![standings](https://github.com/lespalt/iRon/blob/main/standings.png?raw=true)
 
 ### "Cover"
 
-No screenshot, because all it is is a blank rectangle. Can be useful to cover up distracting in-game dashboards, like the one in the next-gen NASCAR.
+No screenshot for this one, because all it is is a blank rectangle. Can be useful to cover up distracting in-game dashboards, like the one in the next-gen NASCAR.
 
 ---
 
 ## Building from source
 
-This app is built with Visual Studio 2022. The free version should suffice, though I haven't tried it. The project/solution files should work out of the box. Depending on your Visual Studio setup, you may need to install additional prerequisites that allow you to build DirectX applications.
+This app is built with Visual Studio 2022. The free version should suffice, though I haven't verified it. The project/solution files should work out of the box. Depending on your Visual Studio setup, you may need to install additional prerequisites (static libs) needed to build DirectX applications.
 
 ---
 
@@ -92,7 +92,7 @@ Build dependencies (most notably the iRacing SDK and picojson) are kept to a min
 
 ## Bug reports and feature requests
 
-If you encounter a problem, please file a github issue and I'll do my best to address it. Pull requests are welcome too, of course.
+If you encounter a problem, please file a github issue and I'll do my best to address it. Pull requests with fixes are welcome too, of course.
 
 If you'd like to see a specific feature added, feel free to file a github issue as well. If it's something small, I may actually get to it :-)
 
