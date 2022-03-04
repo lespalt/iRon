@@ -78,7 +78,7 @@ No screenshot, because all it is is a blank rectangle. Can be useful to cover up
 
 ## Building from source
 
-This app is built with Visual Studio 2022. The free version should suffice, though I haven't tried it. The project/solution files should work out of the box. Depending on your system, you may need to separately install prerequisites to build DirectX applications.
+This app is built with Visual Studio 2022. The free version should suffice, though I haven't tried it. The project/solution files should work out of the box. Depending on your Visual Studio setup, you may need to install additional prerequisites that allow you to build DirectX applications.
 
 ---
 
