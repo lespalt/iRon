@@ -1,8 +1,10 @@
 # iRon - lightweight overlays for iRacing <!-- omit in toc -->
 
-This project provides a few lightweight overlays for iRacing. Included are: a relative display with optional minimap, a dashboard with fuel calculator, a throttle/brake input graph, and a standings display. 
+This project provides a few lightweight overlays for iRacing. Included are: a relative display with optional minimap, a dashboard with fuel calculator, a throttle/brake input graph, and a standings display.
 
-The implementation aims to be small, easy to modify, and free of external dependencies.
+I created this program for my own personal use. As such, its feature set is limited to what I considered sensible in practice, given the way I use iRacing. That said, I'm making it available in the hope it might be useful to others in the iRacing community, either for direct use or as a starting point for other homebrew overlays.
+
+iRon's code base aims to be small, easy to modify, and free of external dependencies.
 
 # Contents <!-- omit in toc -->
 
@@ -47,7 +49,7 @@ Shows throttle/brake/steering in a moving graph. I find it useful to practice co
 
 ### "Standings"
 
-Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions.
+Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions. Or glimpse at it pre-race to get a sense of the competition level.
 
 Like the "Relative" overlay, this will highlight buddies in green (Dale Jr. in the example below).
 
@@ -87,7 +89,7 @@ This app is built with Visual Studio 2022. The free version should suffice, thou
 
 ## Dependencies
 
-There are no external dependencies other than standard Windows components like DirectX.  Those should already be present on most systems.
+There are no runtime dependencies other than standard Windows components like DirectX.  Those should already be present on most if not all systems that can run iRacing.
 
 Build dependencies (most notably the iRacing SDK and picojson) are kept to a minimum and are included in the repository.
 
@@ -97,10 +99,10 @@ Build dependencies (most notably the iRacing SDK and picojson) are kept to a min
 
 If you encounter a problem, please file a github issue and I'll do my best to address it. Pull requests with fixes are welcome too, of course.
 
-If you'd like to see a specific feature added, feel free to file a github issue as well. If it's something small, I may actually get to it :-) No promises though, as my time to work on this project is quite limited.
+If you'd like to see a specific feature added, feel free to file a github issue as well. If it's something small, I may actually get to it :-) No promises though, as unfortunately the time I can spend on this project is quite limited.
 
 ---
 
 ## Donations
 
-If you like this project enough to wonder whether you can contribute financially: thank you! I'm not looking for donations, but **please consider giving to Ukraine-related charities instead**.
+If you like this project enough to wonder whether you can contribute financially: first of all, thank you! I'm not looking for donations, but **please consider giving to Ukraine-related charities instead**.
