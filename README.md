@@ -68,6 +68,8 @@ Shows throttle/brake/steering in a moving graph. I find it useful mainly to prac
 
 Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions.
 
+Like the "Relative" overlay, this will highlight buddies in green (Dale Jr. in the example below).
+
 ![standings](https://github.com/lespalt/iRon/blob/main/standings.png?raw=true)
 
 ### "Cover"
