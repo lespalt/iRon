@@ -44,7 +44,7 @@ _Note that currently, the config file will be created only after the overlays ha
 
 ### "Relative"
 
-Shows the drivers around you like the Relative box in iRacing, but with additional information such as license, iRating, and laps driven since the last pit stop. You can also highlight your friends by adding their names to a buddy list in the config file.
+Like the "Relative" box in iRacing, but with additional information such as license, iRating, and laps driven since the last pit stop. You can also highlight your friends by adding their names to a buddy list in the config file.
 
 Optionally, there is a minimap at the top. It can be set to either relative mode (own car fixed in the center) or absolute mode (start/finish line fixed in the center).
 
