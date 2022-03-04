@@ -2,7 +2,7 @@
 
 This project provides a few lightweight overlays for iRacing. Included are: a relative display with optional minimap, a dashboard with fuel calculator, a throttle/brake input graph, and a standings display.
 
-I created iRon for my own personal use. As such, its feature set is limited to what I considered sensible in practice given the way I use iRacing. That said, I'm making it available in the hope it might be useful to others in the iRacing community, either for direct use or as a starting point for other homebrew overlays.
+I created iRon for my own personal use. As such, its feature set is limited to what I considered sensible in practice given the way I use iRacing. I don't currently plan to extend it further. That said, I'm making it available in the hope it might be useful to others in the iRacing community, either for direct use or as a starting point for other homebrew overlays.
 
 The project's code base aims to be small, easy to modify, and free of external dependencies.
 
