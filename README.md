@@ -1,6 +1,6 @@
 # iRon - lightweight overlays for iRacing <!-- omit in toc -->
 
-This project provides a few lightweight overlays for iRacing. Included are: a relative display with optional minimap, a dash ("DDU") with fuel calculator, a throttle/brake input graph, and a standings display. 
+This project provides a few lightweight overlays for iRacing. Included are: a relative display with optional minimap, a dashboard with fuel calculator, a throttle/brake input graph, and a standings display. 
 
 The implementation aims to be small, easy to modify, and free of external dependencies.
 
