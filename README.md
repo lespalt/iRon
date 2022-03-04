@@ -84,7 +84,7 @@ This app is built with Visual Studio 2022. The free version should suffice, thou
 
 ## Dependencies
 
-There are no external dependencies other than standard Windows components (DirectX) that should already be present on most systems.
+There are no external dependencies other than standard Windows components like DirectX.  Those should already be present on most systems.
 
 Build dependencies (most notably the iRacing SDK and picojson) are kept to a minimum and are included in the repository.
 
