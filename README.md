@@ -6,18 +6,58 @@ The implementation aims to be small, easy to modify, and free of external depend
 
 # Contents <!-- omit in toc -->
 
-- [Installing & Running](#installing--running)
-- [Configuration](#configuration)
 - [Overlays](#overlays)
   - ["Relative"](#relative)
   - ["DDU"](#ddu)
   - ["Inputs"](#inputs)
   - ["Standings"](#standings)
   - ["Cover"](#cover)
+- [Installing & Running](#installing--running)
+- [Configuration](#configuration)
 - [Building from source](#building-from-source)
 - [Dependencies](#dependencies)
 - [Bug reports and feature requests](#bug-reports-and-feature-requests)
 - [Donations](#donations)
+
+---
+
+## Overlays
+
+### "Relative"
+
+Like the "Relative" box in iRacing, but with additional information such as license, iRating, and laps driven since the last pit stop. You can also highlight your friends by adding their names to a buddy list.
+
+At the top is an optional minimap. It can be set to either relative mode (own car fixed in the center) or absolute mode (start/finish line fixed in the center).
+
+![relative](https://github.com/lespalt/iRon/blob/main/relative.png?raw=true)
+
+### "DDU"
+
+A dashboard that concentrates important pieces of information for which you would otherwise have to flip through various boxes in iRacing.
+
+The fuel calculator shows the estimated remaining laps, remaining amount of fuel, estimated fuel used per lap, estimated _additional_ fuel required to finish the race, and the fuel amount that is scheduled to be added on the next pit stop. To compute the estimated fuel consumption, the last 4 laps under green and without pit stops are taken into account, and a 5% safety margin is added. These parameters can be customized.
+
+![ddu](https://github.com/lespalt/iRon/blob/main/ddu.png?raw=true)
+
+### "Inputs"
+
+Shows throttle/brake/steering in a moving graph. I find it useful to practice consistent braking.
+
+![inputs](https://github.com/lespalt/iRon/blob/main/inputs.png?raw=true)
+
+### "Standings"
+
+Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions.
+
+Like the "Relative" overlay, this will highlight buddies in green (Dale Jr. in the example below).
+
+![standings](https://github.com/lespalt/iRon/blob/main/standings.png?raw=true)
+
+### "Cover"
+
+No screenshot for this one, because all it is is a blank rectangle. Can be useful to cover up distracting in-game dashboards, like the one in the next-gen NASCAR.
+
+---
 
 ## Installing & Running
 
@@ -36,45 +76,6 @@ Overlays can be switched on and off at runtime using the hotkeys displayed durin
 Certain aspects of the overlays, such as colors, font types, sizes etc. can be customized. To do that, open the file **config.json** that iRon created and experiment by editing the (hopefully mostly self-explanatory) parameters. You can do that while the app is running -- the changes will take effect immediately whenever the file is saved.
 
 _Note that currently, the config file will be created only after the overlays have been "touched" for the first time, usually by dragging or resizing them._
-
-
-## Overlays
-
----
-
-### "Relative"
-
-Like the "Relative" box in iRacing, but with additional information such as license, iRating, and laps driven since the last pit stop. You can also highlight your friends by adding their names to a buddy list in the config file.
-
-At the top is an optional minimap. It can be set to either relative mode (own car fixed in the center) or absolute mode (start/finish line fixed in the center).
-
-![relative](https://github.com/lespalt/iRon/blob/main/relative.png?raw=true)
-
-### "DDU"
-
-A dashboard that concentrates important pieces of information for which you would otherwise have to flip through various iRacing boxes.
-
-The fuel calculator shows the estimated remaining laps, remaining amount of fuel, estimated fuel used per lap, estimated _additional_ fuel required to finish the race, and the fuel amount that is scheduled to be added on the next pit stop. To compute the estimated fuel consumption, the last 4 laps under green and without pit stops are taken into account, and a 5% safety margin is added. These parameters can be customized.
-
-![ddu](https://github.com/lespalt/iRon/blob/main/ddu.png?raw=true)
-
-### "Inputs"
-
-Shows throttle/brake/steering in a moving graph. I find it useful mainly to practice consistent braking.
-
-![inputs](https://github.com/lespalt/iRon/blob/main/inputs.png?raw=true)
-
-### "Standings"
-
-Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions.
-
-Like the "Relative" overlay, this will highlight buddies in green (Dale Jr. in the example below).
-
-![standings](https://github.com/lespalt/iRon/blob/main/standings.png?raw=true)
-
-### "Cover"
-
-No screenshot for this one, because all it is is a blank rectangle. Can be useful to cover up distracting in-game dashboards, like the one in the next-gen NASCAR.
 
 ---
 
@@ -96,7 +97,7 @@ Build dependencies (most notably the iRacing SDK and picojson) are kept to a min
 
 If you encounter a problem, please file a github issue and I'll do my best to address it. Pull requests with fixes are welcome too, of course.
 
-If you'd like to see a specific feature added, feel free to file a github issue as well. If it's something small, I may actually get to it :-)
+If you'd like to see a specific feature added, feel free to file a github issue as well. If it's something small, I may actually get to it :-) No promises though, as my time to work on this project is quite limited.
 
 ---
 
