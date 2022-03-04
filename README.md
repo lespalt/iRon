@@ -8,6 +8,7 @@ The project's code base aims to be small, easy to modify, and free of external d
 
 # Contents <!-- omit in toc -->
 
+- [Where to Download](#where-to-download)
 - [Overlays](#overlays)
   - [*Relative*](#relative)
   - [*DDU*](#ddu)
@@ -22,6 +23,10 @@ The project's code base aims to be small, easy to modify, and free of external d
 - [Donations](#donations)
 
 ---
+
+## Where to Download
+
+The latest binary release can be found [here](https://github.com/lespalt/iRon/releases/latest).
 
 ## Overlays
 
