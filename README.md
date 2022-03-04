@@ -9,11 +9,11 @@ The project's code base aims to be small, easy to modify, and free of external d
 # Contents <!-- omit in toc -->
 
 - [Overlays](#overlays)
-  - ["Relative"](#relative)
-  - ["DDU"](#ddu)
-  - ["Inputs"](#inputs)
-  - ["Standings"](#standings)
-  - ["Cover"](#cover)
+  - [*Relative*](#relative)
+  - [*DDU*](#ddu)
+  - [*Inputs*](#inputs)
+  - [*Standings*](#standings)
+  - [*Cover*](#cover)
 - [Installing & Running](#installing--running)
 - [Configuration](#configuration)
 - [Building from source](#building-from-source)
@@ -25,15 +25,15 @@ The project's code base aims to be small, easy to modify, and free of external d
 
 ## Overlays
 
-### "Relative"
+### *Relative*
 
-Like the "Relative" box in iRacing, but with additional information such as license, iRating, and laps driven since the last pit stop. You can also highlight your friends by adding their names to a buddy list.
+Like the *Relative* box in iRacing, but with additional information such as license, iRating, and laps driven since the last pit stop. You can also highlight your friends by adding their names to a buddy list.
 
 At the top is an optional minimap. It can be set to either relative mode (own car fixed in the center) or absolute mode (start/finish line fixed in the center).
 
 ![relative](https://github.com/lespalt/iRon/blob/main/relative.png?raw=true)
 
-### "DDU"
+### *DDU*
 
 A dashboard that concentrates important pieces of information for which you would otherwise have to flip through various boxes in iRacing.
 
@@ -41,13 +41,13 @@ The fuel calculator shows the estimated remaining laps, remaining amount of fuel
 
 ![ddu](https://github.com/lespalt/iRon/blob/main/ddu.png?raw=true)
 
-### "Inputs"
+### *Inputs*
 
 Shows throttle/brake/steering in a moving graph. I find it useful to practice consistent braking.
 
 ![inputs](https://github.com/lespalt/iRon/blob/main/inputs.png?raw=true)
 
-### "Standings"
+### *Standings*
 
 Shows the standings of the entire field, including safety rating, iRating, and number of laps since the last pit stop ("pit age"). I usually leave this off by default and switch it on during cautions. Or glimpse at it pre-race to get a sense of the competition level.
 
@@ -55,7 +55,7 @@ Like the "Relative" overlay, this will highlight buddies in green (Dale Jr. in t
 
 ![standings](https://github.com/lespalt/iRon/blob/main/standings.png?raw=true)
 
-### "Cover"
+### *Cover*
 
 No screenshot for this one, because all it is is a blank rectangle. Can be useful to cover up distracting in-game dashboards, like the one in the next-gen NASCAR.
 
@@ -65,7 +65,7 @@ No screenshot for this one, because all it is is a blank rectangle. Can be usefu
 
 The app does not require installation. Just copy the executable to a folder of your choice. Make sure the folder is not write protected, as iRon will attempt to save its configuration file in the working directory.
 
-To use, simply run the executable. It doesn't matter whether you do this before or after launching iRacing. A console window will pop up, indicating that iRon is running. Once you're in the car in iRacing, the overlays should show up, and you can configure things to your liking.
+To use it, simply run the executable. It doesn't matter whether you do this before or after launching iRacing. A console window will pop up, indicating that iRon is running. Once you're in the car in iRacing, the overlays should show up, and you can configure things to your liking. I recommend running iRacing in borderless window mode. Overlays *might* work in other modes as well, but I haven't tested it.
 
 ---
 
