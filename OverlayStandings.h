@@ -164,6 +164,7 @@ protected:
         const float4 fastestLapCol      = g_cfg.getFloat4( m_name, "fastest_lap_col", float4(1,0,1,1) );
         const float4 pitCol             = g_cfg.getFloat4( m_name, "pit_col", float4(0.94f,0.8f,0.13f,1) );
         const float  licenseBgAlpha     = g_cfg.getFloat( m_name, "license_background_alpha", 0.8f );
+        const bool   imperial           = ir_DisplayUnits.getInt() == 0;
 
         const float xoff = 10.0f;
         const float yoff = 10;
@@ -359,9 +360,17 @@ protected:
         
         // Footer
         {
+            float trackTemp = ir_TrackTempCrew.getFloat();
+            float airTemp   = ir_AirTemp.getFloat();
+
+            if( imperial ) {
+                trackTemp = celsiusToFahrenheit( trackTemp );
+                airTemp   = celsiusToFahrenheit( airTemp );
+            }
+
             m_brush->SetColor(float4(1,1,1,0.4f));
             m_renderTarget->DrawLine( float2(0,ybottom),float2((float)m_width,ybottom),m_brush.Get() );
-            swprintf( s, _countof(s), L"SoF: %d      Track Temp: %.1f°      Air Temp: %.1f°      Setup: %s      Subsession: %d", ir_session.sof, ir_TrackTempCrew.getFloat(), ir_AirTemp.getFloat(), ir_session.isFixedSetup?L"fixed":L"open", ir_session.subsessionId );
+            swprintf( s, _countof(s), L"SoF: %d      Track Temp: %.1f°      Air Temp: %.1f°      Setup: %s      Subsession: %d", ir_session.sof, trackTemp, airTemp, ir_session.isFixedSetup?L"fixed":L"open", ir_session.subsessionId );
             y = m_height - (m_height-ybottom)/2;
             m_brush->SetColor( headerCol );
             m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff, (float)m_width-2*xoff, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
