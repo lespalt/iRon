@@ -496,7 +496,10 @@ class OverlayDDU : public Overlay
                 // Remaining
                 if( remainingFuel >= 0 )
                 {
-                    swprintf( s, _countof(s), imperial ? L"%.1f gl" : L"%.1f lt", remainingFuel );
+                    float val = remainingFuel;
+                    if( imperial )
+                        val *= 0.264172f;
+                    swprintf( s, _countof(s), imperial ? L"%.1f gl" : L"%.1f lt", val );
                     m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxFuel.x0, m_boxFuel.x1-xoff, m_boxFuel.y0+m_boxFuel.h*5.1f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_TRAILING );
                 }
 
