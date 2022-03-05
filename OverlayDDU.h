@@ -451,7 +451,7 @@ class OverlayDDU : public Overlay
                 m_text.render( m_renderTarget.Get(), L"Fin+", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*8.7f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
                 m_text.render( m_renderTarget.Get(), L"Add", m_textFormatSmall.Get(), m_boxFuel.x0+xoff, m_boxFuel.x1, m_boxFuel.y0+m_boxFuel.h*10.5f/12.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_LEADING );
 
-                const float estimateFactor = g_cfg.getFloat( m_name, "fuel_estimate_factor", 1.05f );                
+                const float estimateFactor = g_cfg.getFloat( m_name, "fuel_estimate_factor", 1.1f );
                 const float remainingFuel  = ir_FuelLevel.getFloat();
 
                 // Update average fuel consumption tracking. Ignore laps that weren't entirely under green or where we pitted.
