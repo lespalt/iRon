@@ -34,7 +34,7 @@ class OverlayRelative : public Overlay
 {
     public:
 
-        const float DefaultFontSize = 16;
+        const float DefaultFontSize = 15.3f;
 
         OverlayRelative()
             : Overlay("OverlayRelative")
@@ -58,7 +58,7 @@ class OverlayRelative : public Overlay
         {
             m_text.reset( m_dwriteFactory.Get() );
 
-            const std::string font = g_cfg.getString( m_name, "font", "Calibri Bold" );
+            const std::string font = g_cfg.getString( m_name, "font", "Microsoft YaHei UI" );
             const float fontSize = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
             const int fontWeight = g_cfg.getInt( m_name, "font_weight", 500 );
             HRCHECK(m_dwriteFactory->CreateTextFormat( toWide(font).c_str(), NULL, (DWRITE_FONT_WEIGHT)fontWeight, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fontSize, L"en-us", &m_textFormat ));
