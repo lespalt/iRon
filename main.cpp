@@ -100,8 +100,15 @@ static void handleConfigChange( std::vector<Overlay*> overlays, ConnectionStatus
     }
 }
 
+static void giveFocusToIracing()
+{
+    HWND hwnd = FindWindow( "SimWinClass", NULL );
+    if( hwnd )
+        SetForegroundWindow( hwnd );
+}
+
 int main()
-{    
+{
     // Bump priority up so we get time from the sim
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 
@@ -191,6 +198,11 @@ int main()
                     uiEdit = !uiEdit;
                     for( Overlay* o : overlays )
                         o->enableUiEdit( uiEdit );
+
+                    // When we're exiting edit mode, attempt to make iRacing the foreground window again for best perf
+                    // without the user having to manually click into iRacing.
+                    if( !uiEdit )
+                        giveFocusToIracing();
                 }
                 else
                 {
