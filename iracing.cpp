@@ -556,7 +556,10 @@ ConnectionStatus ir_tick()
             car.lastLapInPits = ir_CarIdxLap.getInt(carIdx);
     }
 
-    return ir_IsOnTrack.getBool() ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;
+    // Check for both ir_IsOnTrack and ir_IsOnTrackCar, because I've seen iRacing report true for ir_IsOnTrack 
+    // (for just a short time) even when we're not in the car in a practice session. Checking both does seem
+    // to address that.
+    return (ir_IsOnTrack.getBool() && ir_IsOnTrackCar.getBool()) ? ConnectionStatus::DRIVING : ConnectionStatus::CONNECTED;
 }
 
 void ir_handleConfigChange()

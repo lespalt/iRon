@@ -395,9 +395,9 @@ class OverlayRelative : public Overlay
                         if( minimapIsRelative )
                         {
                             e = e - eself + 0.5f;
-                            while( e > 1 )
+                            if( e > 1 )
                                 e -= 1;
-                            while( e < 0 )
+                            if( e < 0 )
                                 e += 1;
                         }
                         e = e * w + x;
