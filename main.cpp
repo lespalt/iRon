@@ -148,14 +148,16 @@ int main()
     overlays.push_back( new OverlayDebug() );
 #endif
 
-    ConnectionStatus  status = ConnectionStatus::UNKNOWN;
-    bool              uiEdit = false;
+    ConnectionStatus  status   = ConnectionStatus::UNKNOWN;
+    bool              uiEdit   = false;
+    unsigned          frameCnt = 0;
 
     while( true )
     {
-        ConnectionStatus prevStatus = status;
-        SessionType      prevSessionType = ir_session.sessionType;
+        ConnectionStatus prevStatus       = status;
+        SessionType      prevSessionType  = ir_session.sessionType;
 
+        // Refresh connection and session info
         status = ir_tick();
         if( status != prevStatus )
         {
@@ -176,9 +178,28 @@ int main()
 
         dbg( "connection status: %s, session type: %s, session state: %d, pace mode: %d, on track: %d, flags: 0x%X", ConnectionStatusStr[(int)status], SessionTypeStr[(int)ir_session.sessionType], ir_SessionState.getInt(), ir_PaceMode.getInt(), (int)ir_IsOnTrackCar.getBool(), ir_SessionFlags.getInt() );
 
-        // Update roughly every 16ms
-        for( Overlay* o : overlays )
-            o->update();
+        // Update/render overlays
+        {
+            if( !g_cfg.getBool("General", "performance_mode_30hz", false) )
+            {
+                // Update everything every frame, roughly every 16ms (~60Hz)
+                for( Overlay* o : overlays )
+                    o->update();
+            }
+            else
+            {
+                // To save perf, update half of the (enabled) overlays on even frames and the other half on odd, for ~30Hz overall
+                int cnt = 0;
+                for( Overlay* o : overlays )
+                {
+                    if( o->isEnabled() )
+                        cnt++;
+
+                    if( (cnt & 1) == (frameCnt & 1) )
+                        o->update();
+                }
+            }
+        }
 
         // Watch for config change signal
         if( g_cfg.hasChanged() )
@@ -191,6 +212,7 @@ int main()
         MSG msg = {};
         while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
+            // Handle hotkeys
             if( msg.message == WM_HOTKEY )
             {
                 if( msg.wParam == (int)Hotkey::UiEdit )
@@ -233,6 +255,8 @@ int main()
             TranslateMessage(&msg);
             DispatchMessage(&msg);            
         }
+
+        frameCnt++;
     }
 
     for( Overlay* o : overlays )
