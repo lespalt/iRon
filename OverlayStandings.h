@@ -363,16 +363,18 @@ protected:
             float trackTemp = ir_TrackTempCrew.getFloat();
             float airTemp   = ir_AirTemp.getFloat();
             char  tempUnit  = 'C';
+            int lapcount = ir_CarIdxLap.getInt(ir_session.driverCarIdx);
+            int totallaps = ir_SessionLapsTotal.getInt();
 
             if( imperial ) {
                 trackTemp = celsiusToFahrenheit( trackTemp );
                 airTemp   = celsiusToFahrenheit( airTemp );
                 tempUnit  = 'F';
             }
-
+          
             m_brush->SetColor(float4(1,1,1,0.4f));
             m_renderTarget->DrawLine( float2(0,ybottom),float2((float)m_width,ybottom),m_brush.Get() );
-            swprintf( s, _countof(s), L"SoF: %d      Track Temp: %.1f°%c      Air Temp: %.1f°%c      Setup: %s      Subsession: %d", ir_session.sof, trackTemp, tempUnit, airTemp, tempUnit, ir_session.isFixedSetup?L"fixed":L"open", ir_session.subsessionId );
+            swprintf( s, _countof(s), L"SoF: %d      Track Temp: %.1f°%c      Air Temp: %.1f°%c      Setup: %s      Subsession: %d      Lap: %d/%d", ir_session.sof, trackTemp, tempUnit, airTemp, tempUnit, ir_session.isFixedSetup?L"fixed":L"open", ir_session.subsessionId, lapcount, totallaps);
             y = m_height - (m_height-ybottom)/2;
             m_brush->SetColor( headerCol );
             m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), xoff, (float)m_width-2*xoff, y, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
