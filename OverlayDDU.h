@@ -31,7 +31,6 @@ SOFTWARE.
 #include "iracing.h"
 #include "Config.h"
 #include "OverlayDebug.h"
-
 class OverlayDDU : public Overlay
 {
     public:
@@ -200,7 +199,6 @@ class OverlayDDU : public Overlay
         {
             const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
             const float4 outlineCol         = g_cfg.getFloat4( m_name, "outline_col", float4(0.7f,0.7f,0.7f,0.9f) );
-            const float4 limiterCol         = g_cfg.getFloat4( m_name, "limiter_col", float4(1,0.6f,0,1));
             const float4 textCol            = g_cfg.getFloat4( m_name, "text_col", float4(1,1,1,0.9f) );
             const float4 goodCol            = g_cfg.getFloat4( m_name, "good_col", float4(0,0.8f,0,0.6f) );
             const float4 badCol             = g_cfg.getFloat4( m_name, "bad_col", float4(0.8f,0.1f,0.1f,0.6f) );
@@ -258,77 +256,59 @@ class OverlayDDU : public Overlay
                 const float rpmPct = (rpm-lo) / (hi-lo);
 
                 const float ww = 0.16f;
-                if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                for (int i = 0; i < 8; ++i)
                 {
-                    for (int i = 0; i < 8; ++i)
-                    {
-                        const float lightPct = i / 8.0f;
-                        const float lightRpm = lo + (hi - lo) * lightPct;
+                    const float lightPct = i / 8.0f;
+                    const float lightRpm = lo + (hi - lo) * lightPct;
 
-                        D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
 
-                        if (rpmPct < lightPct) {
-                            m_brush->SetColor(outlineCol);
-                            m_renderTarget->DrawEllipse(&e, m_brush.Get());
-                        }
-                        else {
-                            if (lightRpm < ir_session.rpmSLFirst)
-                                m_brush->SetColor(float4(1, 1, 1, 1));
-                            else if (lightRpm < ir_session.rpmSLLast)
-                                m_brush->SetColor(warnCol);
-                            else
-                                m_brush->SetColor(float4(1, 0, 0, 1));
-                            m_renderTarget->FillEllipse(&e, m_brush.Get());
-                        }
+                    if (rpmPct < lightPct) {
+                        m_brush->SetColor(outlineCol);
+                        m_renderTarget->DrawEllipse(&e, m_brush.Get());
+                    }
+                    else {
+                        if (lightRpm < ir_session.rpmSLFirst)
+                            m_brush->SetColor(float4(1, 1, 1, 1));
+                        else if (lightRpm < ir_session.rpmSLLast)
+                            m_brush->SetColor(warnCol);
+                        else
+                            m_brush->SetColor(float4(1, 0, 0, 1));
+                        m_renderTarget->FillEllipse(&e, m_brush.Get());
                     }
                 }
-                else
+                
+                if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
                 {
-                    D2D1_ELLIPSE l0 = { float2(r2ax(0.5f - ww / 2 + (0 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l1 = { float2(r2ax(0.5f - ww / 2 + (1 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l2 = { float2(r2ax(0.5f - ww / 2 + (2 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l3 = { float2(r2ax(0.5f - ww / 2 + (3 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l4 = { float2(r2ax(0.5f - ww / 2 + (4 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l5 = { float2(r2ax(0.5f - ww / 2 + (5 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l6 = { float2(r2ax(0.5f - ww / 2 + (6 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-                    D2D1_ELLIPSE l7 = { float2(r2ax(0.5f - ww / 2 + (7 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-
                     int frames = 60;
                     if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
-
-                    if (m_rpmFlashTickCount <= frames / 2)
+                    if (m_rpmFlashTickCount <= frames / 4)  m_brush->SetColor(warnCol);
+                    else m_brush->SetColor(outlineCol);
+                    
+                    for (int i = 0; i < 8; ++i)
                     {
-                        m_brush->SetColor(limiterCol);
-                        m_renderTarget->FillEllipse(&l0, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l1, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l2, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l3, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l4, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l5, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l6, m_brush.Get());
-                        m_renderTarget->FillEllipse(&l7, m_brush.Get());
-                        m_rpmFlashTickCount++;
+                        D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                        m_renderTarget->DrawEllipse(&e, m_brush.Get());
                     }
-                    else
-                    {
-                        m_brush->SetColor(outlineCol);
-                        m_renderTarget->DrawEllipse(&l0, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l1, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l2, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l3, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l4, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l5, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l6, m_brush.Get());
-                        m_renderTarget->DrawEllipse(&l7, m_brush.Get());
-                        m_rpmFlashTickCount++;
-                    }
-                    if (m_rpmFlashTickCount > frames) m_rpmFlashTickCount = 0;
+                    m_rpmFlashTickCount++;
+                    if (m_rpmFlashTickCount > frames / 2) m_rpmFlashTickCount = 0;
                 }
             }
 
             // Gear & Speed
             {
-                if( ir_RPM.getFloat() >= ir_session.rpmSLShift || ir_EngineWarnings.getInt() & irsdk_revLimiterActive )
+                if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                {
+                    int frames = 60;
+                    if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
+                    if (m_rpmFlashTickCount <= frames / 4)
+                    {
+                        m_brush->SetColor(goodCol);
+                        D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
+                        m_renderTarget->FillRectangle(&r, m_brush.Get());
+                    }
+                }
+                else if( ir_RPM.getFloat() >= ir_session.rpmSLShift )
                 {
                     m_brush->SetColor( warnCol );
                     D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
