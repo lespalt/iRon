@@ -200,6 +200,7 @@ class OverlayDDU : public Overlay
         {
             const float  fontSize           = g_cfg.getFloat( m_name, "font_size", DefaultFontSize );
             const float4 outlineCol         = g_cfg.getFloat4( m_name, "outline_col", float4(0.7f,0.7f,0.7f,0.9f) );
+            const float4 limiterCol         = g_cfg.getFloat4( m_name, "limiter_col", float4(1,0.6f,0,1));
             const float4 textCol            = g_cfg.getFloat4( m_name, "text_col", float4(1,1,1,0.9f) );
             const float4 goodCol            = g_cfg.getFloat4( m_name, "good_col", float4(0,0.8f,0,0.6f) );
             const float4 badCol             = g_cfg.getFloat4( m_name, "bad_col", float4(0.8f,0.1f,0.1f,0.6f) );
@@ -264,18 +265,39 @@ class OverlayDDU : public Overlay
 
                     D2D1_ELLIPSE e = { float2(r2ax(0.5f-ww/2+(i+0.5f)*ww/8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
 
-                    if( rpmPct < lightPct ) {
-                        m_brush->SetColor( outlineCol );
-                        m_renderTarget->DrawEllipse( &e, m_brush.Get() );
+                    if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                    {
+                        if (rpmPct < lightPct) {
+                            m_brush->SetColor(outlineCol);
+                            m_renderTarget->DrawEllipse(&e, m_brush.Get());
+                        }
+                        else {
+                            if (lightRpm < ir_session.rpmSLFirst)
+                                m_brush->SetColor(float4(1, 1, 1, 1));
+                            else if (lightRpm < ir_session.rpmSLLast)
+                                m_brush->SetColor(warnCol);
+                            else
+                                m_brush->SetColor(float4(1, 0, 0, 1));
+                            m_renderTarget->FillEllipse(&e, m_brush.Get());
+                        }
                     }
-                    else {
-                        if( lightRpm < ir_session.rpmSLFirst )
-                            m_brush->SetColor( float4(1,1,1,1) );
-                        else if( lightRpm < ir_session.rpmSLLast )
-                            m_brush->SetColor( warnCol );
+                    else
+                    {
+                        int frames = 60;
+                        if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
+                        
+                        if (m_rpmFlashTickCount <= frames / 2)
+                        {
+                            m_brush->SetColor(limiterCol);
+                            m_rpmFlashTickCount++;
+                        }
                         else
-                            m_brush->SetColor( float4(1,0,0,1) );
-                        m_renderTarget->FillEllipse( &e, m_brush.Get() );
+                        {
+                            m_brush->SetColor(outlineCol);
+                            m_rpmFlashTickCount++;
+                        }
+                        if (m_rpmFlashTickCount > frames) m_rpmFlashTickCount = 0;
+                        m_renderTarget->DrawEllipse(&e, m_brush.Get());
                     }
                 }
             }
@@ -777,6 +799,7 @@ class OverlayDDU : public Overlay
 
         int                 m_prevCurrentLap = 0;
         DWORD               m_lastLapChangeTickCount = 0;
+        DWORD               m_rpmFlashTickCount = 0;
 
         float               m_prevBestLapTime = 0;
 
