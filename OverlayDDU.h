@@ -278,7 +278,7 @@ class OverlayDDU : public Overlay
                     }
                 }
                 
-                if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                if ((ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
                 {
                     int frames = 60;
                     if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
@@ -297,7 +297,7 @@ class OverlayDDU : public Overlay
 
             // Gear & Speed
             {
-                if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                if ((ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
                 {
                     int frames = 60;
                     if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
