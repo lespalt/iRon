@@ -258,15 +258,15 @@ class OverlayDDU : public Overlay
                 const float rpmPct = (rpm-lo) / (hi-lo);
 
                 const float ww = 0.16f;
-                for( int i=0; i<8; ++i )
+                if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
                 {
-                    const float lightPct = i/8.0f;
-                    const float lightRpm = lo + (hi-lo) * lightPct;
-
-                    D2D1_ELLIPSE e = { float2(r2ax(0.5f-ww/2+(i+0.5f)*ww/8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
-
-                    if (!(ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                    for (int i = 0; i < 8; ++i)
                     {
+                        const float lightPct = i / 8.0f;
+                        const float lightRpm = lo + (hi - lo) * lightPct;
+
+                        D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+
                         if (rpmPct < lightPct) {
                             m_brush->SetColor(outlineCol);
                             m_renderTarget->DrawEllipse(&e, m_brush.Get());
@@ -281,24 +281,48 @@ class OverlayDDU : public Overlay
                             m_renderTarget->FillEllipse(&e, m_brush.Get());
                         }
                     }
+                }
+                else
+                {
+                    D2D1_ELLIPSE l0 = { float2(r2ax(0.5f - ww / 2 + (0 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l1 = { float2(r2ax(0.5f - ww / 2 + (1 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l2 = { float2(r2ax(0.5f - ww / 2 + (2 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l3 = { float2(r2ax(0.5f - ww / 2 + (3 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l4 = { float2(r2ax(0.5f - ww / 2 + (4 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l5 = { float2(r2ax(0.5f - ww / 2 + (5 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l6 = { float2(r2ax(0.5f - ww / 2 + (6 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE l7 = { float2(r2ax(0.5f - ww / 2 + (7 + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+
+                    int frames = 60;
+                    if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
+
+                    if (m_rpmFlashTickCount <= frames / 2)
+                    {
+                        m_brush->SetColor(limiterCol);
+                        m_renderTarget->FillEllipse(&l0, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l1, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l2, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l3, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l4, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l5, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l6, m_brush.Get());
+                        m_renderTarget->FillEllipse(&l7, m_brush.Get());
+                        m_rpmFlashTickCount++;
+                    }
                     else
                     {
-                        int frames = 60;
-                        if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
-                        
-                        if (m_rpmFlashTickCount <= frames / 2)
-                        {
-                            m_brush->SetColor(limiterCol);
-                            m_rpmFlashTickCount++;
-                        }
-                        else
-                        {
-                            m_brush->SetColor(outlineCol);
-                            m_rpmFlashTickCount++;
-                        }
-                        if (m_rpmFlashTickCount > frames) m_rpmFlashTickCount = 0;
-                        m_renderTarget->DrawEllipse(&e, m_brush.Get());
+                        m_brush->SetColor(outlineCol);
+                        m_renderTarget->DrawEllipse(&l0, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l1, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l2, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l3, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l4, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l5, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l6, m_brush.Get());
+                        m_renderTarget->DrawEllipse(&l7, m_brush.Get());
+                        m_rpmFlashTickCount++;
                     }
+                    if (m_rpmFlashTickCount > frames) m_rpmFlashTickCount = 0;
                 }
             }
 
