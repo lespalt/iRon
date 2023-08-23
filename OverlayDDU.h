@@ -579,25 +579,32 @@ class OverlayDDU : public Overlay
                 const float rr = 100.0f * std::min(std::min( ir_RRwearL.getFloat(), ir_RRwearM.getFloat() ), ir_RRwearR.getFloat() );
 
                 // Left
-                if( ir_dpLTireChange.getFloat() )
-                    m_brush->SetColor( serviceCol );
-                else
-                    m_brush->SetColor( textCol );
-                swprintf( s, _countof(s), L"%d", (int)(lf+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+20, m_boxTires.x0+m_boxTires.w/2, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-                swprintf( s, _countof(s), L"%d", (int)(lr+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+20, m_boxTires.x0+m_boxTires.w/2, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                if (ir_dpLTireChange.isValid())
+                {
+                    if (ir_dpLTireChange.getFloat())
+                        m_brush->SetColor(serviceCol);
+                    else
+                        m_brush->SetColor(textCol);
 
-                // Right
-                if( ir_dpRTireChange.getFloat() )
-                    m_brush->SetColor( serviceCol );
-                else
-                    m_brush->SetColor( textCol );
-                swprintf( s, _countof(s), L"%d", (int)(rf+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-                swprintf( s, _countof(s), L"%d", (int)(rr+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-                m_brush->SetColor( textCol );
+                        swprintf(s, _countof(s), L"%d", (int)(lf + 0.5f));
+                        m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + 20, m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.y0 + m_boxTires.h * 1.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                        swprintf(s, _countof(s), L"%d", (int)(lr + 0.5f));
+                        m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + 20, m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.y0 + m_boxTires.h * 2.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                }
+
+                if (ir_dpRTireChange.isValid())
+                {
+                    // Right
+                    if (ir_dpRTireChange.getFloat())
+                        m_brush->SetColor(serviceCol);
+                    else
+                        m_brush->SetColor(textCol);
+                    swprintf(s, _countof(s), L"%d", (int)(rf + 0.5f));
+                    m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.x1 - 20, m_boxTires.y0 + m_boxTires.h * 1.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                    swprintf(s, _countof(s), L"%d", (int)(rr + 0.5f));
+                    m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.x1 - 20, m_boxTires.y0 + m_boxTires.h * 2.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                    m_brush->SetColor(textCol);
+                }
                 
                 /* TODO: why doesn't iracing report 255 here in an AI session where we DO have unlimited tire sets??
 
@@ -659,9 +666,12 @@ class OverlayDDU : public Overlay
 
             // Brake bias
             {
-                const float bias = ir_dcBrakeBias.getFloat();
-                swprintf( s, _countof(s), L"%+3.1f", bias );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxBias.x0, m_boxBias.x1, m_boxBias.y0+m_boxBias.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                if (ir_dcBrakeBias.isValid())
+                {
+                    const float bias = ir_dcBrakeBias.getFloat();
+                    swprintf(s, _countof(s), L"%+3.1f", bias);
+                    m_text.render(m_renderTarget.Get(), s, m_textFormat.Get(), m_boxBias.x0, m_boxBias.x1, m_boxBias.y0 + m_boxBias.h * 0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                }
             }
 
             // Oil temp
