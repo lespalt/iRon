@@ -282,7 +282,7 @@ class OverlayDDU : public Overlay
                 {
                     int frames = 60;
                     if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
-                    if (m_rpmFlashTickCount <= frames / 4)  m_brush->SetColor(warnCol);
+                    if (((tickCount / 16) % (frames / 2)) <= frames / 4)  m_brush->SetColor(warnCol);
                     else m_brush->SetColor(outlineCol);
                     
                     for (int i = 0; i < 8; ++i)
@@ -290,18 +290,18 @@ class OverlayDDU : public Overlay
                         D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
                         m_renderTarget->DrawEllipse(&e, m_brush.Get());
                     }
-                    m_rpmFlashTickCount++;
-                    if (m_rpmFlashTickCount > frames / 2) m_rpmFlashTickCount = 0;
                 }
             }
 
             // Gear & Speed
             {
+                //std::cout << tickCount / 16 << std::endl;
                 if ((ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
                 {
                     int frames = 60;
                     if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
-                    if (m_rpmFlashTickCount <= frames / 4)
+                    //std::cout << (tickCount % frames) << std::endl;
+                    if (((tickCount / 16) % (frames / 2)) <= frames / 4)
                     {
                         m_brush->SetColor(goodCol);
                         D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
@@ -813,7 +813,6 @@ class OverlayDDU : public Overlay
 
         int                 m_prevCurrentLap = 0;
         DWORD               m_lastLapChangeTickCount = 0;
-        DWORD               m_rpmFlashTickCount = 0;
 
         float               m_prevBestLapTime = 0;
 
