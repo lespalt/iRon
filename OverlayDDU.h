@@ -31,7 +31,6 @@ SOFTWARE.
 #include "iracing.h"
 #include "Config.h"
 #include "OverlayDebug.h"
-
 class OverlayDDU : public Overlay
 {
     public:
@@ -257,32 +256,59 @@ class OverlayDDU : public Overlay
                 const float rpmPct = (rpm-lo) / (hi-lo);
 
                 const float ww = 0.16f;
-                for( int i=0; i<8; ++i )
+                for (int i = 0; i < 8; ++i)
                 {
-                    const float lightPct = i/8.0f;
-                    const float lightRpm = lo + (hi-lo) * lightPct;
+                    const float lightPct = i / 8.0f;
+                    const float lightRpm = lo + (hi - lo) * lightPct;
 
-                    D2D1_ELLIPSE e = { float2(r2ax(0.5f-ww/2+(i+0.5f)*ww/8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                    D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
 
-                    if( rpmPct < lightPct ) {
-                        m_brush->SetColor( outlineCol );
-                        m_renderTarget->DrawEllipse( &e, m_brush.Get() );
+                    if (rpmPct < lightPct) {
+                        m_brush->SetColor(outlineCol);
+                        m_renderTarget->DrawEllipse(&e, m_brush.Get());
                     }
                     else {
-                        if( lightRpm < ir_session.rpmSLFirst )
-                            m_brush->SetColor( float4(1,1,1,1) );
-                        else if( lightRpm < ir_session.rpmSLLast )
-                            m_brush->SetColor( warnCol );
+                        if (lightRpm < ir_session.rpmSLFirst)
+                            m_brush->SetColor(float4(1, 1, 1, 1));
+                        else if (lightRpm < ir_session.rpmSLLast)
+                            m_brush->SetColor(warnCol);
                         else
-                            m_brush->SetColor( float4(1,0,0,1) );
-                        m_renderTarget->FillEllipse( &e, m_brush.Get() );
+                            m_brush->SetColor(float4(1, 0, 0, 1));
+                        m_renderTarget->FillEllipse(&e, m_brush.Get());
+                    }
+                }
+                
+                if ((ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                {
+                    int frames = 60;
+                    if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
+                    if (((tickCount / 16) % (frames / 2)) <= frames / 4)  m_brush->SetColor(warnCol);
+                    else m_brush->SetColor(outlineCol);
+                    
+                    for (int i = 0; i < 8; ++i)
+                    {
+                        D2D1_ELLIPSE e = { float2(r2ax(0.5f - ww / 2 + (i + 0.5f) * ww / 8),r2ay(0.065f)), r2ax(0.007f), r2ax(0.007f) };
+                        m_renderTarget->DrawEllipse(&e, m_brush.Get());
                     }
                 }
             }
 
             // Gear & Speed
             {
-                if( ir_RPM.getFloat() >= ir_session.rpmSLShift || ir_EngineWarnings.getInt() & irsdk_revLimiterActive )
+                //std::cout << tickCount / 16 << std::endl;
+                if ((ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter))
+                {
+                    int frames = 60;
+                    if (g_cfg.getBool("General", "performance_mode_30hz", false)) frames = 30;
+                    //std::cout << (tickCount % frames) << std::endl;
+                    if (((tickCount / 16) % (frames / 2)) <= frames / 4)
+                    {
+                        m_brush->SetColor(goodCol);
+                        D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
+                        m_renderTarget->FillRectangle(&r, m_brush.Get());
+                    }
+                }
+                else if( ir_RPM.getFloat() >= ir_session.rpmSLShift )
                 {
                     m_brush->SetColor( warnCol );
                     D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
@@ -553,25 +579,32 @@ class OverlayDDU : public Overlay
                 const float rr = 100.0f * std::min(std::min( ir_RRwearL.getFloat(), ir_RRwearM.getFloat() ), ir_RRwearR.getFloat() );
 
                 // Left
-                if( ir_dpLTireChange.getFloat() )
-                    m_brush->SetColor( serviceCol );
-                else
-                    m_brush->SetColor( textCol );
-                swprintf( s, _countof(s), L"%d", (int)(lf+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+20, m_boxTires.x0+m_boxTires.w/2, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-                swprintf( s, _countof(s), L"%d", (int)(lr+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+20, m_boxTires.x0+m_boxTires.w/2, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                if (ir_dpLTireChange.isValid())
+                {
+                    if (ir_dpLTireChange.getFloat())
+                        m_brush->SetColor(serviceCol);
+                    else
+                        m_brush->SetColor(textCol);
 
-                // Right
-                if( ir_dpRTireChange.getFloat() )
-                    m_brush->SetColor( serviceCol );
-                else
-                    m_brush->SetColor( textCol );
-                swprintf( s, _countof(s), L"%d", (int)(rf+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*1.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-                swprintf( s, _countof(s), L"%d", (int)(rr+0.5f) );
-                m_text.render( m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0+m_boxTires.w/2, m_boxTires.x1-20, m_boxTires.y0+m_boxTires.h*2.0f/3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
-                m_brush->SetColor( textCol );
+                        swprintf(s, _countof(s), L"%d", (int)(lf + 0.5f));
+                        m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + 20, m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.y0 + m_boxTires.h * 1.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                        swprintf(s, _countof(s), L"%d", (int)(lr + 0.5f));
+                        m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + 20, m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.y0 + m_boxTires.h * 2.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                }
+
+                if (ir_dpRTireChange.isValid())
+                {
+                    // Right
+                    if (ir_dpRTireChange.getFloat())
+                        m_brush->SetColor(serviceCol);
+                    else
+                        m_brush->SetColor(textCol);
+                    swprintf(s, _countof(s), L"%d", (int)(rf + 0.5f));
+                    m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.x1 - 20, m_boxTires.y0 + m_boxTires.h * 1.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                    swprintf(s, _countof(s), L"%d", (int)(rr + 0.5f));
+                    m_text.render(m_renderTarget.Get(), s, m_textFormatSmall.Get(), m_boxTires.x0 + m_boxTires.w / 2, m_boxTires.x1 - 20, m_boxTires.y0 + m_boxTires.h * 2.0f / 3.0f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                    m_brush->SetColor(textCol);
+                }
                 
                 /* TODO: why doesn't iracing report 255 here in an AI session where we DO have unlimited tire sets??
 
@@ -633,9 +666,12 @@ class OverlayDDU : public Overlay
 
             // Brake bias
             {
-                const float bias = ir_dcBrakeBias.getFloat();
-                swprintf( s, _countof(s), L"%+3.1f", bias );
-                m_text.render( m_renderTarget.Get(), s, m_textFormat.Get(), m_boxBias.x0, m_boxBias.x1, m_boxBias.y0+m_boxBias.h*0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER );
+                if (ir_dcBrakeBias.isValid())
+                {
+                    const float bias = ir_dcBrakeBias.getFloat();
+                    swprintf(s, _countof(s), L"%+3.1f", bias);
+                    m_text.render(m_renderTarget.Get(), s, m_textFormat.Get(), m_boxBias.x0, m_boxBias.x1, m_boxBias.y0 + m_boxBias.h * 0.5f, m_brush.Get(), DWRITE_TEXT_ALIGNMENT_CENTER);
+                }
             }
 
             // Oil temp
