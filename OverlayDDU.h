@@ -206,6 +206,8 @@ class OverlayDDU : public Overlay
             const float4 fastestCol         = g_cfg.getFloat4( m_name, "fastest_col", float4(0.8f,0,0.8f,0.6f) );
             const float4 serviceCol         = g_cfg.getFloat4( m_name, "service_col", float4(0.36f,0.61f,0.84f,1) );
             const float4 warnCol            = g_cfg.getFloat4( m_name, "warn_col", float4(1,0.6f,0,1) );
+            const float4 shiftCol           = g_cfg.getFloat4( m_name, "shift_col", float4(1, 0.1f, 0.1f, 0.9f) );
+            const float4 pitCol             = g_cfg.getFloat4( m_name, "pit_col", float4(0, 0.8f, 0, 0.6f) );
 
             const int  carIdx   = ir_session.driverCarIdx;
             const bool imperial = ir_DisplayUnits.getInt() == 0;
@@ -282,12 +284,25 @@ class OverlayDDU : public Overlay
 
             // Gear & Speed
             {
-                if( ir_RPM.getFloat() >= ir_session.rpmSLShift || ir_EngineWarnings.getInt() & irsdk_revLimiterActive )
+                if( ir_RPM.getFloat() >= ir_session.rpmSLShift  )
                 {
-                    m_brush->SetColor( warnCol );
+                    m_brush->SetColor( shiftCol );
                     D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
                     m_renderTarget->FillRectangle( &r, m_brush.Get() );
                 }
+                else if ( ir_EngineWarnings.getInt() & irsdk_revLimiterActive )
+                {
+                    m_brush->SetColor(warnCol);
+                    D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
+                    m_renderTarget->FillRectangle(&r, m_brush.Get());
+                }
+                else if ( ir_EngineWarnings.getInt() & irsdk_pitSpeedLimiter )
+                {
+                    m_brush->SetColor(pitCol);
+                    D2D1_RECT_F r = { m_boxGear.x0, m_boxGear.y0, m_boxGear.x1, m_boxGear.y1 };
+                    m_renderTarget->FillRectangle(&r, m_brush.Get());
+                }
+
                 m_brush->SetColor( textCol );
 
                 const int gear = ir_Gear.getInt();
